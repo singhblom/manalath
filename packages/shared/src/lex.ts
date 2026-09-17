@@ -6,3 +6,5 @@ export * as Accept from './lexicon/types/top/manalath/accept.js';
 export * as Move from './lexicon/types/top/manalath/move.js';
 export * as Defs from './lexicon/types/top/manalath/defs.js';
 export * as StrongRef from './lexicon/types/com/atproto/repo/strongRef.js';
+export * as GetPlayer from './lexicon/types/top/manalath/getPlayer.js';
+export * as GetLeaderboard from './lexicon/types/top/manalath/getLeaderboard.js';

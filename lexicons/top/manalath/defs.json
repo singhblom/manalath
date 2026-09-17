@@ -33,6 +33,53 @@
           "default": 4
         }
       }
+    },
+    "playerRating": {
+      "type": "object",
+      "description": "A player's standing on the ladder as derived by this appview. Never written to a repo: every indexer computes it from the public match, accept and move records with the algorithm named in `algorithm`.",
+      "required": [
+        "did",
+        "rating",
+        "deviation",
+        "games",
+        "provisional",
+        "algorithm"
+      ],
+      "properties": {
+        "did": {
+          "type": "string",
+          "format": "did"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Glicko-2 rating, rounded."
+        },
+        "deviation": {
+          "type": "integer",
+          "description": "Glicko-2 rating deviation at the time of the query, rounded."
+        },
+        "games": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rated games folded into this rating."
+        },
+        "rank": {
+          "type": "string",
+          "description": "Display grade on a go-style ladder, e.g. `6k` or `2d`. Absent until the player has a rated game."
+        },
+        "provisional": {
+          "type": "boolean",
+          "description": "True while the deviation is too wide to trust the rank."
+        },
+        "lastPlayedAt": {
+          "type": "string",
+          "format": "datetime"
+        },
+        "algorithm": {
+          "type": "string",
+          "description": "Identifier of the rating algorithm and version, e.g. `glicko2-v1`."
+        }
+      }
     }
   }
 }

@@ -5,6 +5,7 @@ import type { LiveMatch } from '../match/live.js';
 import { matchStore } from '../match/store.js';
 import { didFromRequest } from '../auth.js';
 import { getProfile } from '../repo/profile.js';
+import { ratingService } from '../ratings/service.js';
 export { TIME_CONTROLS } from './lobby.js';
 
 export type WsData = { matchId: string; seat: Seat | null; unsubscribe?: () => void };
@@ -36,7 +37,7 @@ export function matchRoutes(server: () => Server<WsData>) {
       const m = matches.get(req.params.id);
       if (!m) return Response.json({ error: 'not found' }, { status: 404 });
       const row = matchStore.load(m.id)!;
-      return Response.json({ ...m.snapshot(), records: { match: row.matchRef, accept: row.acceptRef, moves: matchStore.writes(m.id) } });
+      return Response.json({ ...m.snapshot(), ratings: ratingService.forMatch(m), records: { match: row.matchRef, accept: row.acceptRef, moves: matchStore.writes(m.id) } });
     },
 
     '/ws/match/:id': async (req: Request & { params: { id: string } }) => {
@@ -58,7 +59,8 @@ export function matchRoutes(server: () => Server<WsData>) {
 }
 
 const send = (ws: ServerWebSocket<WsData>, msg: unknown): void => { ws.send(JSON.stringify(msg)); };
-const snapshot = (m: LiveMatch) => m.snapshot();
+/** The live snapshot plus each seat's rating; the rating hook runs before socket listeners, so a finished game already shows its change. */
+const snapshot = (m: LiveMatch) => ({ ...m.snapshot(), ratings: ratingService.forMatch(m) });
 
 export const matchWebsocket = {
   open(ws: ServerWebSocket<WsData>) {

@@ -4,6 +4,7 @@ import { agentFor, didFromRequest, type OAuthClient } from '../auth.js';
 import { LobbyError, LobbyService, type Repo } from '../lobby/service.js';
 import { matchStore } from '../match/store.js';
 import { getProfile, resolveHandle } from '../repo/profile.js';
+import { ratingService } from '../ratings/service.js';
 
 export const TIME_CONTROLS: Record<string, TimeControl | null> = {
   '1+0': { base: 60, increment: 0 },
@@ -48,9 +49,14 @@ export function lobbyRoutes(lobby: LobbyService) {
       const games = me ? matchStore.forPlayer(me).map((m) => ({
         id: m.id, seats: m.seats.map((s) => ({ did: s.did, name: s.name, avatar: s.avatar ?? null })), startedAt: m.startedAt, result: m.result,
         timeControl: m.config.timeControl, rated: !!m.config.rated, createdAt: m.createdAt,
+        ratingChange: m.result && m.config.rated ? ratingService.changes(m.id)?.map((c) => Math.round(c.after.rating - c.before.rating)) ?? null : null,
       })) : [];
+      const leaderboard = ratingService.leaderboard(10);
+      const dids = [me, ...challenges.flatMap((c) => [c.challenger, c.opponent]), ...games.flatMap((g) => g.seats.map((s) => s.did))].filter((d): d is string => !!d);
       return Response.json({
         me: me ? await getProfile(me) : null, challenges, games, timeControls: Object.keys(TIME_CONTROLS),
+        ratings: ratingService.many(dids), leaderboard,
+        leaderboardProfiles: Object.fromEntries(await Promise.all(leaderboard.map(async (p) => [p.did, await getProfile(p.did)]))),
       });
     },
 

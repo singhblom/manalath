@@ -44,9 +44,10 @@ Monorepo, laid out for the online version (see the ATProto design below):
   - `game.js` – rules, group detection, legality, win/lose checks, passing, undo.
   - `ai.js` – computer opponent.
   - `match.ts` – match state machine: two seats, Fischer clocks, draw offers, resignation, timeout, forced passes. Replayable from its event list; the client and server run the same code.
+  - `ratings.ts` – Glicko-2 applied per game, the dan/kyu ladder, and the deterministic fold over finished rated games that every indexer runs (`glicko2-v1`).
   - `lex.ts` – barrel over the generated lexicon types in `lexicon/` (do not edit; regenerate).
 - `apps/web/` – the browser client. `src/renderers/` holds one renderer per theme family, all implementing `update(game)` / `destroy()`; `src/main.js` is UI wiring; `src/lobby.js` renders the Online dialog (login and lobby); `src/online.js` mirrors a server-hosted match at `/m/:id` over a websocket, with an on-board status pill, player handles, clocks, resign/draw/rematch controls and a toast for refused moves.
-- `apps/server/` – Bun server. `auth.ts` is the ATProto OAuth client (loopback in dev, confidential with `PUBLIC_URL` + `OAUTH_PRIVATE_KEY` in production); `match/` holds the in-memory live matches, the flag timers and SQLite persistence; `lobby/` turns challenges into matches (first accept wins, random first mover from the accept CID's last byte); `repo/writer.ts` mirrors every accepted event into the players' repos as chained `top.manalath.move` records (plus `match` and `accept` at the start), serially per match with retries and never on the hot path; `routes/` has the HTTP and websocket handlers. State lives in `manalath.sqlite` (override with `DB_PATH`).
+- `apps/server/` – Bun server. `auth.ts` is the ATProto OAuth client (loopback in dev, confidential with `PUBLIC_URL` + `OAUTH_PRIVATE_KEY` in production); `match/` holds the in-memory live matches, the flag timers and SQLite persistence; `lobby/` turns challenges into matches (first accept wins, random first mover from the accept CID's last byte); `ratings/` caches the rating fold in SQLite, rebuilt from scratch after every rated game, and serves it as `top.manalath.getPlayer` / `getLeaderboard` XRPC queries; `repo/writer.ts` mirrors every accepted event into the players' repos as chained `top.manalath.move` records (plus `match` and `accept` at the start), serially per match with retries and never on the hot path; `routes/` has the HTTP and websocket handlers. State lives in `manalath.sqlite` (override with `DB_PATH`).
 - `lexicons/` – ATProto lexicon definitions under `top.manalath.*` (the domain manalath.top).
 - `docs/plan.md` – decisions, rejected alternatives and phase status.
 
@@ -54,6 +55,8 @@ Monorepo, laid out for the online version (see the ATProto design below):
 
 Moves form a tree: every `top.manalath.move` references its predecessor by strong ref, so a fresh game is a move with no `prev` and a fork of any public position is a move whose `prev` points into another game. A `top.manalath.match` is a labelled path through that tree (players, first mover, clock, rated, optional `root`), and a `top.manalath.accept` from the opponent pins the agreed terms by CID. Board state, results and ratings are derived by the appview, never written to repos.
 
-### Arbiter
+### Ratings
+
+A rating is a pure function of the public records, so any indexer that folds the same finished rated games in the same order (finish time, then id) gets the same numbers. The fold is Glicko-2 with each game as its own rating period and deviation inflating with real time since a player's last game; the display rank is a go-style ladder with 100 points per grade and 1 dan at 2100, shown with a `?` while the deviation is above 110. Only clocked, unforked games with `rated: true` count; untimed games cannot end when a player walks away, so they are never rated.
 
 A match record may name an `arbiter`: the DID of the game server both players agreed to have run the game live. The field is a pointer, not proof. A later `verdict` record in the arbiter's own repo, referencing the match by CID, is what lets independent indexers trust clock results such as timeouts; set `ARBITER_DID` to stamp the field on challenges this server hosts.

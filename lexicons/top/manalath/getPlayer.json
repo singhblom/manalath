@@ -1,0 +1,21 @@
+{
+  "lexicon": 1,
+  "id": "top.manalath.getPlayer",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "A player's rating and rank as derived by this appview.",
+      "parameters": {
+        "type": "params",
+        "required": ["actor"],
+        "properties": {
+          "actor": { "type": "string", "format": "did" }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": { "type": "ref", "ref": "top.manalath.defs#playerRating" }
+      }
+    }
+  }
+}

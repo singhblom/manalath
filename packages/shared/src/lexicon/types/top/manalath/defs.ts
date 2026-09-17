@@ -44,3 +44,32 @@ export function isRules<V>(v: V) {
 export function validateRules<V>(v: V) {
   return validate<Rules & V>(v, id, hashRules)
 }
+
+/** A player's standing on the ladder as derived by this appview. Never written to a repo: every indexer computes it from the public match, accept and move records with the algorithm named in `algorithm`. */
+export interface PlayerRating {
+  $type?: 'top.manalath.defs#playerRating'
+  did: string
+  /** Glicko-2 rating, rounded. */
+  rating: number
+  /** Glicko-2 rating deviation at the time of the query, rounded. */
+  deviation: number
+  /** Rated games folded into this rating. */
+  games: number
+  /** Display grade on a go-style ladder, e.g. `6k` or `2d`. Absent until the player has a rated game. */
+  rank?: string
+  /** True while the deviation is too wide to trust the rank. */
+  provisional: boolean
+  lastPlayedAt?: string
+  /** Identifier of the rating algorithm and version, e.g. `glicko2-v1`. */
+  algorithm: string
+}
+
+const hashPlayerRating = 'playerRating'
+
+export function isPlayerRating<V>(v: V) {
+  return is$typed(v, id, hashPlayerRating)
+}
+
+export function validatePlayerRating<V>(v: V) {
+  return validate<PlayerRating & V>(v, id, hashPlayerRating)
+}

@@ -7,6 +7,8 @@ import { matches } from './match/registry.js';
 import { RepoWriter } from './repo/writer.js';
 import { LobbyService } from './lobby/service.js';
 import { lobbyRoutes, oauthRepo } from './routes/lobby.js';
+import { ratingService } from './ratings/service.js';
+import { ratingRoutes } from './routes/ratings.js';
 
 const port = Number(process.env.PORT ?? 8765);
 const dev = process.env.NODE_ENV !== 'production';
@@ -21,6 +23,10 @@ const oauth = await createOAuthClient({ origin, privateKeyJwk: process.env.OAUTH
 const writer = new RepoWriter(oauth);
 matches.onAll(writer.onMatch);
 writer.resumeAll();
+
+// Ratings are a cache over finished rated matches; rebuild it on start and after every rated game.
+ratingService.recompute();
+matches.onAll(ratingService.onMatch);
 
 const lobby = new LobbyService(oauthRepo(oauth));
 
@@ -37,6 +43,7 @@ const server: Server<WsData> = Bun.serve<WsData>({
     ...Object.fromEntries(Object.entries(authRoutes(oauth, origin)).filter(([k]) => k !== '/login')),
     ...matchRoutes(() => server),
     ...lobbyRoutes(lobby),
+    ...ratingRoutes(),
   },
   websocket: matchWebsocket,
   fetch(req) {

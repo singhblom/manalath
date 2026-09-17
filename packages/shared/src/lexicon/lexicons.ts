@@ -93,6 +93,126 @@ export const schemaDict = {
           },
         },
       },
+      playerRating: {
+        type: 'object',
+        description:
+          "A player's standing on the ladder as derived by this appview. Never written to a repo: every indexer computes it from the public match, accept and move records with the algorithm named in `algorithm`.",
+        required: [
+          'did',
+          'rating',
+          'deviation',
+          'games',
+          'provisional',
+          'algorithm',
+        ],
+        properties: {
+          did: {
+            type: 'string',
+            format: 'did',
+          },
+          rating: {
+            type: 'integer',
+            description: 'Glicko-2 rating, rounded.',
+          },
+          deviation: {
+            type: 'integer',
+            description:
+              'Glicko-2 rating deviation at the time of the query, rounded.',
+          },
+          games: {
+            type: 'integer',
+            minimum: 0,
+            description: 'Rated games folded into this rating.',
+          },
+          rank: {
+            type: 'string',
+            description:
+              'Display grade on a go-style ladder, e.g. `6k` or `2d`. Absent until the player has a rated game.',
+          },
+          provisional: {
+            type: 'boolean',
+            description:
+              'True while the deviation is too wide to trust the rank.',
+          },
+          lastPlayedAt: {
+            type: 'string',
+            format: 'datetime',
+          },
+          algorithm: {
+            type: 'string',
+            description:
+              'Identifier of the rating algorithm and version, e.g. `glicko2-v1`.',
+          },
+        },
+      },
+    },
+  },
+  TopManalathGetLeaderboard: {
+    lexicon: 1,
+    id: 'top.manalath.getLeaderboard',
+    defs: {
+      main: {
+        type: 'query',
+        description:
+          'Rated players ordered by rating, as derived by this appview.',
+        parameters: {
+          type: 'params',
+          properties: {
+            limit: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
+              default: 25,
+            },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['algorithm', 'players'],
+            properties: {
+              algorithm: {
+                type: 'string',
+              },
+              players: {
+                type: 'array',
+                items: {
+                  type: 'ref',
+                  ref: 'lex:top.manalath.defs#playerRating',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  TopManalathGetPlayer: {
+    lexicon: 1,
+    id: 'top.manalath.getPlayer',
+    defs: {
+      main: {
+        type: 'query',
+        description: "A player's rating and rank as derived by this appview.",
+        parameters: {
+          type: 'params',
+          required: ['actor'],
+          properties: {
+            actor: {
+              type: 'string',
+              format: 'did',
+            },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'ref',
+            ref: 'lex:top.manalath.defs#playerRating',
+          },
+        },
+      },
     },
   },
   TopManalathMatch: {
@@ -305,6 +425,8 @@ export const ids = {
   ComAtprotoRepoStrongRef: 'com.atproto.repo.strongRef',
   TopManalathAccept: 'top.manalath.accept',
   TopManalathDefs: 'top.manalath.defs',
+  TopManalathGetLeaderboard: 'top.manalath.getLeaderboard',
+  TopManalathGetPlayer: 'top.manalath.getPlayer',
   TopManalathMatch: 'top.manalath.match',
   TopManalathMove: 'top.manalath.move',
 } as const
