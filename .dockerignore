@@ -1,0 +1,10 @@
+node_modules
+.git
+*.sqlite
+*.sqlite-*
+.env
+.env.*
+.claude
+docs
+README.md
+LICENSE

@@ -15,6 +15,28 @@ bun run dev
 
 then open <http://localhost:8765>. The board is always the main view. The **Online** button opens a dialog in the same style as the menu: log in with a Bluesky handle, post an open or direct challenge (this writes a `top.manalath.match` record to your repo), or accept one (which writes the `top.manalath.accept` and swaps the live match in under the dialog). While your challenge waits you can close the dialog and play the computer; acceptance pulls you into the game. `/m/:id` still opens a match directly for sharing and spectating; `/lobby` and `/login` redirect to `/?online`. You can accept your own challenge from a second tab to test alone. `/dev/matches` shows how many events have been written to repos. Run exactly one server per database: two processes on one SQLite file would both arm flag timers. The server bundles the web app (including Three.js from npm) with hot reload. `bun test` runs the tests and `bun run lex` regenerates TypeScript types from the lexicons.
 
+## Deploy to Fly.io
+
+The repo ships a `Dockerfile` and `fly.toml`. The server keeps live matches and flag timers in memory and owns its SQLite file, so the config runs exactly one machine that never auto-stops, with the database on a persistent volume at `/data`, and replaces it in place on deploy rather than overlapping old and new. First-time setup, after installing [flyctl](https://fly.io/docs/flyctl/install/):
+
+```bash
+fly launch --no-deploy --copy-config --name manalath
+```
+
+```bash
+fly volumes create manalath_data --region arn --size 1
+```
+
+```bash
+fly secrets set OAUTH_PRIVATE_KEY="$(bun run gen-key)"
+```
+
+```bash
+fly deploy
+```
+
+`bun run gen-key` prints a fresh ES256 signing key as a JWK; the ATProto OAuth client is confidential in production and publishes the public half at `/oauth/jwks.json`, so keep the same key for the lifetime of the deployment. Edit `app`, `primary_region` and `PUBLIC_URL` in `fly.toml` to taste. `PUBLIC_URL` must be the exact origin browsers use, since it becomes the OAuth `client_id` and redirect URI; if you attach a custom domain with `fly certs add`, change it to that domain. Uncomment `ARBITER_DID` to stamp challenges with the server's DID. `/xrpc/_health` is the health check.
+
 ## Features
 
 - **Hotseat** – two players sharing one screen.
