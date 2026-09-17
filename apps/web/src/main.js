@@ -1,14 +1,34 @@
 import { Game, checkEnd, groupAt } from '@manalath/shared/game.js';
 import { chooseMove } from '@manalath/shared/ai.js';
+import { ThreeRenderer } from './renderers/three.js';
+import { TerracesRenderer } from './renderers/terraces.js';
 import { PaperRenderer } from './renderers/paper.js';
+import { TerminalRenderer } from './renderers/terminal.js';
+import { ConstellationRenderer } from './renderers/constellation.js';
+import { MercuryRenderer } from './renderers/mercury.js';
+import { SlimeRenderer } from './renderers/slime.js';
+import { GobanRenderer } from './renderers/goban.js';
+import { NeonRenderer } from './renderers/neon.js';
 import { OnlineMatch, formatClock } from './online.js';
 import { mountLobby } from './lobby.js';
 
 const $ = (s) => document.querySelector(s);
 const boardEl = $('#board');
 
+const THEME_HINTS = {
+  goban: 'Go-inspired 3D: a thick kaya-wood board with straight grain; stones sit on the intersections of an inked triangular lattice, dropped a little irregularly.',
+  marble: 'Realistic 3D: marble tiles, ivory and onyx spheres, soft shadows. Drag to orbit, scroll to zoom.',
+  neon: 'Glowing 3D: crystals floating over a neon lattice of intersections. Drag to orbit, scroll to zoom.',
+  terraces: 'Group-focused 3D: every group rises as one plateau, height = size. Quarts glow red, quints gold.',
+  constellation: 'Group-focused 2D: stars on a faint lattice; groups are linked clusters in a shared nebula.',
+  mercury: 'Fluid 3D: groups are pools of liquid metal and oil that flow together (marching-cubes metaballs) over a rippling wave-simulated pool.',
+  slime: 'Fluid 2D: groups are blobs of goo in a petri dish that melt together, jiggle, bubble and drip.',
+  paper: 'Hand-drawn 2D: pencil hexes, ink blobs and red pencil rings on ruled paper.',
+  terminal: 'Text mode: a monospace hex grid on a phosphor CRT, with a move log and group list.',
+};
+
 const settings = Object.assign(
-  { mode: 'hotseat', level: 'normal', side: '1' },
+  { mode: 'hotseat', level: 'normal', side: '1', theme: 'terraces' },
   JSON.parse(localStorage.getItem('manalath.settings') || '{}')
 );
 function saveSettings() { localStorage.setItem('manalath.settings', JSON.stringify(settings)); }
@@ -187,17 +207,28 @@ function renderHud() {
   setPieceIcon($('#carry .hud-piece'), selColor ? pieceIcons[selColor] : null);
 }
 
-function makeRenderer() {
+function makeRenderer(name) {
   const handlers = { onCellClick, canPlay, statusText, selectedColor, previewOutcome };
-  return new PaperRenderer(boardEl, handlers);
+  if (name === 'terraces') return new TerracesRenderer(boardEl, handlers);
+  if (name === 'mercury') return new MercuryRenderer(boardEl, handlers);
+  if (name === 'goban') return new GobanRenderer(boardEl, handlers);
+  if (name === 'slime') return new SlimeRenderer(boardEl, handlers);
+  if (name === 'neon') return new NeonRenderer(boardEl, handlers);
+  if (name === 'marble') return new ThreeRenderer(boardEl, handlers, name);
+  if (name === 'paper') return new PaperRenderer(boardEl, handlers);
+  if (name === 'constellation') return new ConstellationRenderer(boardEl, handlers);
+  return new TerminalRenderer(boardEl, handlers);
 }
 
-function setRenderer() {
+function setTheme(name) {
   if (renderer) renderer.destroy();
-  renderer = makeRenderer();
-  boardEl.dataset.theme = 'paper';
-  document.documentElement.dataset.theme = 'paper';
+  renderer = makeRenderer(name);
+  settings.theme = name; saveSettings();
+  document.querySelectorAll('#themes button').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
+  boardEl.dataset.theme = name;
+  document.documentElement.dataset.theme = name;
   applyPieceIcons();
+  $('#theme-hint').textContent = THEME_HINTS[name];
   render();
 }
 
@@ -329,6 +360,8 @@ const panel = $('#panel');
 $('#settings').addEventListener('click', () => panel.showModal());
 $('#close-panel').addEventListener('click', () => panel.close());
 panel.addEventListener('click', e => { if (e.target === panel) panel.close(); });
+// theme choice closes the menu so you see the result immediately
+document.querySelectorAll('#themes button').forEach(b => b.addEventListener('click', () => panel.close()));
 $('#undo').addEventListener('click', undo);
 $('#col1').addEventListener('click', () => setColor(1));
 $('#col2').addEventListener('click', () => setColor(2));
@@ -339,6 +372,7 @@ boardEl.addEventListener('pointermove', e => {
   carry.style.left = (e.clientX - r.left) + 'px';
   carry.style.top = (e.clientY - r.top) + 'px';
 });
+document.querySelectorAll('#themes button').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
 window.addEventListener('keydown', e => {
   if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || panel.open || onlineDialog.open) return;
   if (!online && (e.key === 'u' || e.key === 'U')) undo();
@@ -414,7 +448,7 @@ window.addEventListener('popstate', () => {
   if (id) enterMatch(id, null, { push: false }); else exitMatch({ push: false });
 });
 
-setRenderer();
+setTheme(settings.theme in THEME_HINTS ? settings.theme : 'terraces');
 {
   const id = matchIdFromUrl();
   const params = new URLSearchParams(location.search);

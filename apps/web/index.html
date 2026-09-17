@@ -21,7 +21,7 @@
     <button id="draw" hidden title="Offer or accept a draw">½<span> Offer draw</span></button>
     <button id="resign" hidden title="Resign">⚑<span> Resign</span></button>
     <button id="rematch" hidden title="Offer a rematch">⟳<span> Rematch</span></button>
-    <button id="settings" title="Settings and rules">☰<span> Menu</span></button>
+    <button id="settings" title="Settings, themes and rules">☰<span> Menu</span></button>
     <button id="online-btn" title="Play online">⚔<span> Online</span></button>
   </div>
   <dialog id="panel" class="sheet">
@@ -68,6 +68,21 @@
       <div id="groups"></div>
     </section>
 
+    <section>
+      <h2>Theme</h2>
+      <div id="themes" class="theme-grid">
+        <button data-theme="terraces"><span class="sw sw-terraces"></span>Quartz<small>3D · groups as stone plateaus</small></button>
+        <button data-theme="constellation"><span class="sw sw-constellation"></span>Constellation<small>2D · groups as star clusters</small></button>
+        <button data-theme="mercury"><span class="sw sw-mercury"></span>Quintessence<small>3D · liquid metal metaballs</small></button>
+        <button data-theme="slime"><span class="sw sw-slime"></span>Slime Lab<small>2D · gooey blobs</small></button>
+        <button data-theme="goban"><span class="sw sw-goban"></span>Goban<small>3D · kaya wood &amp; shell stones</small></button>
+        <button data-theme="marble"><span class="sw sw-marble"></span>Marble Hall<small>3D · realistic</small></button>
+        <button data-theme="neon"><span class="sw sw-neon"></span>Neon Void<small>3D · glowing</small></button>
+        <button data-theme="paper"><span class="sw sw-paper"></span>Paper &amp; Ink<small>2D · hand-drawn</small></button>
+        <button data-theme="terminal"><span class="sw sw-terminal"></span>Phosphor Terminal<small>text · CRT</small></button>
+      </div>
+      <p class="hint" id="theme-hint"></p>
+    </section>
 
     <details>
       <summary>Rules</summary>
@@ -78,7 +93,7 @@
         <li>At the end of <b>your own</b> turn, only groups of your colour are checked: a group of exactly <b>four</b> (quart) means you lose; a group of exactly <b>five</b> (quint) means you win. A quart takes precedence.</li>
         <li>Passing is only allowed when you have no legal move. End conditions still apply after a pass, so a player stuck with a group of four loses. Two consecutive passes, or a full board, is a draw.</li>
       </ul>
-      <p class="hint">Manalath was designed by Dieter Stein and Néstor Romeral Andrés.</p>
+      <p class="hint">Manalath was designed by Dieter Stein and Néstor Romeral Andrés. Drag to orbit in the 3D themes; scroll to zoom.</p>
     </details>
     </dialog>
   <dialog id="online" class="sheet">

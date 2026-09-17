@@ -19,7 +19,20 @@ then open <http://localhost:8765>. The board is always the main view. The **Onli
 
 - **Hotseat** – two players sharing one screen.
 - **Local vs computer** – alpha-beta search with iterative deepening (Easy / Normal / Hard), choose your side.
-- **Paper & Ink** board – 2D canvas, hand-drawn pencil hexes and ink pieces.
+- **Nine visual themes**, switchable mid-game. One is a homage to go:
+  - *Goban* – Three.js, a thick kaya-wood slab with procedurally drawn straight grain and an ink hex grid, on legs over tatami; lens-shaped slate and clamshell stones with clearcoat reflection and mild iridescence, dropped with slightly irregular placement.
+
+  Two treat groups as fluids: Two treat groups as fluids:
+  - *Quintessence* – Three.js marching-cubes metaballs: same-colour stones flow into one pool of liquid metal or oil, with spring-driven wobble, a gooey hover preview, and a wave-simulated pool surface that ripples on every placement.
+  - *Slime Lab* – SVG goo filter: blobs of slime in a petri dish that melt together, splat on arrival, jiggle their neighbours, breathe, bubble and drip.
+
+  Two are built around Manalath's group focus:
+  - *Quartz* – Three.js, every group rises as one plateau whose height is its size, with floating size badges; quarts glow red, quints gold.
+  - *Constellation* – SVG, stones are stars, adjacent stones are linked, each cluster has a size badge and hovering previews the size of the resulting group.
+  - *Marble Hall* – Three.js, realistic marble tiles with shadows and orbit camera.
+  - *Neon Void* – Three.js, glowing floating crystals over an endless grid with fog.
+  - *Paper & Ink* – 2D canvas, hand-drawn pencil hexes and ink pieces.
+  - *Phosphor Terminal* – monospace CRT-style text grid with a move log.
 - Colour picker (`1` / `2`, `X` to toggle, right-click for the other colour), undo (`U`), new game (`N`), a live list of group sizes, last-move and decisive-group highlights.
 
 ## Layout
@@ -32,7 +45,7 @@ Monorepo, laid out for the online version (see the ATProto design below):
   - `ai.js` – computer opponent.
   - `match.ts` – match state machine: two seats, Fischer clocks, draw offers, resignation, timeout, forced passes. Replayable from its event list; the client and server run the same code.
   - `lex.ts` – barrel over the generated lexicon types in `lexicon/` (do not edit; regenerate).
-- `apps/web/` – the browser client. `src/renderers/` holds the board renderer, implementing `update(game)` / `destroy()`; `src/main.js` is UI wiring; `src/lobby.js` renders the Online dialog (login and lobby); `src/online.js` mirrors a server-hosted match at `/m/:id` over a websocket, with an on-board status pill, player handles, clocks, resign/draw/rematch controls and a toast for refused moves.
+- `apps/web/` – the browser client. `src/renderers/` holds one renderer per theme family, all implementing `update(game)` / `destroy()`; `src/main.js` is UI wiring; `src/lobby.js` renders the Online dialog (login and lobby); `src/online.js` mirrors a server-hosted match at `/m/:id` over a websocket, with an on-board status pill, player handles, clocks, resign/draw/rematch controls and a toast for refused moves.
 - `apps/server/` – Bun server. `auth.ts` is the ATProto OAuth client (loopback in dev, confidential with `PUBLIC_URL` + `OAUTH_PRIVATE_KEY` in production); `match/` holds the in-memory live matches, the flag timers and SQLite persistence; `lobby/` turns challenges into matches (first accept wins, random first mover from the accept CID's last byte); `repo/writer.ts` mirrors every accepted event into the players' repos as chained `top.manalath.move` records (plus `match` and `accept` at the start), serially per match with retries and never on the hot path; `routes/` has the HTTP and websocket handlers. State lives in `manalath.sqlite` (override with `DB_PATH`).
 - `lexicons/` – ATProto lexicon definitions under `top.manalath.*` (the domain manalath.top).
 - `docs/plan.md` – decisions, rejected alternatives and phase status.
