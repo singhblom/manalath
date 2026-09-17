@@ -1,6 +1,7 @@
 {
   "name": "manalath",
   "private": true,
+  "license": "MIT",
   "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "dev": "bun --hot apps/server/src/index.ts",

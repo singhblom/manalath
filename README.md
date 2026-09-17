@@ -60,3 +60,7 @@ Moves form a tree: every `top.manalath.move` references its predecessor by stron
 A rating is a pure function of the public records, so any indexer that folds the same finished rated games in the same order (finish time, then id) gets the same numbers. The fold is Glicko-2 with each game as its own rating period and deviation inflating with real time since a player's last game; the display rank is a go-style ladder with 100 points per grade and 1 dan at 2100, shown with a `?` while the deviation is above 110. Only clocked, unforked games with `rated: true` count; untimed games cannot end when a player walks away, so they are never rated.
 
 A match record may name an `arbiter`: the DID of the game server both players agreed to have run the game live. The field is a pointer, not proof. A later `verdict` record in the arbiter's own repo, referencing the match by CID, is what lets independent indexers trust clock results such as timeouts; set `ARBITER_DID` to stamp the field on challenges this server hosts.
+
+## License
+
+[MIT](LICENSE). Manalath itself was designed by Dieter Stein and Néstor Romeral Andrés; this is an independent implementation.
