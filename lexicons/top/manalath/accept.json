@@ -1,0 +1,19 @@
+{
+  "lexicon": 1,
+  "id": "top.manalath.accept",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Acceptance of an top.manalath.match. Written to the accepting player's repo. Referencing the match by CID pins the exact terms agreed to.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["match", "createdAt"],
+        "properties": {
+          "match": { "type": "ref", "ref": "com.atproto.repo.strongRef" },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}

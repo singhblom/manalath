@@ -1,0 +1,10 @@
+{
+  "name": "@manalath/web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@manalath/shared": "workspace:*",
+    "three": "0.160.0"
+  }
+}

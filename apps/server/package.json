@@ -1,0 +1,19 @@
+{
+  "name": "@manalath/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "NODE_ENV=production bun src/index.ts"
+  },
+  "dependencies": {
+    "@atproto/api": "^0.20.44",
+    "@atproto/jwk-jose": "^0.2.4",
+    "@atproto/oauth-client-node": "^0.5.7",
+    "@atproto/oauth-types": "^0.7.6",
+    "@manalath/shared": "workspace:*",
+    "@manalath/web": "workspace:*",
+    "multiformats": "^13"
+  }
+}

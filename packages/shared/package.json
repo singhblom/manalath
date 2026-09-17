@@ -1,0 +1,14 @@
+{
+  "name": "@manalath/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@atproto/lexicon": "^0.5.0",
+    "@atproto/xrpc": "^0.7.0",
+    "multiformats": "^13"
+  }
+}

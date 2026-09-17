@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "manalath",
+      "runtimeExecutable": "/Users/martin.singh-blom/.bun/bin/bun",
+      "runtimeArgs": [
+        "--hot",
+        "--env-file=.env.preview",
+        "apps/server/src/index.ts"
+      ],
+      "port": 8765,
+      "autoPort": true
+    }
+  ]
+}

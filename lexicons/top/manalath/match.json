@@ -1,0 +1,61 @@
+{
+  "lexicon": 1,
+  "id": "top.manalath.match",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A proposal to play a game of Manalath. Written to the challenger's repo. The match starts once the opponent writes an top.manalath.accept referencing this record. Moves form a tree; a match is a labelled path through it, starting at `root` (or at the empty board when `root` is absent).",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": [
+          "firstMover",
+          "createdAt"
+        ],
+        "properties": {
+          "opponent": {
+            "type": "string",
+            "format": "did",
+            "description": "The player being challenged. Absent for an open challenge that anyone may accept."
+          },
+          "firstMover": {
+            "type": "string",
+            "description": "Who plays the first ply after `root`. `random` is resolved from the accept record's CID: if the last byte of the CID is even the challenger moves first, otherwise the opponent.",
+            "knownValues": [
+              "challenger",
+              "opponent",
+              "random"
+            ]
+          },
+          "root": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "An existing top.manalath.move to continue from. Absent to start from the empty board."
+          },
+          "rules": {
+            "type": "ref",
+            "ref": "top.manalath.defs#rules"
+          },
+          "timeControl": {
+            "type": "ref",
+            "ref": "top.manalath.defs#timeControl",
+            "description": "Absent for an untimed (correspondence) game."
+          },
+          "rated": {
+            "type": "boolean",
+            "default": false
+          },
+          "arbiter": {
+            "type": "string",
+            "format": "did",
+            "description": "A game server both players agree to have run this match live. Not evidence in itself: an indexer treats the match as arbitrated only if this DID's repo holds a verdict record referencing this match by CID. Absent for self-reported games."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

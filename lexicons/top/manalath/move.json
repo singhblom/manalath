@@ -1,0 +1,76 @@
+{
+  "lexicon": 1,
+  "id": "top.manalath.move",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "One ply in a game of Manalath, written to the repo of the player who made it. Moves form a tree via `prev`; `ply` is the absolute depth in that tree.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["match", "ply", "action", "createdAt"],
+        "properties": {
+          "match": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "The match this move was played in."
+          },
+          "ply": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Depth in the move tree. Equal to prev.ply + 1, or 0 when starting from the empty board."
+          },
+          "prev": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "The previous move. Absent only at ply 0. For the first move of a forked match this is the match's `root`, which lives in another match."
+          },
+          "action": {
+            "type": "union",
+            "refs": ["#place", "#pass", "#resign", "#offerDraw", "#acceptDraw", "#timeout"]
+          },
+          "clock": {
+            "type": "ref",
+            "ref": "#clock",
+            "description": "Informational clock state after this move, as stamped by the game server. Not authoritative for other indexers."
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    },
+    "place": {
+      "type": "object",
+      "description": "Place a stone of either colour on an empty cell. Axial coordinates, pointy-top layout, origin at the centre cell.",
+      "required": ["q", "r", "color"],
+      "properties": {
+        "q": { "type": "integer", "minimum": -8, "maximum": 8 },
+        "r": { "type": "integer", "minimum": -8, "maximum": 8 },
+        "color": { "type": "integer", "minimum": 1, "maximum": 2 }
+      }
+    },
+    "pass": {
+      "type": "object",
+      "description": "Pass. Only legal when the player has no legal placement.",
+      "properties": {}
+    },
+    "resign": { "type": "object", "properties": {} },
+    "offerDraw": {
+      "type": "object",
+      "description": "Offer a draw. Does not consume the turn: the offering player still moves at this ply in a subsequent record only if the offer is declined; indexers treat the offer as pending until the next action.",
+      "properties": {}
+    },
+    "acceptDraw": { "type": "object", "properties": {} },
+    "timeout": {
+      "type": "object",
+      "description": "The player whose repo this is written to ran out of time. Written by the game server acting for that player.",
+      "properties": {}
+    },
+    "clock": {
+      "type": "object",
+      "required": ["remainingMs"],
+      "properties": {
+        "remainingMs": { "type": "integer", "minimum": 0, "description": "The mover's remaining time after this move." }
+      }
+    }
+  }
+}
