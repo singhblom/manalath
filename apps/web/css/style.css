@@ -4,7 +4,7 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); }
-#app { display: flex; height: 100vh; height: 100dvh; height: var(--app-h, 100dvh); }
+#app { display: flex; height: var(--app-h, 100dvh); }
 /* floating toolbar over the board */
 #toolbar { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--panel) 82%, transparent); border: 1px solid var(--border); border-radius: 12px; padding: 6px 10px 6px 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
 #toolbar h1 { font-size: 20px; margin-right: 8px; }
@@ -17,7 +17,7 @@ dialog.sheet[open] { display: flex; }
 dialog.sheet::backdrop { background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); }
 .panel-head { display: flex; align-items: center; justify-content: space-between; }
 .panel-head button { font-size: 16px; padding: 4px 10px; }
-#board { flex: 1; position: relative; overflow: hidden; min-width: 0; background: #000; height: 100vh; height: 100dvh; height: var(--app-h, 100dvh); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; --turn: #888; --hud-bg: rgba(12,14,20,0.78); --hud-fg: #f2f2f5; --hud-font: inherit; --hud-radius: 999px; --hud-border: rgba(255,255,255,0.14); }
+#board { flex: 1; position: relative; overflow: hidden; min-width: 0; background: #000; height: var(--app-h, 100dvh); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; --turn: #888; --hud-bg: rgba(12,14,20,0.78); --hud-fg: #f2f2f5; --hud-font: inherit; --hud-radius: 999px; --hud-border: rgba(255,255,255,0.14); }
 #board > * { position: absolute; inset: 0; }
 #board::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 4px var(--turn), inset 0 0 40px 4px color-mix(in srgb, var(--turn) 55%, transparent); transition: box-shadow 0.3s; z-index: 5; }
 #board.over::after { box-shadow: inset 0 0 0 4px var(--turn); }
