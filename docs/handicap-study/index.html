@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handicaps for Manalath</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s1-wash: rgba(42,120,214,.12); --s2-wash: rgba(235,104,52,.12);
+  --p1: #f4f1e8; --p2: #2b2b2b; --cell: #ece9df; --cell-stroke: #c9c4b4; --dead: #e34948;
+  --code-bg: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
+    --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
+    --code-bg: #242422;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
+  --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
+  --code-bg: #242422;
+}
+* { box-sizing: border-box; }
+html { background: var(--page); }
+body {
+  margin: 0; padding: 0 16px 80px; background: var(--page); color: var(--ink);
+  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; }
+header { padding: 64px 0 24px; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
+h1 { font-size: 40px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
+.sub { color: var(--ink-2); font-size: 19px; margin: 0 0 16px; }
+.meta { color: var(--muted); font-size: 14px; }
+h2 { font-size: 26px; margin: 56px 0 12px; letter-spacing: -.005em; }
+h3 { font-size: 19px; margin: 32px 0 8px; }
+p, li { color: var(--ink); }
+a { color: var(--s1); }
+code, pre { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+figure { margin: 28px 0; }
+figcaption { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin-top: 10px; }
+figcaption b { color: var(--ink); font-weight: 600; }
+.chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px 8px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font-weight: 600; font-size: 15px; margin: 0 6px 2px; }
+.chart-sub { color: var(--ink-2); font-size: 13px; margin: 0 6px 10px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 6px 0; font-size: 13px; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 12px; }
+.boards figure { margin: 0; text-align: center; }
+.boards svg { width: 100%; height: auto; }
+.boards figcaption { margin-top: 4px; font-size: 13px; }
+.boards figcaption small { display: block; color: var(--muted); font-size: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 16px 0; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.base td { color: var(--ink-2); }
+.hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.tile .l { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
+.tile .d { color: var(--muted); font-size: 13px; }
+.callout { border-left: 3px solid var(--s1); padding: 4px 16px; margin: 20px 0; color: var(--ink-2); }
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); font-size: 13px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 10; white-space: nowrap; }
+.note { color: var(--muted); font-size: 14px; }
+details { margin: 16px 0; }
+summary { cursor: pointer; color: var(--ink-2); }
+.toc { columns: 2; gap: 24px; font-size: 15px; padding-left: 20px; margin: 0 0 8px; }
+.toc li { margin: 2px 0; }
+@media (max-width: 520px) { h1 { font-size: 32px; } .toc { columns: 1; } body { font-size: 16px; } }
+</style>
+</head>
+<body>
+<div class="tip" id="tip"></div>
+<main>
+<header>
+  <h1>Handicaps for Manalath</h1>
+  <p class="sub">What self-play says about giving a weaker player a fair game, and why the answer is empty cells rather than extra stones.</p>
+  <p class="meta">Martin Singh-Blom with Claude · September 2026 · 26,400 self-play games</p>
+</header>
+
+<ol class="toc">
+  <li><a href="#summary">Summary</a></li>
+  <li><a href="#why">Why go stones don't transfer</a></li>
+  <li><a href="#method">Method</a></li>
+  <li><a href="#candidates">Four candidates</a></li>
+  <li><a href="#dead">Dead cells</a></li>
+  <li><a href="#ladder">The star-point ladder</a></li>
+  <li><a href="#elo">Mapping to Elo</a></li>
+  <li><a href="#ratings">Implications for ratings</a></li>
+  <li><a href="#limits">Limitations</a></li>
+  <li><a href="#appendix">Appendix: all runs</a></li>
+</ol>
+
+<h2 id="summary">Summary</h2>
+<p>Go balances a mismatched pair by giving the weaker player stones. We asked whether anything similar works for Manalath, a game where a stone of your own colour is as likely to be a liability as an asset. We tested four ideas by self-play between fixed-depth versions of the game's own AI. Three of them fail in instructive ways. The fourth, forbidding the stronger player from ever playing on a small set of cells, works, is monotone by construction, and grades naturally along the board's seven star points.</p>
+
+<div class="hero">
+  <div class="tile"><div class="l">Pass tokens for the weaker player</div><div class="v">+0 pts</div><div class="d">no measurable effect at any count</div></div>
+  <div class="tile"><div class="l">One dead star point (the centre)</div><div class="v">+100 Elo</div><div class="d">between equal depth-2 players</div></div>
+  <div class="tile"><div class="l">All seven dead star points</div><div class="v">+300 Elo</div><div class="d">plateau at the top of the ladder</div></div>
+</div>
+
+<p>The catch that matters for ratings: the same handicap is worth about twice as much Elo between stronger players as between weaker ones. A fixed points-per-level table would be wrong. The offset has to scale with the pair's rating, or be fitted from real results.</p>
+
+<h2 id="why">Why go stones don't transfer</h2>
+<p>A quick recap of the rules as implemented in <code>packages/shared/src/game.js</code>. The board is a hexagon of 61 cells. On your turn you place one stone of <em>either</em> colour. No group may ever exceed five stones. At the end of your own turn, a group of your colour of exactly four (a <em>quart</em>) loses you the game, and a group of exactly five (a <em>quint</em>) wins it; a quart takes precedence over a quint.</p>
+<p>In go a stone is monotonically good: more stones, more territory, more influence. That is what makes handicap stones a clean dial. In Manalath a stone of your colour is double-edged. It is raw material for your quint, but also raw material for a quart your opponent can build and then seal, since every extension that would make a sixth stone is illegal. The players place both colours, so material is never simply yours. This one fact rules out the obvious transplant, and it turns out to rule out several less obvious ones too.</p>
+
+<h2 id="method">Method</h2>
+<p>We copied the shared AI (<code>packages/shared/src/ai.js</code>, a negamax search with a hand-written evaluation) into a fixed-depth variant with no time limit, so that "depth 2" means the same thing in every game. Three strengths were used:</p>
+<ul>
+  <li><b>Depth 0</b> plays a uniformly random move among those that do not lose immediately.</li>
+  <li><b>Depth 1</b> looks one ply ahead.</li>
+  <li><b>Depth 2</b> looks two plies ahead. Depth 3 was measured at about 18 seconds per game and was too slow for a sweep.</li>
+</ul>
+<p>Each configuration ran 200 games (400 for the cheap baselines). With 200 games the standard error on a win rate near 50% is 3.5 points, which is the yardstick to keep in mind throughout: differences under about 7 points between two 200-game runs are not significant. Every handicap was run with the handicapped player as first mover and as second mover, and we report the colour-averaged figure so first-move advantage cancels out.</p>
+
+<figure>
+  <div class="chart" id="fig-baseline"></div>
+  <figcaption><b>Figure 1. The strength ladder.</b> Win rate of the row player against the column player, colour-averaged. Depth 1 crushes depth 0, but is itself outscored 64 to 36 by depth 2, a gap of roughly 100 Elo. That 100-point gap is the mismatch most of the handicap tests try to close. First-move advantage at equal strength is small, 50 to 55%.</figcaption>
+</figure>
+
+<p>Win rates are converted to Elo differences with the standard logistic, <code>Δ = 400·log₁₀(p / (1 − p))</code>. Error bars on Elo figures are the win-rate standard error pushed through the same function, which is why they widen sharply above 80%.</p>
+
+<h2 id="candidates">Four candidates</h2>
+<p>We tested four mechanisms. All four are things the weaker player could plausibly be given at the start of a game, and all four can be graded.</p>
+
+<h3>Pass tokens</h3>
+<p>Passing is normally illegal in Manalath, and the endgame is pure zugzwang: the player who runs out of safe moves loses. A pass token, usable at any time, seemed a precise tool for exactly that moment. We tried two ways of using it. First as a last resort, spent only when the search saw no safe move. Then as a properly searched option, where a pass is valued like any other move by handing the position to the opponent. The AI used its tokens in about a fifth of games under the second policy.</p>
+<p>It made no difference. Across nine configurations and 1,800 games, the weaker player's win rate moved within noise of its baseline. The reason is structural. Zugzwang in Manalath is one-sided: when you have no safe move, your opponent almost always still has a quiet one. Passing hands back the same losing position with one fewer token. In 1,800 games the two players never both passed.</p>
+
+<h3>Pre-placed groups</h3>
+<p>If stones are liabilities, give the stronger player some. We pre-placed groups of three of the stronger player's colour in the board's corners, where they have few liberties, and varied the count from one to three. This idea has a compelling story: a group of three can never be extended by its owner (that makes a quart) and would never be extended by the opponent (that gifts a quint), so it sits on the board as a threat until the endgame forces someone's hand.</p>
+
+<figure>
+  <div class="chart" id="fig-liab"></div>
+  <figcaption><b>Figure 2. Pre-placed corner groups are tactical, not gradual.</b> Weaker player (depth 1) against depth 2, baseline about 37%. Each panel is one count of corner groups; dots show the weaker player as first and as second mover. A single group for the weaker player when moving second lost <em>every</em> game. Two groups flipped the result the other way; three flipped it again. Giving the groups to the stronger player instead (the original "liability" idea, hollow markers, run with the weaker player moving first only) made them win more, not less.</figcaption>
+</figure>
+
+<p>The story is right about the threat, but wrong about who it threatens. Figure 3 shows how the 100% case happens. The depth-1 player, tactically blind, scatters its own colour near the corner group. The depth-2 opponent then places a fourth stone of that colour to make a quart whose every liberty is already adjacent to another friendly stone, so extending it to five would make an illegal six. The quart cannot be resolved, and the weaker player loses at the end of their next turn.</p>
+
+<figure>
+  <div id="fig-trap" class="boards" style="grid-template-columns: 1fr; max-width: 360px; margin: 0 auto;"></div>
+  <figcaption><b>Figure 3. The sealed quart.</b> Black (player 2, moving second) started with the three-stone corner group at the bottom. White's fifth move completes a black quart. Every empty cell adjacent to it also touches a black stone black placed itself, so any extension would make a group of six, which is illegal. Black loses at the end of their turn. This took six moves.</figcaption>
+</figure>
+
+<p>Pre-placed material therefore makes each handicap position a sharp tactical puzzle with a winner already decided for players who can read it. It is the opposite of a smooth dial, and it punishes exactly the players it is meant to help.</p>
+
+<h3>Extra opening tempo</h3>
+<p>Let the weaker player place two or three stones before alternation begins. This is monotone in spirit and was the only mechanism of the first three that moved the needle in the right direction. It just did not move it very far. Three extra placements took the depth-1 player from 36% to about 46% against depth 2, closing roughly half the gap, with the first placement worth almost nothing. The value was inconsistent between colours and between runs, and we judged it too weak to grade a ladder on.</p>
+
+<h3>Dead cells</h3>
+<p>The fourth idea came from the observation that cells which would complete a group of six are already dead: nobody may play there. The handicap extends this asymmetrically. A set of cells is dead <em>for the stronger player only</em>; the weaker player may still play them. This has a property the other three lack: removing options from a player can never raise that player's game-theoretic value, since they could always have declined to use them. The handicap is monotone by construction. What remained to find out was how large the effect is, whether it is monotone in practice against imperfect players, and which cells to choose.</p>
+
+<h2 id="dead">Dead cells</h2>
+<p>We first swept random dead cells for the stronger player at counts of 2, 4, 8 and 12, then compared placement rules at a fixed count: cells drawn at random, the most central cells, the most peripheral cells, and the board's star points.</p>
+
+<figure>
+  <div class="chart" id="fig-deadcount"></div>
+  <figcaption><b>Figure 4. Dead cells for the stronger player, by count.</b> Weaker player (depth 1) against depth 2, colour-averaged, with standard error. Randomly placed cells (blue) grow the weaker player's win rate steadily from 37% to over 80%. Star points (orange), filled centre-first with the outer points in random order, track the random curve almost exactly per cell. Eight cells clustered around the centre (aqua) are worth a third as much as eight spread out.</figcaption>
+</figure>
+
+<p>Two things stand out. Dead cells behave monotonically against real, imperfect play, not just in theory. And spacing matters a great deal: the same number of cells is far more effective spread across the board than clustered in the middle. This makes sense once you think about where the handicap bites. It is not the opening, where the stronger player simply plays around the dead cells. It is the endgame, where the count of safe moves decides who runs out first. Cells spread across the board remove safe moves from every local fight at once.</p>
+<p>That also settles the question of which cells to choose. The seven star points, the centre and the six cells two steps out along the axes, are spread out, symmetric, already marked on the goban renderer, and as effective per cell as random placement. The ladder writes itself.</p>
+
+<h3>A loophole that never opened</h3>
+<p>One risk with asymmetric dead cells: if the only empty cells left are dead for the stronger player, that player has no legal move and passes for free, and the weaker player must fill those cells alone. In 5,600 dead-cell games this never happened; the game always ended by quint or quart with live cells remaining. It is still worth closing in the rules. The simplest patch is that dead cells become live for the stronger player once they have no other legal move.</p>
+
+<h2 id="ladder">The star-point ladder</h2>
+<p>The proposed handicap is a level from one to seven, each adding star points to the set the stronger player may not use. The patterns were chosen for symmetry and for looking good on the board. Cells are named by row letter, a to i from the top, and position within the row.</p>
+
+<figure>
+  <div class="boards" id="fig-ladder-boards"></div>
+  <figcaption><b>Figure 5. The seven handicap levels.</b> Red cells are dead for the stronger player. Level 1 is the centre alone; level 2 swaps it for the two points on the middle row; levels 3 and 4 form a triangle and then a trapezium; level 5 adds the centre back; 6 is the outer ring; 7 is everything.</figcaption>
+</figure>
+
+<figure>
+  <div class="chart" id="fig-ladder"></div>
+  <figcaption><b>Figure 6. The ladder holds.</b> Weaker player (depth 1) against depth 2 at each level, as first mover, second mover, and averaged. The baseline is 37%. No step goes backwards beyond noise. The levels pair up: 1 and 2 are equal, 3 and 4 are equal, and 5 to 7 are close. A lone outer point (far right, "e3") is worth only about 4 points against the centre's 11, which is why the ladder starts with the centre.</figcaption>
+</figure>
+
+<p>The centre is worth about two to three outer points. That shows up twice: level 2 swaps the centre for two outer points and gains nothing, and level 6 does the same swap against level 5 with the same result. The even-numbered levels mostly buy symmetry rather than strength, which is a fine trade for a seven-step ladder as long as everyone knows it. If finer grading at the bottom were wanted, the centre plus one outer point would sit around 50% and could replace level 2 at the cost of its symmetry.</p>
+
+<h2 id="elo">Mapping to Elo</h2>
+<p>To turn a level into a rating offset, run the ladder between players of equal strength and ask how much the handicap shifts the result. We did this for depth 2 against itself and, because it is cheap, depth 1 against itself.</p>
+
+<figure>
+  <div class="chart" id="fig-elo"></div>
+  <figcaption><b>Figure 7. The Elo value of each level depends on who is playing.</b> Colour-averaged win rate of the unrestricted player at equal strength, converted to an Elo difference, with standard errors. Between depth-2 players (blue) the ladder runs from about +100 at level 1 to a plateau near +300. Between depth-1 players (orange) the same cells are worth +15 at level 1 and +170 at level 7. The dashed marker is the lone outer point.</figcaption>
+</figure>
+
+<p>The finding that matters is the gap between the two curves. Dead cells are worth roughly twice as much Elo between stronger players. This follows from where the handicap bites: stronger players reach the endgame and count safe moves; weaker players have usually blundered before the parity of safe moves matters. The earlier cross-strength result fits neatly in between. Level 1 was worth about +80 for depth 1 against depth 2, bracketed by +15 for depth 1 against itself and +100 for depth 2 against itself.</p>
+
+<table>
+  <thead><tr><th>Level</th><th>Dead cells</th><th class="n">Depth 2 vs 2</th><th class="n">Elo</th><th class="n">Depth 1 vs 1</th><th class="n">Elo</th></tr></thead>
+  <tbody id="tbl-elo"></tbody>
+</table>
+<p class="note">Colour-averaged win rate of the unrestricted player, 200 games per colour. Standard error is about ±3.5 points on the rate, which is ±25 Elo near 60% and ±40 or more near 85%, so the top three depth-2 rows are a statistical plateau.</p>
+
+<h2 id="ratings">Implications for ratings</h2>
+<p>Manalath's ratings are Glicko-2 applied per game (see <a href="../plan.md">the plan</a>). The clean way to rate a handicap game is to compute the expected score as if the handicapped player's rating were higher by an offset, then update both players normally. Because the offset depends on strength, it cannot be a single number per level. Two practical routes:</p>
+<ol>
+  <li><b>Start with a conservative mid-level table and refit it.</b> Something like +50, +50, +120, +120, +200, +200, +230 for levels 1 to 7. Record the level on every match so the table can be refitted from real results once a few hundred handicap games exist. Underestimating the offset makes handicap games slightly generous to the weaker player's rating, which is the tolerable direction to err in.</li>
+  <li><b>Leave handicap games unrated at first</b> and use them purely to collect the data for route 1.</li>
+</ol>
+<p>We recommend route 1. It costs one field on the match record, one lookup in the rating fold, and a version bump on the algorithm id when the table changes. The offset is a function of the level and of the pair's average rating; a linear interpolation between a "weak" and a "strong" table is enough to start.</p>
+<p>The rule change itself is small: a per-player mask in the legality check and in the AI's move generation, the seven patterns as data, and a handicap field on the match lexicon that the accept record pins by CID like the other terms.</p>
+
+<h2 id="limits">Limitations</h2>
+<ul>
+  <li><b>The players are shallow.</b> Depth 2 is a weak player by human standards, and the AI's evaluation is hand-written. The <em>ordering</em> and <em>monotonicity</em> of the dead-cell results are structural and should carry over to people. The specific Elo values will not, and the strength dependence in Figure 7 says they will be larger between good players.</li>
+  <li><b>Both sides know about the dead cells.</b> The search on both sides was told about the mask. That is the right model, since a human stronger player also knows, but it means the AI is exploiting the handicap as well as a depth-2 player can.</li>
+  <li><b>200 games per cell.</b> Enough to see effects of 10 points and to establish monotonicity; not enough to separate levels 5, 6 and 7 or to pin any Elo figure closer than ±30.</li>
+  <li><b>The asymmetric rule was not tested.</b> A variant in which the weaker player's quart does not lose would need the AI to understand the variant on both sides before self-play could say anything about it.</li>
+  <li><b>Random play is unrescuable.</b> Depth 0 lost every game to depth 2 with 16 dead cells or all seven star points. No handicap compensates for blundering into immediate losses, which is a reminder that the ladder is for players who have learned the rules.</li>
+</ul>
+
+<h2 id="appendix">Appendix: all runs</h2>
+<p>Every configuration that was run, as recorded. Configuration fields are per player: <code>d</code> is search depth, <code>pass</code> the number of pass tokens, <code>liab</code> the number of pre-placed corner groups of that player's colour, <code>tempo</code> the number of extra opening placements, and <code>dead</code> the number of cells dead for that player, placed by <code>mode</code>. Repeated configurations were run as separate seeds. The harness is <a href="sim.js">sim.js</a> with <a href="ai-fixed-depth.js">ai-fixed-depth.js</a>, run with Bun from this directory, for example <code>bun sim.js '{"d":[1,2],"dead":[0,3],"deadMode":"pattern","games":200}'</code>.</p>
+<details open>
+  <summary>128 runs</summary>
+  <table id="tbl-all"><thead><tr><th>d</th><th>pass</th><th>liab</th><th>tempo</th><th>dead</th><th>mode</th><th class="n">games</th><th class="n">P1 wins</th><th class="n">P2 wins</th><th class="n">P1 %</th></tr></thead><tbody></tbody></table>
+</details>
+
+</main>
+
+<script>
+// ---------- data ----------
+const RUNS = [{"d":[0,0],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":211,"p2":189,"draw":0},{"d":[0,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":1,"p2":399,"draw":0},{"d":[1,0],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":400,"p2":0,"draw":0},{"d":[2,0],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":200,"p2":0,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":201,"p2":199,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":131,"p2":69,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":77,"p2":123,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":109,"p2":91,"draw":0},{"d":[1,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":62,"p2":138,"draw":0},{"d":[2,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":107,"p2":93,"draw":0},{"d":[2,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":111,"p2":89,"draw":0},{"d":[2,2],"pass":[0,1],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":108,"p2":92,"draw":0},{"d":[2,2],"pass":[0,2],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":106,"p2":94,"draw":0},{"d":[1,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":75,"p2":125,"draw":0},{"d":[0,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[1,2],"pass":[3,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":79,"p2":121,"draw":0},{"d":[0,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[0,2],"pass":[3,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[2,1],"pass":[0,1],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":134,"p2":66,"draw":0},{"d":[2,1],"pass":[0,2],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":132,"p2":68,"draw":0},{"d":[2,1],"pass":[0,3],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":137,"p2":63,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,3],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":51,"p2":149,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[2,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":124,"p2":76,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,1],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":53,"p2":147,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,2],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":59,"p2":141,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[1,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":129,"p2":71,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,3],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":48,"p2":152,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,2],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":84,"p2":116,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,1],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":156,"p2":44,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[1,0],"dead":[0,0],"mode":"-","g":200,"p1":73,"p2":127,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[2,0],"dead":[0,0],"mode":"-","g":200,"p1":86,"p2":114,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[1,0],"dead":[0,0],"mode":"-","g":200,"p1":140,"p2":60,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[2,0],"dead":[0,0],"mode":"-","g":200,"p1":129,"p2":71,"draw":0},{"d":[1,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":78,"p2":122,"draw":0},{"d":[1,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":69,"p2":131,"draw":0},{"d":[2,1],"pass":[0,1],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":136,"p2":64,"draw":0},{"d":[2,1],"pass":[0,3],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":131,"p2":69,"draw":0},{"d":[1,2],"pass":[3,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":77,"p2":123,"draw":0},{"d":[2,1],"pass":[0,2],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":126,"p2":74,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[3,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":118,"p2":82,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[2,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":47,"p2":153,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,3],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":82,"p2":118,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[1,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":113,"p2":87,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,2],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":175,"p2":25,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,1],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":200,"p2":0,"draw":0},{"d":[2,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":95,"p2":105,"draw":0},{"d":[2,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":117,"p2":83,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[3,0],"dead":[0,0],"mode":"-","g":200,"p1":93,"p2":107,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,3],"dead":[0,0],"mode":"-","g":200,"p1":110,"p2":90,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[2,0],"dead":[0,0],"mode":"-","g":200,"p1":89,"p2":111,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,2],"dead":[0,0],"mode":"-","g":200,"p1":128,"p2":72,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[1,0],"dead":[0,0],"mode":"-","g":200,"p1":78,"p2":122,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,1],"dead":[0,0],"mode":"-","g":200,"p1":119,"p2":81,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,2],"dead":[0,0],"mode":"-","g":200,"p1":82,"p2":118,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,1],"dead":[0,0],"mode":"-","g":200,"p1":110,"p2":90,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,12],"mode":"random","g":200,"p1":166,"p2":34,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"edge","g":200,"p1":130,"p2":70,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"random","g":200,"p1":140,"p2":60,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"random","g":200,"p1":122,"p2":78,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"random","g":200,"p1":90,"p2":110,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"random","g":200,"p1":80,"p2":120,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"center","g":200,"p1":108,"p2":92,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"random","g":200,"p1":0,"p2":200,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,16],"mode":"random","g":200,"p1":0,"p2":200,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"center","g":200,"p1":111,"p2":89,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"random","g":200,"p1":59,"p2":141,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[12,0],"mode":"random","g":200,"p1":39,"p2":161,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"random","g":200,"p1":172,"p2":28,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"random","g":200,"p1":153,"p2":47,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"star","g":200,"p1":162,"p2":38,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"star","g":200,"p1":136,"p2":64,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"star","g":200,"p1":94,"p2":106,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"star","g":200,"p1":127,"p2":73,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"star","g":200,"p1":0,"p2":200,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"star","g":200,"p1":30,"p2":170,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"star","g":200,"p1":99,"p2":101,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"star","g":200,"p1":179,"p2":21,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[2,0],"mode":"pattern","g":200,"p1":118,"p2":82,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"pattern","g":200,"p1":127,"p2":73,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"pattern","g":200,"p1":105,"p2":95,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"pattern","g":200,"p1":98,"p2":102,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"pattern","g":200,"p1":97,"p2":103,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"pattern","g":200,"p1":99,"p2":101,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[1,0],"mode":"pattern","g":200,"p1":116,"p2":84,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"pattern","g":200,"p1":98,"p2":102,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"pattern","g":200,"p1":160,"p2":40,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"pattern","g":200,"p1":37,"p2":163,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"pattern","g":200,"p1":144,"p2":56,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[5,0],"mode":"pattern","g":200,"p1":70,"p2":130,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,6],"mode":"pattern","g":200,"p1":142,"p2":58,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[6,0],"mode":"pattern","g":200,"p1":56,"p2":144,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":131,"p2":69,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":81,"p2":119,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":119,"p2":81,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":81,"p2":119,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"pattern","g":200,"p1":160,"p2":40,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"pattern","g":200,"p1":165,"p2":35,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"pattern","g":200,"p1":147,"p2":53,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[2,0],"mode":"pattern","g":200,"p1":88,"p2":112,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"pattern","g":200,"p1":59,"p2":141,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"pattern","g":200,"p1":55,"p2":145,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"pattern","g":200,"p1":142,"p2":58,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[1,0],"mode":"pattern","g":200,"p1":85,"p2":115,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,6],"mode":"pattern","g":200,"p1":179,"p2":21,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"pattern","g":200,"p1":168,"p2":32,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[5,0],"mode":"pattern","g":200,"p1":20,"p2":180,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"pattern","g":200,"p1":171,"p2":29,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"pattern","g":200,"p1":111,"p2":89,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[1,0],"mode":"pattern","g":200,"p1":103,"p2":97,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[6,0],"mode":"pattern","g":200,"p1":55,"p2":145,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"pattern","g":200,"p1":31,"p2":169,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"pattern","g":200,"p1":108,"p2":92,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[2,0],"mode":"pattern","g":200,"p1":103,"p2":97,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"pattern","g":200,"p1":120,"p2":80,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"pattern","g":200,"p1":75,"p2":125,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"pattern","g":200,"p1":116,"p2":84,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"pattern","g":200,"p1":136,"p2":64,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"pattern","g":200,"p1":83,"p2":117,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":136,"p2":64,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":103,"p2":97,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[5,0],"mode":"pattern","g":200,"p1":70,"p2":130,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,6],"mode":"pattern","g":200,"p1":141,"p2":59,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[6,0],"mode":"pattern","g":200,"p1":60,"p2":140,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"pattern","g":200,"p1":137,"p2":63,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"pattern","g":200,"p1":46,"p2":154,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":112,"p2":88,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":87,"p2":113,"draw":0}];
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const tip = $('#tip');
+function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 28) + 'px'; }
+function hideTip() { tip.style.opacity = 0; }
+const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const elo = p => { p = Math.min(Math.max(p, .005), .995); return 400 * Math.log10(p / (1 - p)); };
+
+// Sum all runs matching a config (repeated seeds pool together).
+function agg(f) {
+  const rs = RUNS.filter(f); let g = 0, p1 = 0, p2 = 0;
+  for (const r of rs) { g += r.g; p1 += r.p1; p2 += r.p2; }
+  return g ? { g, p1, p2, p1rate: p1 / g, p2rate: p2 / g, se: Math.sqrt(.25 / g) } : null;
+}
+const plain = r => eq(r.pass, [0, 0]) && eq(r.liab, [0, 0]) && eq(r.tempo, [0, 0]) && eq(r.dead, [0, 0]);
+// Colour-averaged rate of "the handicapped/weaker player" across two mirrored configs.
+function mirrored(fA, fB) {
+  const a = agg(fA), b = agg(fB); if (!a || !b) return null;
+  const p = (a.p1rate + b.p2rate) / 2;
+  return { first: a.p1rate, second: b.p2rate, avg: p, se: Math.sqrt(a.se ** 2 + b.se ** 2) / 2 };
+}
+const pct = x => Math.round(x * 100) + '%';
+
+// ---------- hex board ----------
+const R = 4, SQ3 = Math.sqrt(3);
+const CELLS = [];
+for (let r = -R; r <= R; r++) for (let q = Math.max(-R, -r - R); q <= Math.min(R, -r + R); q++) CELLS.push({ q, r, i: CELLS.length });
+const ROWS = []; for (let r = -R; r <= R; r++) ROWS.push(CELLS.filter(c => c.r === r).map(c => c.i));
+const cellOf = n => ROWS[n.charCodeAt(0) - 97][+n.slice(1) - 1];
+const idx = (q, r) => { const c = CELLS.find(c => c.q === q && c.r === r); return c ? c.i : -1; };
+function boardSVG(dead = [], stones = {}, size = 100, marks = {}) {
+  const s = size / 17, cx = size / 2, cy = size / 2;
+  let out = `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img">`;
+  for (const c of CELLS) {
+    const x = cx + s * SQ3 * (c.q + c.r / 2), y = cy + s * 1.5 * c.r;
+    const pts = []; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k - 30); pts.push((x + s * .96 * Math.cos(a)).toFixed(2) + ',' + (y + s * .96 * Math.sin(a)).toFixed(2)); }
+    const isDead = dead.includes(c.i);
+    out += `<polygon points="${pts.join(' ')}" fill="${isDead ? 'var(--dead)' : 'var(--cell)'}" stroke="var(--cell-stroke)" stroke-width=".6"/>`;
+    if (stones[c.i]) out += `<circle cx="${x}" cy="${y}" r="${s * .62}" fill="${stones[c.i] === 1 ? 'var(--p1)' : 'var(--p2)'}" stroke="var(--ink)" stroke-width=".5" stroke-opacity=".5"/>`;
+    if (marks[c.i]) out += `<text x="${x}" y="${y + s * .32}" text-anchor="middle" font-size="${s * .9}" font-family="system-ui,sans-serif" fill="${stones[c.i] === 2 ? 'var(--p1)' : 'var(--ink)'}">${marks[c.i]}</text>`;
+  }
+  return out + '</svg>';
+}
+
+// ---------- generic chart scaffolding ----------
+function svgOpen(w, h) { return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`; }
+function yAxis(x0, x1, y, v2y, ticks, fmt) {
+  let s = '';
+  for (const t of ticks) { const yy = v2y(t); s += `<line x1="${x0}" x2="${x1}" y1="${yy}" y2="${yy}" stroke="var(--grid)" stroke-width="1"/><text x="${x0 - 8}" y="${yy + 4}" text-anchor="end" font-size="12" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${fmt(t)}</text>`; }
+  return s;
+}
+function attach(container, items) {
+  container.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', e => showTip(e, el.dataset.tip));
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+// ---------- Figure 1: baseline matrix ----------
+(function () {
+  const depths = [0, 1, 2];
+  const val = (a, b) => { // colour-averaged rate of depth a vs depth b
+    if (a === b) { const r = agg(x => eq(x.d, [a, a]) && plain(x)); return { p: .5, first: r.p1rate }; }
+    const m = mirrored(x => eq(x.d, [a, b]) && plain(x), x => eq(x.d, [b, a]) && plain(x));
+    return { p: m.avg, first: m.first, second: m.second };
+  };
+  const W = 460, H = 230, cw = 100, ch = 54, x0 = 120, y0 = 40;
+  let s = svgOpen(W, H);
+  for (let j = 0; j < 3; j++) s += `<text x="${x0 + j * cw + cw / 2}" y="${y0 - 10}" text-anchor="middle" font-size="13" fill="var(--ink-2)">vs depth ${depths[j]}</text>`;
+  for (let i = 0; i < 3; i++) {
+    s += `<text x="${x0 - 12}" y="${y0 + i * ch + ch / 2 + 4}" text-anchor="end" font-size="13" fill="var(--ink-2)">depth ${depths[i]}</text>`;
+    for (let j = 0; j < 3; j++) {
+      const v = val(depths[i], depths[j]);
+      const shade = i === j ? 'var(--code-bg)' : v.p > .5 ? `rgba(42,120,214,${.15 + .6 * (v.p - .5) * 2})` : `rgba(235,104,52,${.15 + .6 * (.5 - v.p) * 2})`;
+      const label = i === j ? `${pct(v.first)} as P1` : pct(v.p);
+      const t = i === j ? `depth ${depths[i]} vs itself: first mover wins ${pct(v.first)}` : `depth ${depths[i]} vs depth ${depths[j]}: ${pct(v.first)} as first mover, ${pct(v.second)} as second, average ${pct(v.p)} (${elo(v.p) > 0 ? '+' : ''}${Math.round(elo(v.p))} Elo)`;
+      s += `<g data-tip="${t}"><rect x="${x0 + j * cw + 2}" y="${y0 + i * ch + 2}" width="${cw - 4}" height="${ch - 4}" rx="6" fill="${shade}"/><text x="${x0 + j * cw + cw / 2}" y="${y0 + i * ch + ch / 2 + 5}" text-anchor="middle" font-size="${i === j ? 12 : 15}" font-weight="${i === j ? 400 : 600}" fill="var(--ink)" style="font-variant-numeric:tabular-nums">${label}</text></g>`;
+    }
+  }
+  s += '</svg>';
+  const el = $('#fig-baseline'); el.innerHTML = `<div class="chart-title">Win rate of row player against column player</div><div class="chart-sub">Colour-averaged; diagonal shows first-move advantage</div>${s}`; attach(el);
+})();
+
+// ---------- Figure 2: liability groups ----------
+(function () {
+  const W = 640, H = 300, L = 48, Rr = 16, T = 20, B = 44, pw = (W - L - Rr) / 3;
+  const v2y = p => T + (1 - p) * (H - T - B);
+  let s = svgOpen(W, H);
+  s += yAxis(L, W - Rr, 0, v2y, [0, .25, .5, .75, 1], p => pct(p));
+  const base = mirrored(x => eq(x.d, [1, 2]) && plain(x), x => eq(x.d, [2, 1]) && plain(x));
+  s += `<line x1="${L}" x2="${W - Rr}" y1="${v2y(base.avg)}" y2="${v2y(base.avg)}" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="${W - Rr}" y="${v2y(base.avg) - 5}" text-anchor="end" font-size="11" fill="var(--muted)">baseline ${pct(base.avg)}</text>`;
+  for (let k = 1; k <= 3; k++) {
+    const px = L + (k - 1) * pw, cxm = px + pw / 2;
+    if (k > 1) s += `<line x1="${px}" x2="${px}" y1="${T}" y2="${H - B}" stroke="var(--grid)"/>`;
+    s += `<text x="${cxm}" y="${H - 14}" text-anchor="middle" font-size="13" fill="var(--ink-2)">${k} corner group${k > 1 ? 's' : ''}</text>`;
+    // weaker player owns the groups
+    const wf = agg(x => eq(x.d, [1, 2]) && eq(x.liab, [k, 0])), ws = agg(x => eq(x.d, [2, 1]) && eq(x.liab, [0, k]));
+    // stronger player owns the groups
+    const sf = agg(x => eq(x.d, [1, 2]) && eq(x.liab, [0, k])), ss = agg(x => eq(x.d, [2, 1]) && eq(x.liab, [k, 0]));
+    const pts = [
+      [cxm - 45, wf?.p1rate, 'var(--s1)', true, `weaker player (first mover) owns ${k} group${k > 1 ? 's' : ''}: wins ${pct(wf?.p1rate ?? 0)}`],
+      [cxm - 15, ws?.p2rate, 'var(--s1)', true, `weaker player (second mover) owns ${k} group${k > 1 ? 's' : ''}: wins ${pct(ws?.p2rate ?? 0)}`],
+      [cxm + 15, sf?.p1rate, 'var(--s2)', false, `stronger player owns ${k} group${k > 1 ? 's' : ''}, weaker moves first: weaker wins ${pct(sf?.p1rate ?? 0)}`],
+      [cxm + 45, ss?.p2rate, 'var(--s2)', false, `stronger player owns ${k} group${k > 1 ? 's' : ''}, weaker moves second: weaker wins ${pct(ss?.p2rate ?? 0)}`],
+    ].filter(p => p[1] != null);
+    for (const [x, p, c, filled, t] of pts) {
+      s += `<g data-tip="${t}"><circle cx="${x}" cy="${v2y(p)}" r="12" fill="transparent"/><circle cx="${x}" cy="${v2y(p)}" r="6" fill="${filled ? c : 'var(--surface)'}" stroke="${c}" stroke-width="2"/></g>`;
+    }
+  }
+  s += `<line x1="${L}" x2="${W - Rr}" y1="${H - B}" y2="${H - B}" stroke="var(--axis)"/></svg>`;
+  const el = $('#fig-liab'); el.innerHTML = `<div class="chart-title">Weaker player's win rate with pre-placed corner groups</div><div class="chart-sub">Depth 1 vs depth 2; pairs of dots are first and second mover</div>${s}<div class="legend"><span style="--c:var(--s1)">weaker player owns the groups</span><span style="--c:var(--s2)">stronger player owns the groups (hollow)</span></div>`; attach(el);
+})();
+
+// ---------- Figure 3: the trap ----------
+(function () {
+  // Replayed game: black pre-placed at (0,4),(-1,4),(1,3). Moves: 1:W@0,2  2:B@-2,3  1:B@-2,2  2:B@2,1  1:B@0,3  2:B@-4,4
+  const stones = {}, marks = {};
+  for (const [q, r] of [[0, 4], [-1, 4], [1, 3]]) stones[idx(q, r)] = 2;
+  const moves = [[1, 0, 2], [2, -2, 3], [2, -2, 2], [2, 2, 1], [2, 0, 3], [2, -4, 4]];
+  moves.forEach(([c, q, r], n) => { stones[idx(q, r)] = c; marks[idx(q, r)] = n + 1; });
+  $('#fig-trap').innerHTML = `<figure>${boardSVG([], stones, 120, marks)}</figure>`;
+})();
+
+// ---------- Figure 4: dead cells by count ----------
+(function () {
+  const W = 640, H = 320, L = 48, Rr = 20, T = 20, B = 44;
+  const xs = [0, 2, 4, 6, 8, 10, 12], v2x = k => L + (k / 12) * (W - L - Rr), v2y = p => T + (1 - p) * (H - T - B);
+  let s = svgOpen(W, H);
+  s += yAxis(L, W - Rr, 0, v2y, [0, .25, .5, .75, 1], pct);
+  for (const k of xs) s += `<text x="${v2x(k)}" y="${H - 16}" text-anchor="middle" font-size="12" fill="var(--muted)">${k}</text>`;
+  s += `<text x="${(L + W - Rr) / 2}" y="${H - 2}" text-anchor="middle" font-size="12" fill="var(--ink-2)">cells dead for the stronger player</text>`;
+  const base = mirrored(x => eq(x.d, [1, 2]) && plain(x), x => eq(x.d, [2, 1]) && plain(x));
+  const series = [
+    { name: 'random cells', c: 'var(--s1)', mode: 'random', ks: [2, 4, 8, 12] },
+    { name: 'star points (centre first)', c: 'var(--s2)', mode: 'star', ks: [1, 3, 5, 7] },
+    { name: 'central cells', c: 'var(--s3)', mode: 'center', ks: [4, 8] },
+    { name: 'edge cells', c: 'var(--s4)', mode: 'edge', ks: [8] },
+  ];
+  let marksOut = '';
+  for (const se of series) {
+    const pts = [[0, base.avg, base.se, 'no handicap']];
+    for (const k of se.ks) {
+      const m = mirrored(x => eq(x.d, [1, 2]) && eq(x.dead, [0, k]) && x.mode === se.mode, x => eq(x.d, [2, 1]) && eq(x.dead, [k, 0]) && x.mode === se.mode);
+      if (m) pts.push([k, m.avg, m.se, `${m.first != null ? pct(m.first) + ' first, ' + pct(m.second) + ' second' : ''}`]);
+      else { const a = agg(x => eq(x.d, [1, 2]) && eq(x.dead, [0, k]) && x.mode === se.mode); if (a) pts.push([k, a.p1rate, a.se, `${pct(a.p1rate)} as first mover only`]); }
+    }
+    if (pts.length > 2) s += `<path d="${pts.map((p, i) => (i ? 'L' : 'M') + v2x(p[0]) + ',' + v2y(p[1])).join(' ')}" fill="none" stroke="${se.c}" stroke-width="2" stroke-linejoin="round"/>`;
+    for (const [k, p, e, t] of pts.slice(1)) {
+      marksOut += `<g data-tip="${se.name}, ${k} cells: weaker player wins ${pct(p)} (${t})"><line x1="${v2x(k)}" x2="${v2x(k)}" y1="${v2y(p - e)}" y2="${v2y(p + e)}" stroke="${se.c}" stroke-width="1.5"/><circle cx="${v2x(k)}" cy="${v2y(p)}" r="12" fill="transparent"/><circle cx="${v2x(k)}" cy="${v2y(p)}" r="5" fill="${se.c}" stroke="var(--surface)" stroke-width="2"/></g>`;
+    }
+  }
+  s += `<g data-tip="no handicap: weaker player wins ${pct(base.avg)}"><circle cx="${v2x(0)}" cy="${v2y(base.avg)}" r="5" fill="var(--muted)" stroke="var(--surface)" stroke-width="2"/></g>` + marksOut;
+  s += `<line x1="${L}" x2="${W - Rr}" y1="${H - B}" y2="${H - B}" stroke="var(--axis)"/></svg>`;
+  const el = $('#fig-deadcount'); el.innerHTML = `<div class="chart-title">Weaker player's win rate by number of dead cells</div><div class="chart-sub">Depth 1 vs depth 2, colour-averaged, ±1 standard error</div>${s}<div class="legend">${series.map(se => `<span style="--c:${se.c}">${se.name}</span>`).join('')}</div>`; attach(el);
+})();
+
+// ---------- Figure 5: ladder boards ----------
+const PATTERNS = [[], ['e5'], ['e3', 'e7'], ['c3', 'e7', 'g3'], ['c3', 'c5', 'g3', 'g5'], ['c3', 'c5', 'e5', 'g3', 'g5'], ['c3', 'c5', 'e3', 'e7', 'g3', 'g5'], ['c3', 'c5', 'e3', 'e5', 'e7', 'g3', 'g5'], ['e3']];
+(function () {
+  $('#fig-ladder-boards').innerHTML = PATTERNS.slice(1, 8).map((p, i) => `<figure>${boardSVG(p.map(cellOf))}<figcaption>Level ${i + 1}<small>${p.join(' ')}</small></figcaption></figure>`).join('');
+})();
+
+// ---------- Figure 6: ladder results ----------
+(function () {
+  const W = 640, H = 320, L = 48, Rr = 20, T = 20, B = 44, n = 8, bw = (W - L - Rr) / n;
+  const v2y = p => T + (1 - p) * (H - T - B);
+  let s = svgOpen(W, H);
+  s += yAxis(L, W - Rr, 0, v2y, [0, .25, .5, .75, 1], pct);
+  const base = mirrored(x => eq(x.d, [1, 2]) && plain(x), x => eq(x.d, [2, 1]) && plain(x));
+  s += `<line x1="${L}" x2="${W - Rr}" y1="${v2y(base.avg)}" y2="${v2y(base.avg)}" stroke="var(--muted)" stroke-dasharray="3 4"/>`;
+  const avgPts = [];
+  for (let k = 1; k <= 8; k++) {
+    const m = mirrored(x => eq(x.d, [1, 2]) && eq(x.dead, [0, k]) && x.mode === 'pattern', x => eq(x.d, [2, 1]) && eq(x.dead, [k, 0]) && x.mode === 'pattern');
+    const cx = L + (k - 1) * bw + bw / 2, label = k === 8 ? 'e3 alone' : 'L' + k;
+    if (k === 8) s += `<line x1="${L + 7 * bw}" x2="${L + 7 * bw}" y1="${T}" y2="${H - B}" stroke="var(--grid)"/>`;
+    s += `<text x="${cx}" y="${H - 16}" text-anchor="middle" font-size="12" fill="var(--muted)">${label}</text>`;
+    // bar for average, dots for first/second
+    const y = v2y(m.avg), y0 = v2y(0);
+    s += `<g data-tip="${k === 8 ? 'lone outer point e3' : 'level ' + k + ' (' + PATTERNS[k].join(' ') + ')'}: ${pct(m.first)} as first mover, ${pct(m.second)} as second, average ${pct(m.avg)}"><rect x="${cx - 11}" y="${y}" width="22" height="${y0 - y}" fill="${k === 8 ? 'var(--muted)' : 'var(--s1)'}" opacity=".85" rx="4" ry="4"/><rect x="${cx - 11}" y="${y0 - 4}" width="22" height="4" fill="${k === 8 ? 'var(--muted)' : 'var(--s1)'}" opacity=".85"/>`;
+    s += `<circle cx="${cx - 5}" cy="${v2y(m.first)}" r="4.5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/><circle cx="${cx + 5}" cy="${v2y(m.second)}" r="4.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/></g>`;
+    s += `<text x="${cx}" y="${Math.min(y, v2y(m.first), v2y(m.second)) - 9}" text-anchor="middle" font-size="12" fill="var(--ink-2)" style="font-variant-numeric:tabular-nums">${pct(m.avg)}</text>`;
+  }
+  s += `<line x1="${L}" x2="${W - Rr}" y1="${H - B}" y2="${H - B}" stroke="var(--axis)"/></svg>`;
+  const el = $('#fig-ladder'); el.innerHTML = `<div class="chart-title">Weaker player's win rate at each handicap level</div><div class="chart-sub">Depth 1 vs depth 2. Bar: colour average. Filled dot: weaker moves first. Hollow dot: weaker moves second. Dashed line: ${pct(base.avg)} baseline with no handicap.</div>${s}`; attach(el);
+})();
+
+// ---------- Figure 7 + table: Elo at equal strength ----------
+(function () {
+  const W = 640, H = 340, L = 56, Rr = 20, T = 24, B = 44, n = 8, bw = (W - L - Rr) / n;
+  const yMin = -50, yMax = 450, v2y = e => T + (1 - (e - yMin) / (yMax - yMin)) * (H - T - B);
+  let s = svgOpen(W, H);
+  s += yAxis(L, W - Rr, 0, v2y, [0, 100, 200, 300, 400], e => '+' + e);
+  s += `<line x1="${L}" x2="${W - Rr}" y1="${v2y(0)}" y2="${v2y(0)}" stroke="var(--axis)"/>`;
+  const series = [{ d: 2, c: 'var(--s1)', name: 'depth 2 vs depth 2' }, { d: 1, c: 'var(--s2)', name: 'depth 1 vs depth 1' }];
+  const rows = [];
+  for (const se of series) {
+    const pts = [];
+    for (let k = 1; k <= 8; k++) {
+      const m = mirrored(x => eq(x.d, [se.d, se.d]) && eq(x.dead, [0, k]) && x.mode === 'pattern', x => eq(x.d, [se.d, se.d]) && eq(x.dead, [k, 0]) && x.mode === 'pattern');
+      pts.push({ k, m, e: elo(m.avg), lo: elo(m.avg - m.se), hi: elo(m.avg + m.se) });
+      (rows[k] ||= {})[se.d] = m;
+    }
+    const line = pts.slice(0, 7);
+    s += `<path d="${line.map((p, i) => (i ? 'L' : 'M') + (L + (p.k - 1) * bw + bw / 2) + ',' + v2y(p.e)).join(' ')}" fill="none" stroke="${se.c}" stroke-width="2" stroke-linejoin="round"/>`;
+    for (const p of pts) {
+      const cx = L + (p.k - 1) * bw + bw / 2;
+      s += `<g data-tip="${se.name}, ${p.k === 8 ? 'e3 alone' : 'level ' + p.k}: unrestricted player wins ${pct(p.m.avg)} (${pct(p.m.first)} as first, ${pct(p.m.second)} as second) = ${p.e > 0 ? '+' : ''}${Math.round(p.e)} Elo"><line x1="${cx}" x2="${cx}" y1="${v2y(p.lo)}" y2="${v2y(p.hi)}" stroke="${se.c}" stroke-width="1.5"/><circle cx="${cx}" cy="${v2y(p.e)}" r="12" fill="transparent"/><circle cx="${cx}" cy="${v2y(p.e)}" r="5" fill="${p.k === 8 ? 'var(--surface)' : se.c}" stroke="${se.c}" stroke-width="2"${p.k === 8 ? ' stroke-dasharray="2 2"' : ''}/></g>`;
+    }
+  }
+  for (let k = 1; k <= 8; k++) s += `<text x="${L + (k - 1) * bw + bw / 2}" y="${H - 16}" text-anchor="middle" font-size="12" fill="var(--muted)">${k === 8 ? 'e3 alone' : 'L' + k}</text>`;
+  s += `<line x1="${L + 7 * bw}" x2="${L + 7 * bw}" y1="${T}" y2="${H - B}" stroke="var(--grid)"/>`;
+  s += `<text x="${(L + W - Rr) / 2}" y="${H - 2}" text-anchor="middle" font-size="12" fill="var(--ink-2)">handicap level</text></svg>`;
+  const el = $('#fig-elo'); el.innerHTML = `<div class="chart-title">Elo value of each level between equal players</div><div class="chart-sub">400·log₁₀(p/(1−p)) of the unrestricted player's colour-averaged win rate, ±1 standard error</div>${s}<div class="legend">${series.map(se => `<span style="--c:${se.c}">${se.name}</span>`).join('')}</div>`; attach(el);
+  // table
+  const names = ['', 'e5', 'e3 e7', 'c3 e7 g3', 'c3 c5 g3 g5', 'c3 c5 e5 g3 g5', 'c3 c5 e3 e7 g3 g5', 'all seven', 'e3 alone'];
+  $('#tbl-elo').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(k => { const r = rows[k]; return `<tr><td>${k === 8 ? 'single' : k}</td><td>${names[k]}</td><td class="n">${pct(r[2].avg)}</td><td class="n">+${Math.round(elo(r[2].avg))}</td><td class="n">${pct(r[1].avg)}</td><td class="n">+${Math.round(elo(r[1].avg))}</td></tr>`; }).join('');
+})();
+
+// ---------- Appendix table ----------
+(function () {
+  const f = a => a.join('/');
+  const sorted = [...RUNS].sort((a, b) => f(a.d).localeCompare(f(b.d)) || a.mode.localeCompare(b.mode) || f(a.dead).localeCompare(f(b.dead)) || f(a.pass).localeCompare(f(b.pass)) || f(a.liab).localeCompare(f(b.liab)) || f(a.tempo).localeCompare(f(b.tempo)));
+  $('#tbl-all tbody').innerHTML = sorted.map(r => `<tr${plain(r) ? ' class="base"' : ''}><td>${f(r.d)}</td><td>${f(r.pass)}</td><td>${f(r.liab)}</td><td>${f(r.tempo)}</td><td>${f(r.dead)}</td><td>${r.mode === '-' ? '' : r.mode}</td><td class="n">${r.g}</td><td class="n">${r.p1}</td><td class="n">${r.p2}</td><td class="n">${(100 * r.p1 / r.g).toFixed(1)}</td></tr>`).join('');
+})();
+</script>
+</body>
+</html>
