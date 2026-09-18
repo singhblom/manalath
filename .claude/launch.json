@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "manalath",
-      "runtimeExecutable": "/Users/martin.singh-blom/.bun/bin/bun",
+      "runtimeExecutable": "bun",
       "runtimeArgs": [
         "--hot",
         "--env-file=.env.preview",
