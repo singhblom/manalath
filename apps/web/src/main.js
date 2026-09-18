@@ -8,6 +8,16 @@ import { ConstellationRenderer } from './renderers/constellation.js';
 import { MercuryRenderer } from './renderers/mercury.js';
 import { SlimeRenderer } from './renderers/slime.js';
 import { GobanRenderer } from './renderers/goban.js';
+
+// Mobile browsers (notably Firefox on Android) can report 100dvh taller than the visible area,
+// pushing the board's bottom edge and the colour reservoirs under the browser toolbar; use the measured height.
+function syncAppHeight() {
+  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', Math.round(Math.min(h, window.innerHeight)) + 'px');
+}
+syncAppHeight();
+window.addEventListener('resize', syncAppHeight);
+window.visualViewport?.addEventListener('resize', syncAppHeight);
 import { NeonRenderer } from './renderers/neon.js';
 import { OnlineMatch, formatClock } from './online.js';
 import { mountLobby } from './lobby.js';

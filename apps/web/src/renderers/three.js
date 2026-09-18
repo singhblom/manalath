@@ -481,6 +481,9 @@ export class ThreeRenderer extends BaseRenderer {
     if (!w || !h) return;
     this.renderer.setSize(w, h);
     this.camera.aspect = w / h;
+    // portrait: shift the view so the board sits a little above centre, clear of the reservoirs in the bottom corners
+    if (h > w) this.camera.setViewOffset(w, h, 0, h * 0.07, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
     this.fitCamera();
   }
