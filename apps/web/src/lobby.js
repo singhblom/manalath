@@ -22,13 +22,18 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
     return json;
   }
 
-  function render() {
-    root.innerHTML = '';
-    if (!data) { root.appendChild(h('<p class="hint">Connecting…</p>')); return; }
-    const current = currentMatchId();
+  // The root has two slots. The forms slot holds static markup (the login form, or the new-challenge
+  // form) and is rebuilt only when the login state changes, so typing in it survives the 2 s poll.
+  // The lists slot holds everything derived from server data and is rebuilt on every poll.
+  const formsSlot = document.createElement('div');
+  const listsSlot = document.createElement('div');
+  root.append(formsSlot, listsSlot);
+  let formsFor; // undefined = never built; otherwise the did the forms were built for, or null when logged out
 
+  function renderForms() {
+    formsSlot.innerHTML = '';
     if (!me) {
-      root.appendChild(h(`<section>
+      formsSlot.appendChild(h(`<section>
         <p class="tagline">Log in with your Bluesky account to challenge other players. Manalath only asks to write its own game records to your repo.</p>
         <form class="stack" method="post" action="/login">
           <input type="hidden" name="next" value="/?online">
@@ -37,29 +42,46 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
           ${loginError ? `<p class="hint error">${escape(loginError)}</p>` : ''}
         </form>
       </section>`));
-    } else {
-      root.appendChild(h(`<div class="who">${person(me)}<a href="#" data-act="logout">log out</a></div>`));
-      const form = h(`<section><h2>New challenge</h2>
-        <form class="stack" id="create">
-          <div class="row">
-            <label>Time control <select name="timeControl">${data.timeControls.map((k) => `<option${k === '3+2' ? ' selected' : ''}>${k}</option>`).join('')}</select></label>
-            <label>Who moves first <select name="firstMover"><option value="random" selected>Random</option><option value="challenger">Me</option><option value="opponent">Opponent</option></select></label>
-          </div>
-          <label>Opponent <input name="opponent" placeholder="anyone (leave empty), or a handle"></label>
-          <label class="check"><input type="checkbox" name="rated" checked> Rated <span class="hint">counts towards your rank; needs a clock</span></label>
-          <button class="primary">Post challenge</button>
-        </form></section>`);
-      const ratedBox = form.querySelector('[name=rated]');
-      const tcSelect = form.querySelector('[name=timeControl]');
-      const syncRated = () => { const untimed = tcSelect.value === 'untimed'; ratedBox.disabled = untimed; if (untimed) ratedBox.checked = false; };
-      tcSelect.addEventListener('change', syncRated);
-      form.querySelector('form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const f = new FormData(e.target);
-        act(() => api('/api/challenge', { timeControl: f.get('timeControl'), firstMover: f.get('firstMover'), opponent: f.get('opponent'), rated: f.get('rated') === 'on' }));
-      });
-      root.appendChild(form);
+      return;
     }
+    const section = h(`<section><h2>New challenge</h2>
+      <form class="stack" id="create">
+        <div class="row">
+          <label>Time control <select name="timeControl">${data.timeControls.map((k) => `<option${k === '3+2' ? ' selected' : ''}>${k}</option>`).join('')}</select></label>
+          <label>Who moves first <select name="firstMover"><option value="random" selected>Random</option><option value="challenger">Me</option><option value="opponent">Opponent</option></select></label>
+        </div>
+        <label>Opponent <input name="opponent" placeholder="anyone (leave empty), or a handle"></label>
+        <label class="check"><input type="checkbox" name="rated" checked> Rated <span class="hint">counts towards your rank; needs a clock</span></label>
+        <button class="primary">Post challenge</button>
+      </form></section>`);
+    const form = section.querySelector('form');
+    const ratedBox = form.querySelector('[name=rated]');
+    const tcSelect = form.querySelector('[name=timeControl]');
+    const syncRated = () => { const untimed = tcSelect.value === 'untimed'; ratedBox.disabled = untimed; if (untimed) ratedBox.checked = false; };
+    tcSelect.addEventListener('change', syncRated);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = new FormData(form);
+      act(async () => {
+        await api('/api/challenge', { timeControl: f.get('timeControl'), firstMover: f.get('firstMover'), opponent: f.get('opponent'), rated: f.get('rated') === 'on' });
+        form.reset();
+        syncRated();
+      });
+    });
+    formsSlot.appendChild(section);
+  }
+
+  function render() {
+    if (!data) { formsSlot.innerHTML = ''; formsFor = undefined; listsSlot.innerHTML = ''; listsSlot.appendChild(h('<p class="hint">Connecting…</p>')); return; }
+    const key = me?.did ?? null;
+    if (formsFor !== key) { renderForms(); formsFor = key; }
+    renderLists();
+  }
+
+  function renderLists() {
+    listsSlot.innerHTML = '';
+    const current = currentMatchId();
+    if (me) listsSlot.appendChild(h(`<div class="who">${person(me)}<a href="#" data-act="logout">log out</a></div>`));
 
     // Open challenges (visible to everyone)
     const open = data.challenges.filter((c) => c.status === 'open' || c.status === 'accepting');
@@ -74,7 +96,7 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
       const li = h(`<li class="${mine ? 'mine' : forMe ? 'forme' : ''}"><span class="tc">${tcLabel(c.timeControl)}</span><span class="who-line">${who}</span><span class="meta">${c.rated ? 'rated · ' : ''}${first} · ${ago(c.createdAt)}</span></li>`);
       const btn = document.createElement('button');
       if (mine) { btn.textContent = 'Withdraw'; btn.onclick = () => act(() => api('/api/challenge/cancel', { uri: c.uri })); }
-      else if (!me) { btn.textContent = 'Log in to accept'; btn.onclick = () => root.querySelector('input[name=handle]')?.focus(); }
+      else if (!me) { btn.textContent = 'Log in to accept'; btn.onclick = () => formsSlot.querySelector('input[name=handle]')?.focus(); }
       else if (c.opponent && !forMe) { btn.textContent = 'Private'; btn.disabled = true; }
       else if (c.status === 'accepting') { btn.textContent = 'Being accepted…'; btn.disabled = true; }
       else { btn.className = 'primary'; btn.textContent = 'Accept'; btn.onclick = () => act(async () => { const { matchId } = await api('/api/challenge/accept', { uri: c.uri }); onOpenMatch(matchId); }); }
@@ -82,7 +104,7 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
       ul.appendChild(li);
     }
     sec.querySelector('.hint').textContent = open.length ? '' : me ? 'No open challenges. Post one; you can close this and play the computer while you wait.' : 'No open challenges right now.';
-    root.appendChild(sec);
+    listsSlot.appendChild(sec);
 
     if (me) {
       const gs = h(`<section><h2>Your games</h2><ul class="list"></ul></section>`);
@@ -99,7 +121,7 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
         if (!g.result) seen.add(g.id);
       }
       if (!data.games.length) gul.appendChild(h('<li><span class="meta">No games yet.</span></li>'));
-      root.appendChild(gs);
+      listsSlot.appendChild(gs);
     }
 
     if (data.leaderboard?.length) {
@@ -109,15 +131,15 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
         const prof = data.leaderboardProfiles?.[p.did] ?? { did: p.did, name: p.did.slice(0, 16) + '…' };
         ol.appendChild(h(`<li><span class="tc">${p.rank ?? ''}${p.provisional ? '?' : ''}</span><span class="who-line">${person({ ...prof, did: null }, me && p.did === me.did ? 'You' : undefined)}</span><span class="meta">${p.rating} ± ${p.deviation} · ${p.games} game${p.games === 1 ? '' : 's'}</span></li>`));
       }
-      root.appendChild(lb);
+      listsSlot.appendChild(lb);
     }
 
     if (current) {
       const leave = h(`<p class="hint leave"><span>You are in a game. Leaving does not resign; find it again under Your games.</span><button data-act="leave">Back to local play</button></p>`);
-      root.appendChild(leave);
+      listsSlot.appendChild(leave);
     }
-    root.querySelector('[data-act=logout]')?.addEventListener('click', async (e) => { e.preventDefault(); await fetch('/logout', { method: 'POST' }); location.href = '/?online'; });
-    root.querySelector('[data-act=leave]')?.addEventListener('click', onLeaveMatch);
+    listsSlot.querySelector('[data-act=logout]')?.addEventListener('click', async (e) => { e.preventDefault(); await fetch('/logout', { method: 'POST' }); location.href = '/?online'; });
+    listsSlot.querySelector('[data-act=leave]')?.addEventListener('click', onLeaveMatch);
   }
 
   async function refresh() {
@@ -129,7 +151,7 @@ export function mountLobby(root, { onOpenMatch, onLeaveMatch, currentMatchId, is
       if (accepted) { seen.add(accepted.matchId); onOpenMatch(accepted.matchId, { announce: true }); }
       if (isOpen()) render();
     } catch (err) {
-      if (isOpen()) { root.innerHTML = ''; root.appendChild(h(`<p class="hint error">Could not reach the server: ${escape(err.message)}</p>`)); }
+      if (isOpen()) { listsSlot.innerHTML = ''; listsSlot.appendChild(h(`<p class="hint error">Could not reach the server: ${escape(err.message)}</p>`)); }
     }
   }
 
