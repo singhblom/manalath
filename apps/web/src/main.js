@@ -489,6 +489,11 @@ if (new URLSearchParams(location.search).has('debug')) {
       `canvas ${r('#board canvas')} buf ${c ? `${c.width}x${c.height}` : '-'}`,
       `sideL ${r('.hud-side-left')}`, `scrollY ${scrollY}`,
       `mq760 ${matchMedia('(max-width: 760px)').matches}`,
+      `perf.now ${performance.now().toFixed(2)} lastFrame ${renderer?.lastFrame?.toFixed?.(2)}`,
+      ...(renderer?.pieces || []).filter(Boolean).slice(0, 4).map((m) => {
+        const p = m.userData.phys;
+        return `stone y${m.position.y.toFixed(2)} rest${m.userData.restY?.toFixed(2)}` + (p ? ` py${p.y.toFixed(2)} vy${p.vy.toFixed(2)} ${p.settled ? 'settled' : 'moving'}` : ' nophys');
+      }),
     ].join('\n');
   };
   setInterval(show, 500); show();
