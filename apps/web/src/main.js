@@ -466,3 +466,30 @@ setTheme(settings.theme in THEME_HINTS ? settings.theme : 'terraces');
   else scheduleAi();
   if (params.has('online')) { openOnline(); history.replaceState({}, '', location.pathname); }
 }
+
+// ?debug: live viewport/layout measurements, for diagnosing mobile browser sizing
+if (new URLSearchParams(location.search).has('debug')) {
+  const box = document.createElement('pre');
+  box.style.cssText = 'position:fixed;top:60px;left:4px;z-index:99;margin:0;padding:6px;font:11px/1.3 monospace;background:rgba(0,0,0,.8);color:#0f0;pointer-events:none;white-space:pre';
+  document.body.appendChild(box);
+  const probe = (h) => { const d = document.createElement('div'); d.style.cssText = `position:absolute;visibility:hidden;height:${h}`; document.body.appendChild(d); const v = d.offsetHeight; d.remove(); return v; };
+  const r = (sel) => { const e = document.querySelector(sel); if (!e) return '-'; const b = e.getBoundingClientRect(); return `${Math.round(b.top)}..${Math.round(b.bottom)} h${Math.round(b.height)}`; };
+  const vv = window.visualViewport;
+  const show = () => {
+    const c = document.querySelector('#board canvas');
+    box.textContent = [
+      navigator.userAgent.slice(0, 60),
+      `inner ${innerWidth}x${innerHeight} dpr ${devicePixelRatio}`,
+      `outer ${outerWidth}x${outerHeight} screen ${screen.width}x${screen.height}`,
+      `docEl client ${document.documentElement.clientWidth}x${document.documentElement.clientHeight}`,
+      `vv ${vv ? `${Math.round(vv.width)}x${Math.round(vv.height)} top${Math.round(vv.offsetTop)} s${vv.scale}` : '-'}`,
+      `100vh ${probe('100vh')} dvh ${probe('100dvh')} svh ${probe('100svh')} lvh ${probe('100lvh')}`,
+      `--app-h ${getComputedStyle(document.documentElement).getPropertyValue('--app-h')}`,
+      `#app ${r('#app')}`, `#toolbar ${r('#toolbar')}`, `#board ${r('#board')}`,
+      `canvas ${r('#board canvas')} buf ${c ? `${c.width}x${c.height}` : '-'}`,
+      `sideL ${r('.hud-side-left')}`, `scrollY ${scrollY}`,
+      `mq760 ${matchMedia('(max-width: 760px)').matches}`,
+    ].join('\n');
+  };
+  setInterval(show, 500); show();
+}
