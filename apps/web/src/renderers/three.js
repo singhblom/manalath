@@ -358,9 +358,9 @@ export class ThreeRenderer extends BaseRenderer {
     mesh.position.set(tile.position.x, restY, tile.position.z);
     mesh.userData.restY = restY;
     if (this.theme.dropPhysics && this.initializedPieces) {
-      // dropped from the hand a little off-centre: falls, bounces, then rolls to the bottom of the dish
+      // dropped from the hand a little off-centre: thrown down from a good height, bounces low, then rolls to the bottom of the dish
       const a = Math.random() * Math.PI * 2, d = 0.12 + Math.random() * 0.14;
-      mesh.userData.phys = { y: restY + 2.2, vy: -1.5, ox: Math.cos(a) * d, oz: Math.sin(a) * d, vx: (Math.random() - 0.5) * 0.6, vz: (Math.random() - 0.5) * 0.6, settled: false };
+      mesh.userData.phys = { y: restY + 2.4, vy: -4.5, ox: Math.cos(a) * d, oz: Math.sin(a) * d, vx: (Math.random() - 0.5) * 0.6, vz: (Math.random() - 0.5) * 0.6, settled: false };
     }
     mesh.castShadow = true;
     mesh.userData.spawn = performance.now();
@@ -529,11 +529,11 @@ export class ThreeRenderer extends BaseRenderer {
         if (!ph.settled) {
           const rest = m.userData.restY;
           // vertical: gravity + bounce
-          ph.vy -= 22 * dt; ph.y += ph.vy * dt;
-          if (ph.y < rest) { ph.y = rest; ph.vy = Math.abs(ph.vy) > 0.6 ? -ph.vy * 0.38 : 0; }
+          ph.vy -= 30 * dt; ph.y += ph.vy * dt;
+          if (ph.y < rest) { ph.y = rest; ph.vy = Math.abs(ph.vy) > 0.6 ? -ph.vy * 0.2 : 0; }
           // lateral: the dish pushes the stone toward the centre; a rolling stone loses energy
           const onFloor = ph.y <= rest + 0.001;
-          const k = onFloor ? 34 : 0, damp = onFloor ? 5.5 : 0.4;
+          const k = onFloor ? 34 : 0, damp = onFloor ? 8 : 0.4;
           ph.vx += (-k * ph.ox - damp * ph.vx) * dt; ph.vz += (-k * ph.oz - damp * ph.vz) * dt;
           ph.ox += ph.vx * dt; ph.oz += ph.vz * dt;
           // the stone rolls as it moves
@@ -552,8 +552,10 @@ export class ThreeRenderer extends BaseRenderer {
         m.position.y = 0.16 + Math.sin(tsec * 1.6 + m.userData.phase) * 0.04;
         m.rotation.y = tsec * 0.6 + m.userData.phase;
         m.rotation.x = Math.sin(tsec * 0.4 + m.userData.phase) * 0.3;
-      } else if (age < 1) {
+      } else if (!m.userData.landed) {
+        // keep going until a frame lands at s = 1: a slow first frame (shader compile on a phone) can skip the whole animation
         m.position.y = (m.userData.restY ?? 0.62) + (1 - s) * 3;
+        m.userData.landed = age >= 1;
       }
     }
     if (this.ghost && this.themeName === 'neon') this.ghost.rotation.y = tsec * 0.6;
@@ -648,6 +650,10 @@ export class ThreeRenderer extends BaseRenderer {
     });
     this.mirror?.dispose?.();
     this.renderer.dispose();
+    // free the GL context now rather than at GC: mobile browsers cap live contexts, and switching themes
+    // repeatedly could otherwise get the current board's context evicted, freezing it on a stale frame
+    el.dataset.destroyed = '1';
+    this.renderer.forceContextLoss();
     el.remove();
   }
 }

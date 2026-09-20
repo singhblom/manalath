@@ -8,6 +8,9 @@ import { ConstellationRenderer } from './renderers/constellation.js';
 import { MercuryRenderer } from './renderers/mercury.js';
 import { SlimeRenderer } from './renderers/slime.js';
 import { GobanRenderer } from './renderers/goban.js';
+import { NeonRenderer } from './renderers/neon.js';
+import { OnlineMatch, formatClock } from './online.js';
+import { mountLobby } from './lobby.js';
 
 // Mobile browsers (notably Firefox on Android) can report 100dvh taller than the visible area,
 // pushing the board's bottom edge and the colour reservoirs under the browser toolbar; use the measured height.
@@ -18,9 +21,6 @@ function syncAppHeight() {
 syncAppHeight();
 window.addEventListener('resize', syncAppHeight);
 window.visualViewport?.addEventListener('resize', syncAppHeight);
-import { NeonRenderer } from './renderers/neon.js';
-import { OnlineMatch, formatClock } from './online.js';
-import { mountLobby } from './lobby.js';
 
 const $ = (s) => document.querySelector(s);
 const boardEl = $('#board');
@@ -229,6 +229,16 @@ function makeRenderer(name) {
   if (name === 'constellation') return new ConstellationRenderer(boardEl, handlers);
   return new TerminalRenderer(boardEl, handlers);
 }
+
+// If the browser drops the board's WebGL context anyway (GPU pressure, backgrounding), rebuild the theme
+// instead of leaving a frozen canvas behind.
+const glLosses = [];
+boardEl.addEventListener('webglcontextlost', (e) => {
+  if (e.target.dataset?.destroyed) return;
+  glLosses.push(`${new Date().toLocaleTimeString()} ${settings.theme}`);
+  e.preventDefault();
+  setTimeout(() => setTheme(settings.theme), 100);
+}, true);
 
 function setTheme(name) {
   if (renderer) renderer.destroy();
@@ -489,6 +499,7 @@ if (new URLSearchParams(location.search).has('debug')) {
       `canvas ${r('#board canvas')} buf ${c ? `${c.width}x${c.height}` : '-'}`,
       `sideL ${r('.hud-side-left')}`, `scrollY ${scrollY}`,
       `mq760 ${matchMedia('(max-width: 760px)').matches}`,
+      `gl lost ${glLosses.length ? glLosses.slice(-3).join(', ') : 'never'}`,
       `perf.now ${performance.now().toFixed(2)} lastFrame ${renderer?.lastFrame?.toFixed?.(2)}`,
       ...(renderer?.pieces || []).filter(Boolean).slice(0, 4).map((m) => {
         const p = m.userData.phys;
