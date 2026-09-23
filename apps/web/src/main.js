@@ -49,6 +49,7 @@ let online = null;
 let renderer = null;
 let thinking = false;
 let aiTimer = null;
+let aiRequest = 0; // id of the AI move in flight; replies to older requests are ignored
 let selColor = 0; // 0 = no colour chosen yet (must choose before placing)
 let note = '';
 
@@ -332,17 +333,36 @@ function afterMove() {
   scheduleAi();
 }
 
+// The search runs in a worker so it never competes with the renderer for the main thread; the move is played
+// once both the search and a short random "thinking" pause are done, so the reply feels considered, not instant.
+let aiWorker = null;
+function requestAiMove(board, player, level) {
+  if (aiWorker === null) {
+    try {
+      aiWorker = new Worker('/ai-worker.js', { type: 'module' }); // bundled and served by the server (see apps/server/src/index.ts)
+      aiWorker.onmessage = ({ data: { id, move } }) => { aiWorker.pending.get(id)?.(move); aiWorker.pending.delete(id); };
+      aiWorker.pending = new Map();
+    } catch (e) { console.warn('AI worker unavailable, searching on the main thread', e); aiWorker = false; }
+  }
+  if (!aiWorker) return Promise.resolve(chooseMove(board, player, level));
+  return new Promise(resolve => { aiWorker.pending.set(aiRequest, resolve); aiWorker.postMessage({ id: aiRequest, board: Array.from(board), player, level }); });
+}
+
 function scheduleAi() {
   clearTimeout(aiTimer);
+  aiRequest++;
   if (!isAiTurn()) return;
   thinking = true;
   render();
-  aiTimer = setTimeout(() => {
-    const m = chooseMove(game.board, game.player, settings.level);
+  const id = aiRequest;
+  const search = requestAiMove(game.board, game.player, settings.level);
+  const pause = new Promise(resolve => { aiTimer = setTimeout(resolve, 500 + Math.random() * 800); });
+  Promise.all([search, pause]).then(([m]) => {
+    if (id !== aiRequest) return; // a new game, undo or mode change superseded this move
     thinking = false;
     if (m) game.place(m.cell, m.color); else game.pass();
     afterMove();
-  }, 250);
+  });
 }
 
 function newGame() {
@@ -413,7 +433,7 @@ function matchIdFromUrl() { return location.pathname.match(/^\/m\/([^/]+)/)?.[1]
 function enterMatch(id, seatToken = null, { push = true, announce = false } = {}) {
   if (online?.matchId === id) { onlineDialog.close(); return; }
   if (online) { online.close(); online = null; }
-  clearTimeout(aiTimer); thinking = false; selColor = 0; note = '';
+  clearTimeout(aiTimer); aiRequest++; thinking = false; selColor = 0; note = '';
   document.body.classList.add('online');
   $('#new').hidden = true; $('#undo').hidden = true; $('#mode-section').hidden = true;
   online = new OnlineMatch(id, seatToken, {

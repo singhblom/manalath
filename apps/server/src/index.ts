@@ -30,6 +30,17 @@ matches.onAll(ratingService.onMatch);
 
 const lobby = new LobbyService(oauthRepo(oauth));
 
+// The AI runs in a Web Worker. The HTML bundler does not rewrite worker URLs, so the worker is bundled here and
+// served at a fixed path; in development it is rebuilt per request so edits to the search show up on reload.
+const workerEntry = new URL('../../web/src/ai-worker.js', import.meta.url).pathname;
+async function buildWorker() {
+  const out = await Bun.build({ entrypoints: [workerEntry], target: 'browser', format: 'esm', minify: !dev });
+  if (!out.success) throw new AggregateError(out.logs, 'ai-worker build failed');
+  return out.outputs[0].text();
+}
+let workerJs: Promise<string> = buildWorker();
+const workerRoute = async () => new Response(await (dev ? (workerJs = buildWorker()) : workerJs), { headers: { 'content-type': 'text/javascript; charset=utf-8' } });
+
 const server: Server<WsData> = Bun.serve<WsData>({
   port,
   development: dev && { hmr: true, console: true },
@@ -40,6 +51,7 @@ const server: Server<WsData> = Bun.serve<WsData>({
     '/lobby': () => Response.redirect(`${origin}/?online`, 302),
     '/login': { GET: () => Response.redirect(`${origin}/?online`, 302), POST: authRoutes(oauth, origin)['/login'].POST },
     '/xrpc/_health': () => Response.json({ version: '0.0.1' }),
+    '/ai-worker.js': workerRoute,
     ...Object.fromEntries(Object.entries(authRoutes(oauth, origin)).filter(([k]) => k !== '/login')),
     ...matchRoutes(() => server),
     ...lobbyRoutes(lobby),
