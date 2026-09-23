@@ -179,27 +179,32 @@ vec3 woodColor(vec3 p) {
   float t = dot(rel, uAxisDir);                 // along the trunk
   vec3 radial = rel - t * uAxisDir;              // radial offset from the axis
   float r = length(radial);
+  // the radial offset in a 2D frame perpendicular to the axis, so noise across the grain varies over the whole
+  // cross-section (sampling world x/z alone leaves vertical faces with no variation in height: vertical streaks)
+  vec3 bu = normalize(cross(uAxisDir, abs(uAxisDir.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+  vec3 bv = cross(uAxisDir, bu);
+  vec2 rad = vec2(dot(radial, bu), dot(radial, bv));
   // the log is not a perfect cylinder: slow wander of the rings along the trunk, plus a finer wobble
-  r += (wnoise(vec3(t * 0.25, radial.x * 0.35, radial.z * 0.35)) * 0.9 + wnoise(p * 1.7) * 0.06) * uWander;
+  r += (wnoise(vec3(t * 0.25, rad.x * 0.35, rad.y * 0.35)) * 0.9 + wnoise(p * 1.7) * 0.06) * uWander;
   // ring spacing itself varies slowly (fast/slow growth years)
   float freq = uRingFreq * (1.0 + 0.25 * uWander * wnoise(vec3(r * 0.5, 3.1, uSeed)));
   float ring = fract(r * freq);
   float late = smoothstep(0.35, 0.7, ring) * (1.0 - smoothstep(0.78, 1.0, ring)); // soft latewood band of each ring
   // fine fibres running along the axis
-  float fib = wnoise(vec3(t * 0.6, radial.x * 28.0, radial.z * 28.0)) * 0.5 + wnoise(vec3(t * 1.1, radial.x * 90.0, radial.z * 90.0)) * 0.25;
+  float fib = wnoise(vec3(t * 0.6, rad.x * 28.0, rad.y * 28.0)) * 0.5 + wnoise(vec3(t * 1.1, rad.x * 90.0, rad.y * 90.0)) * 0.25;
   // gentle large-scale tonal variation across the piece
   float tone = wnoise(p * 0.12) * 0.08 * uWander;
   vec3 col = mix(uEarly, uLate, late * 0.55);
   // colour zones independent of the rings: long streaks along the trunk, wandering slowly across it
   if (uStreak > 0.0) {
-    float zone = wnoise(vec3(t * 0.10, radial.x * 0.7, radial.z * 0.7)) * 0.6 + wnoise(vec3(t * 0.3, radial.x * 2.2, radial.z * 2.2)) * 0.4;
+    float zone = wnoise(vec3(t * 0.10, rad.x * 0.7, rad.y * 0.7)) * 0.6 + wnoise(vec3(t * 0.3, rad.x * 2.2, rad.y * 2.2)) * 0.4;
     col = mix(col, uStreakColor, smoothstep(-0.05, 0.6, zone) * uStreak);
     col *= 1.0 + smoothstep(0.1, 0.6, -zone) * 0.12 * uStreak; // and paler zones the other way
   }
   col *= 1.0 + fib * 0.10 * uFibre + tone;
   // open pores: short dark dashes, dense across the grain and stretched along it
   if (uPores > 0.0) {
-    float pr = wnoise(vec3(t * 2.5, radial.x * 55.0, radial.z * 55.0)) + wnoise(vec3(t * 6.0, radial.x * 140.0, radial.z * 140.0)) * 0.5;
+    float pr = wnoise(vec3(t * 2.5, rad.x * 55.0, rad.y * 55.0)) + wnoise(vec3(t * 6.0, rad.x * 140.0, rad.y * 140.0)) * 0.5;
     float pore = smoothstep(0.45, 0.8, pr) * (0.6 + 0.4 * smoothstep(0.3, 0.7, late)); // more pores in the latewood
     col *= 1.0 - pore * 0.45 * uPores;
   }

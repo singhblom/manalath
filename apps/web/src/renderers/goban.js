@@ -3,6 +3,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { cells, N, step, isStarPoint } from '@manalath/shared/hex.js';
 import { ThreeRenderer, OUTCOME_HEX } from './three.js';
 import { woodTexture, solidWoodMaterial, rng, CHESTNUT, GRAIN_ANGLE } from './wood.js';
+import { tipCutHexGeometry } from './geo.js';
 
 // "Goban": a thick kaya-wood board with straight (masame) grain, an ink-drawn hex grid,
 // slate and clamshell stones with a hint of iridescence, placed a little irregularly by hand.
@@ -112,7 +113,7 @@ export class GobanRenderer extends ThreeRenderer {
     const ga = GRAIN_ANGLE * Math.PI / 180;
     const axisDir = new THREE.Vector3(Math.cos(ga), 0, Math.sin(ga));
     const axisOrigin = new THREE.Vector3(0, 0.35, 5.5);
-    const woodOpts = { axisOrigin, axisDir, ringSpacing: 0.21, early: '#dfb56c', late: '#c08d48', seed: 3.7, fibre: 0.5 };
+    const woodOpts = { axisOrigin, axisDir, ringSpacing: 0.21, early: '#dfb56c', late: '#c08d48', seed: 3.7, fibre: 0.8, pores: 0.4, streak: 0.8, streakColor: '#c08c44' }; // kaya is close-grained: pores and colour zoning stay gentle
     // ink grid as a plain multiply map (white where there is no ink)
     const gridCanvas = document.createElement('canvas'); gridCanvas.width = gridCanvas.height = 1024;
     const gg = gridCanvas.getContext('2d'); gg.fillStyle = '#ffffff'; gg.fillRect(0, 0, 1024, 1024);
@@ -121,18 +122,22 @@ export class GobanRenderer extends ThreeRenderer {
     const bodyMat = solidWoodMaterial({ ...woodOpts, flatShading: true, roughness: 0.55 });
     const topMat = solidWoodMaterial({ ...woodOpts, map: gridTex, roughness: 0.42 });
     topMat.side = THREE.DoubleSide;
-    const bodyGeo = new THREE.CylinderGeometry(BOARD_R, BOARD_R, SLAB_H, 6, 1, true);
-    bodyGeo.rotateY(Math.PI / 6); // board outline has its points on ±x; cylinder hexes point along ±z
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = -SLAB_H / 2 - 0.02;
+    const CUT = 0.05; // crisp edges; only the twelve vertex tips are taken off by a tiny facet, as a plane would leave them
+    const body = new THREE.Mesh(tipCutHexGeometry(BOARD_R, SLAB_H, CUT), bodyMat); // points on ±x, like the cell pattern
+    body.position.y = -0.02;
     body.castShadow = true; body.receiveShadow = true;
     s.add(body);
     // top plate (hexagon) with planar UVs
     const shape = new THREE.Shape();
     for (let k = 0; k < 6; k++) {
       const a = Math.PI / 180 * (60 * k); // points on ±x, matching the cell pattern
-      const x = BOARD_R * Math.cos(a), z = BOARD_R * Math.sin(a);
-      k === 0 ? shape.moveTo(x, z) : shape.lineTo(x, z);
+      // follow the truncated outline: two points per corner, `CUT` along each adjoining edge
+      const [x, z] = [BOARD_R * Math.cos(a), BOARD_R * Math.sin(a)];
+      const ap = Math.PI / 180 * (60 * k - 60), an = Math.PI / 180 * (60 * k + 60);
+      const toP = new THREE.Vector2(BOARD_R * Math.cos(ap) - x, BOARD_R * Math.sin(ap) - z).setLength(CUT);
+      const toN = new THREE.Vector2(BOARD_R * Math.cos(an) - x, BOARD_R * Math.sin(an) - z).setLength(CUT);
+      k === 0 ? shape.moveTo(x + toP.x, z + toP.y) : shape.lineTo(x + toP.x, z + toP.y);
+      shape.lineTo(x + toN.x, z + toN.y);
     }
     shape.closePath();
     const topGeo = new THREE.ShapeGeometry(shape, 1);
@@ -141,17 +146,10 @@ export class GobanRenderer extends ThreeRenderer {
     for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / (2 * BOARD_R) + 0.5, uv.getY(i) / (2 * BOARD_R) + 0.5);
     topGeo.rotateX(-Math.PI / 2); // shape lies in xy, facing +z; rotate so it faces +y (shape y -> world -z)
     const top = new THREE.Mesh(topGeo, topMat);
-    top.position.y = -0.02 + 0.001;
+    top.position.y = -0.02 + 0.004; // a hair above the slab's own top face
     top.receiveShadow = true;
-    top.castShadow = true; // the slab's silhouette on the tatami comes from the top and bottom plates
+    top.castShadow = true;
     s.add(top);
-    // bottom plate
-    const bottomGeo = new THREE.CylinderGeometry(BOARD_R, BOARD_R, 0.05, 6);
-    bottomGeo.rotateY(Math.PI / 6);
-    const bottom = new THREE.Mesh(bottomGeo, bodyMat);
-    bottom.position.y = -SLAB_H;
-    bottom.castShadow = true;
-    s.add(bottom);
     // feet: six turned feet, one under each corner, shaped like inverted truncated cones (wide at the board, narrow at the floor)
     // narrow at the floor, widening toward the board, with a rounded belly just under the slab
     const footProfile = [

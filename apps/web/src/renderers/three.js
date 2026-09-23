@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { woodTexture, solidWoodMaterial, GRAIN_ANGLE, OAK } from './wood.js';
 import { marbleTexture, plasterTexture } from './stone.js';
+import { filletedHexGeometry } from './geo.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { cells, hexToPlane, N } from '@manalath/shared/hex.js';
 import { BaseRenderer } from './base.js';
@@ -308,8 +309,8 @@ export class ThreeRenderer extends BaseRenderer {
       // Goban), so the top shows straight grain and the angled sides cut across the growth rings
       const ga = GRAIN_ANGLE * Math.PI / 180;
       const wood = solidWoodMaterial({ ...WALNUT_OPTS, axisOrigin: new THREE.Vector3(0, 0.35, 5.5), axisDir: new THREE.Vector3(Math.cos(ga), 0, Math.sin(ga)), roughness: 0.5 });
-      const board = new THREE.Mesh(new THREE.CylinderGeometry(9.2, 9.5, 1.05, 6), wood);
-      board.position.y = 0.07 - 1.05 / 2; board.rotation.y = Math.PI / 6; // top face below the bottom of the tile dishes (0.09)
+      const board = new THREE.Mesh(filletedHexGeometry(9.45, 1.05, 0.12), wood); // softly rounded edges: a slab, not a prism
+      board.position.y = 0.07; // top face below the bottom of the tile dishes (0.09)
       board.receiveShadow = true; board.castShadow = true;
       s.add(board);
       // brass moulding: one slightly oversized hex prism under every tile. The prisms tile seamlessly, so brass
