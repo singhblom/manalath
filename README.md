@@ -51,7 +51,7 @@ fly deploy
   Two are built around Manalath's group focus:
   - *Quartz* – Three.js, every group rises as one plateau whose height is its size, with floating size badges; quarts glow red, quints gold.
   - *Constellation* – SVG, stones are stars, adjacent stones are linked, each cluster has a size badge and hovering previews the size of the resulting group.
-  - *Marble Hall* – Three.js, realistic marble tiles with shadows and orbit camera.
+  - *Marble Hall* – Three.js, a walnut-and-brass board with marble tiles on a bistro table in a bright, oak-panelled cafe; shadows and orbit camera.
   - *Neon Void* – Three.js, glowing floating crystals over an endless grid with fog.
   - *Paper & Ink* – 2D canvas, hand-drawn pencil hexes and ink pieces.
   - *Phosphor Terminal* – monospace CRT-style text grid with a move log.

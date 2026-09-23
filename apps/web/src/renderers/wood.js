@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-// Procedural straight-grain wood shared by the Goban (kaya) and Marble Hall (dark walnut) themes.
+// Procedural wood shared by the Goban (kaya) and Marble Hall (grey oak room; its walnut joinery uses solidWoodMaterial) themes.
 export function rng(seed) {
   let a = seed >>> 0;
   return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -24,12 +24,13 @@ export const CHESTNUT = {
   light: (r) => `rgba(220,140,80,${0.06 + r() * 0.12})`,
   speck: (r) => `rgba(60,20,5,${r() * 0.10})`,
 };
-export const WALNUT = {
-  base: ['#3a2416', '#462c1a', '#33200f'],
-  band: (r) => `rgba(${30 + r() * 25 | 0},${16 + r() * 12 | 0},${8 + r() * 8 | 0},${0.10 + r() * 0.12})`,
-  dark: (r) => `rgba(14,7,3,${0.35 + r() * 0.3})`,
-  light: (r) => `rgba(120,80,45,${0.06 + r() * 0.10})`,
-  speck: (r) => `rgba(0,0,0,${r() * 0.10})`,
+// Grey-brown oak, as on cafe wall panelling and parquet: muted, low-contrast grain.
+export const OAK = {
+  base: ['#84776a', '#8e8174', '#7a6d60'],
+  band: (r) => `rgba(${90 + r() * 30 | 0},${75 + r() * 25 | 0},${60 + r() * 20 | 0},${0.08 + r() * 0.10})`,
+  dark: (r) => `rgba(70,56,44,${0.22 + r() * 0.25})`,
+  light: (r) => `rgba(195,180,160,${0.06 + r() * 0.10})`,
+  speck: (r) => `rgba(50,38,28,${r() * 0.06})`,
 };
 
 export function woodTexture(size = 1024, seed = 7, withGrid = null, angleDeg = GRAIN_ANGLE, palette = KAYA) {
@@ -136,10 +137,14 @@ export function ringTexture(size = 1024, seed = 5, palette = KAYA, aspect = 2) {
 // cuts across the tubes. Works on any geometry because it uses world position, no UVs.
 export function solidWoodMaterial({
   axisOrigin = new THREE.Vector3(0, 0, 0), axisDir = new THREE.Vector3(1, 0, 0),
-  ringSpacing = 0.16, early = '#d4a052', late = '#9e6626', fibre = 0.6, seed = 3.7, flatShading = false,
-  roughness = 0.55, metalness = 0, map = null,
+  ringSpacing = 0.16, early = '#d4a052', late = '#9e6626', fibre = 0.6, seed = 3.7, flatShading = false, wander = 1.0,
+  roughness = 0.55, metalness = 0, map = null, clearcoat = 0, clearcoatRoughness = 0.4,
+  pores = 0, streak = 0, streakColor = '#4a3a2c',
 } = {}) {
-  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness, metalness, flatShading, map });
+  // a lacquered finish needs the physical material; plain oiled wood does fine with the cheaper standard one
+  const mat = clearcoat > 0
+    ? new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness, metalness, flatShading, map, clearcoat, clearcoatRoughness })
+    : new THREE.MeshStandardMaterial({ color: 0xffffff, roughness, metalness, flatShading, map });
   const uniforms = {
     uAxisOrigin: { value: axisOrigin.clone() },
     uAxisDir: { value: axisDir.clone().normalize() },
@@ -148,6 +153,10 @@ export function solidWoodMaterial({
     uLate: { value: new THREE.Color(late).convertSRGBToLinear() },
     uFibre: { value: fibre },
     uSeed: { value: seed },
+    uWander: { value: wander }, // 1 = the kaya's irregular rings; lower for straighter, more even timber
+    uPores: { value: pores },   // open-grained timbers (walnut, oak): dark pore dashes along the fibre
+    uStreak: { value: streak }, // broad colour streaks that follow the trunk and cut across the rings (mineral / heartwood zones)
+    uStreakColor: { value: new THREE.Color(streakColor).convertSRGBToLinear() },
   };
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -157,8 +166,8 @@ export function solidWoodMaterial({
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
 varying vec3 vWoodPos;
-uniform vec3 uAxisOrigin, uAxisDir, uEarly, uLate;
-uniform float uRingFreq, uFibre, uSeed;
+uniform vec3 uAxisOrigin, uAxisDir, uEarly, uLate, uStreakColor;
+uniform float uRingFreq, uFibre, uSeed, uWander, uPores, uStreak;
 float whash(vec3 p) { p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3) + uSeed); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
 float wnoise(vec3 x) {
   vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
@@ -171,22 +180,34 @@ vec3 woodColor(vec3 p) {
   vec3 radial = rel - t * uAxisDir;              // radial offset from the axis
   float r = length(radial);
   // the log is not a perfect cylinder: slow wander of the rings along the trunk, plus a finer wobble
-  r += wnoise(vec3(t * 0.25, radial.x * 0.35, radial.z * 0.35)) * 0.9 + wnoise(p * 1.7) * 0.06;
+  r += (wnoise(vec3(t * 0.25, radial.x * 0.35, radial.z * 0.35)) * 0.9 + wnoise(p * 1.7) * 0.06) * uWander;
   // ring spacing itself varies slowly (fast/slow growth years)
-  float freq = uRingFreq * (1.0 + 0.25 * wnoise(vec3(r * 0.5, 3.1, uSeed)));
+  float freq = uRingFreq * (1.0 + 0.25 * uWander * wnoise(vec3(r * 0.5, 3.1, uSeed)));
   float ring = fract(r * freq);
   float late = smoothstep(0.35, 0.7, ring) * (1.0 - smoothstep(0.78, 1.0, ring)); // soft latewood band of each ring
   // fine fibres running along the axis
   float fib = wnoise(vec3(t * 0.6, radial.x * 28.0, radial.z * 28.0)) * 0.5 + wnoise(vec3(t * 1.1, radial.x * 90.0, radial.z * 90.0)) * 0.25;
   // gentle large-scale tonal variation across the piece
-  float tone = wnoise(p * 0.12) * 0.08;
+  float tone = wnoise(p * 0.12) * 0.08 * uWander;
   vec3 col = mix(uEarly, uLate, late * 0.55);
+  // colour zones independent of the rings: long streaks along the trunk, wandering slowly across it
+  if (uStreak > 0.0) {
+    float zone = wnoise(vec3(t * 0.10, radial.x * 0.7, radial.z * 0.7)) * 0.6 + wnoise(vec3(t * 0.3, radial.x * 2.2, radial.z * 2.2)) * 0.4;
+    col = mix(col, uStreakColor, smoothstep(-0.05, 0.6, zone) * uStreak);
+    col *= 1.0 + smoothstep(0.1, 0.6, -zone) * 0.12 * uStreak; // and paler zones the other way
+  }
   col *= 1.0 + fib * 0.10 * uFibre + tone;
+  // open pores: short dark dashes, dense across the grain and stretched along it
+  if (uPores > 0.0) {
+    float pr = wnoise(vec3(t * 2.5, radial.x * 55.0, radial.z * 55.0)) + wnoise(vec3(t * 6.0, radial.x * 140.0, radial.z * 140.0)) * 0.5;
+    float pore = smoothstep(0.45, 0.8, pr) * (0.6 + 0.4 * smoothstep(0.3, 0.7, late)); // more pores in the latewood
+    col *= 1.0 - pore * 0.45 * uPores;
+  }
   return col;
 }`)
       .replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.rgb *= woodColor(vWoodPos);');
   };
-  mat.customProgramCacheKey = () => 'solidwood';
+  mat.customProgramCacheKey = () => 'solidwood' + mat.type; // uniforms differ per material, the program is shared per material class
   mat.userData.woodUniforms = uniforms;
   return mat;
 }

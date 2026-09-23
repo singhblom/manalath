@@ -27,7 +27,7 @@ const boardEl = $('#board');
 
 const THEME_HINTS = {
   goban: 'Go-inspired 3D: a thick kaya-wood board with straight grain; stones sit on the intersections of an inked triangular lattice, dropped a little irregularly.',
-  marble: 'Realistic 3D: marble tiles, ivory and onyx spheres, soft shadows. Drag to orbit, scroll to zoom.',
+  marble: 'Realistic 3D: a walnut and brass board with marble tiles on a bistro table, in a bright cafe. Drag to orbit, scroll to zoom.',
   neon: 'Glowing 3D: crystals floating over a neon lattice of intersections. Drag to orbit, scroll to zoom.',
   terraces: 'Group-focused 3D: every group rises as one plateau, height = size. Quarts glow red, quints gold.',
   constellation: 'Group-focused 2D: stars on a faint lattice; groups are linked clusters in a shared nebula.',

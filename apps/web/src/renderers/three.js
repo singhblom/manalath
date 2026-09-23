@@ -1,17 +1,18 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { woodTexture, WALNUT } from './wood.js';
+import { woodTexture, solidWoodMaterial, GRAIN_ANGLE, OAK } from './wood.js';
+import { marbleTexture, plasterTexture } from './stone.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { cells, hexToPlane, N } from '@manalath/shared/hex.js';
 import { BaseRenderer } from './base.js';
 
-// Two 3D themes rendered with Three.js: a warm marble/wood set, and a neon void.
+// 3D themes rendered with Three.js: a marble-and-walnut board in a bright cafe, and a neon void.
 export const THREE_THEMES = {
   marble: {
     label: 'Marble Hall',
     colors: { p1: '#f3ead8', p2: '#1d1a1f' },
-    background: 0x1e130c,
+    background: 0xefe6d9, // cream plaster; the room itself is built in buildLights
     fog: null,
     // ivory / marble: matte, low specular, with a warm sheen standing in for subsurface scatter
     tile: { color: 0xe6d9c1, roughness: 0.62, metalness: 0.0, physical: { specularIntensity: 0.3, sheen: 0.55, sheenRoughness: 0.75, sheenColor: 0xf2dcc0, clearcoat: 0.08, clearcoatRoughness: 0.6 } },
@@ -192,10 +193,10 @@ export class ThreeRenderer extends BaseRenderer {
   buildLights() {
     const s = this.scene;
     if (this.themeName === 'marble') {
-      // a strong, lowish key light and very little ambient so the stones throw clear shadows into the dishes
-      s.add(new THREE.HemisphereLight(0xfff1dc, 0x3a2418, 0.2));
-      const key = new THREE.DirectionalLight(0xffe6c4, 3.6);
-      key.position.set(11, 7.5, 4); // lowish sun: longer, clearer shadows
+      // Daylit cafe: bright warm ambient from cream walls, one soft key so the stones still throw shadows into the dishes
+      s.add(new THREE.HemisphereLight(0xffefd9, 0x9c7a5c, 0.75));
+      const key = new THREE.DirectionalLight(0xffe7c8, 2.0);
+      key.position.set(11, 12, 6);
       key.castShadow = true;
       key.shadow.mapSize.set(4096, 4096);
       key.shadow.camera.left = key.shadow.camera.bottom = -12;
@@ -203,47 +204,114 @@ export class ThreeRenderer extends BaseRenderer {
       key.shadow.camera.near = 1; key.shadow.camera.far = 40;
       key.shadow.bias = -0.0003;
       key.shadow.normalBias = 0.02;
-      key.shadow.radius = 2;
+      key.shadow.radius = 4;
       s.add(key);
-      const fill = new THREE.DirectionalLight(0xc9d8ff, 0.25);
-      fill.position.set(-10, 6, -8);
+      const fill = new THREE.DirectionalLight(0xf0ece4, 0.5);
+      fill.position.set(-10, 8, -8);
       s.add(fill);
       // soft environment so the brass and polished stones pick up reflections
       const pmrem = new THREE.PMREMGenerator(this.renderer);
       this.envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
       pmrem.dispose();
       s.environment = this.envTex;
-      s.environmentIntensity = 0.1;
-      // Wooden table, a thick walnut board, and a brass inlay sheet the marble tiles sit flush in
-      const tableTex = woodTexture(1024, 21, null, 2, WALNUT);
-      tableTex.wrapS = tableTex.wrapT = THREE.RepeatWrapping; tableTex.repeat.set(5, 5);
-      const table = new THREE.Mesh(
-        new THREE.CircleGeometry(40, 64),
-        new THREE.MeshPhysicalMaterial({ map: tableTex, color: 0x8a7a6a, roughness: 0.5, metalness: 0.0, clearcoat: 0.3, clearcoatRoughness: 0.35, envMapIntensity: 0.3 }) // lacquered table (the shine comes from the mirror layer)
+      s.environmentIntensity = 0.35;
+
+      // --- The room: grey-oak panelling with a walnut rail, cream plaster above, brass globe sconces, oak floor ---
+      const ROOM_R = 55, FLOOR_Y = -14, RAIL_Y = 5, WALL_TOP = 70; // rail low enough that the plaster and sconces show at the flattest camera angle
+      const panelTex = woodTexture(1024, 13, (g, size) => {
+        // one panel per texture repeat: a shadowed seam with a slim batten highlight down the left edge
+        g.fillStyle = 'rgba(40,30,22,0.55)'; g.fillRect(0, 0, size * 0.012, size);
+        g.fillStyle = 'rgba(210,195,175,0.25)'; g.fillRect(size * 0.012, 0, size * 0.004, size);
+      }, 90, OAK);
+      panelTex.wrapS = panelTex.wrapT = THREE.RepeatWrapping; panelTex.repeat.set(26, 1);
+      const panelling = new THREE.Mesh(
+        new THREE.CylinderGeometry(ROOM_R, ROOM_R, RAIL_Y - FLOOR_Y, 96, 1, true),
+        new THREE.MeshStandardMaterial({ map: panelTex, color: 0xa9a29a, roughness: 0.7, metalness: 0, side: THREE.BackSide })
       );
-      table.rotation.x = -Math.PI / 2; table.position.y = -0.9; table.receiveShadow = true;
-      s.add(table);
-      // real planar reflection of the board and stones in the lacquer: a translucent mirror laid over the wood
+      panelling.position.y = (RAIL_Y + FLOOR_Y) / 2;
+      s.add(panelling);
+      // Walnut everywhere in the joinery: the Goban's solid-wood shader (growth tubes around a trunk axis, sampled
+      // in world space) with dark, low-contrast walnut tones instead of kaya.
+      // Bastogne walnut, oiled: warm honey-tan earlywood against chocolate latewood bands, clear figure with a
+      // moderate ring wander, and a glossy warm sheen from the finish.
+      const WALNUT_OPTS = { ringSpacing: 0.22, early: '#9a7a52', late: '#4e3622', seed: 7.3, fibre: 1.8, wander: 0.6, pores: 0.9, streak: 0.75, streakColor: '#45322a', clearcoat: 0.35, clearcoatRoughness: 0.45 }; // oiled, not lacquered: a soft sheen rather than a gloss
+      const walnut = solidWoodMaterial({ ...WALNUT_OPTS, axisOrigin: new THREE.Vector3(0, RAIL_Y + 3, 0), axisDir: new THREE.Vector3(1, 0, 0.15), roughness: 0.55 });
+      walnut.side = THREE.DoubleSide;
+      const rail = new THREE.Mesh(new THREE.CylinderGeometry(ROOM_R - 0.6, ROOM_R - 0.6, 1.6, 96, 1, true), walnut);
+      rail.position.y = RAIL_Y + 0.8;
+      s.add(rail);
+      const railTop = new THREE.Mesh(new THREE.RingGeometry(ROOM_R - 0.6, ROOM_R + 0.1, 96), walnut);
+      railTop.rotation.x = -Math.PI / 2; railTop.position.y = RAIL_Y + 1.6;
+      s.add(railTop);
+      const plasterTex = plasterTexture(); plasterTex.repeat.set(24, 6);
+      const plaster = new THREE.Mesh(
+        new THREE.CylinderGeometry(ROOM_R, ROOM_R, WALL_TOP - RAIL_Y, 96, 1, true),
+        new THREE.MeshStandardMaterial({ map: plasterTex, roughness: 0.95, metalness: 0, side: THREE.BackSide })
+      );
+      plaster.position.y = (WALL_TOP + RAIL_Y) / 2 + 1.6;
+      s.add(plaster);
+      const brass = new THREE.MeshStandardMaterial({ color: 0x8c6a33, metalness: 0.85, roughness: 0.5, envMapIntensity: 0.9 }); // aged brass
+      const globeMat = new THREE.MeshStandardMaterial({ color: 0xfff6ea, emissive: 0xffe9cf, emissiveIntensity: 1.8, roughness: 0.4 });
+      const globeGeo = new THREE.SphereGeometry(2.1, 32, 24), plateGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.25, 24), armGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.6, 12);
+      for (let k = 0; k < 6; k++) {
+        const a = Math.PI / 3 * k + Math.PI / 6, r = ROOM_R - 0.2;
+        const sconce = new THREE.Group();
+        sconce.position.set(Math.cos(a) * r, RAIL_Y + 4.5, Math.sin(a) * r);
+        sconce.lookAt(0, RAIL_Y + 4.5, 0); // +z points into the room
+        const plate = new THREE.Mesh(plateGeo, brass); plate.rotation.x = Math.PI / 2; sconce.add(plate);
+        const arm = new THREE.Mesh(armGeo, brass); arm.position.set(0, 0.9, 0.85); arm.rotation.x = 0.7; sconce.add(arm); // leans up and out from the plate to the globe
+        const globe = new THREE.Mesh(globeGeo, globeMat); globe.position.set(0, 2.3, 2.1); sconce.add(globe);
+        const glow = new THREE.PointLight(0xffe2b8, 350, 0, 2); glow.position.copy(globe.position); sconce.add(glow);
+        s.add(sconce);
+      }
+      const floorTex = woodTexture(1024, 23, null, 45, OAK);
+      floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(10, 10);
+      const floor = new THREE.Mesh(new THREE.CircleGeometry(ROOM_R + 1, 96), new THREE.MeshStandardMaterial({ map: floorTex, color: 0x8d7d6d, roughness: 0.6, metalness: 0 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR_Y;
+      s.add(floor);
+
+      // --- Bistro table: a pink-beige marble top set in a walnut rim with a brass band, on a walnut pedestal ---
+      const TABLE_R = 17, TOP_Y = -0.9;
+      const marble = new THREE.MeshPhysicalMaterial({ map: marbleTexture(), color: 0xc2b2a3, roughness: 0.42, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.4, envMapIntensity: 0.35 });
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(TABLE_R, TABLE_R, 0.5, 128), marble);
+      top.position.y = TOP_Y - 0.25; top.receiveShadow = true;
+      s.add(top);
+      // rim, pedestal and foot turned from one log standing on the table's axis: straight grain down the pedestal, arcs across the rim top
+      const rimMat = solidWoodMaterial({ ...WALNUT_OPTS, axisOrigin: new THREE.Vector3(0.8, 0, -1.1), axisDir: new THREE.Vector3(0.03, 1, 0.02), roughness: 0.5 });
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(TABLE_R + 0.55, TABLE_R + 0.55, 1.3, 128), rimMat);
+      rim.position.y = TOP_Y - 0.05 - 0.65; rim.receiveShadow = true;
+      s.add(rim);
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(TABLE_R + 0.6, TABLE_R + 0.6, 0.26, 128, 1, true), brass);
+      band.position.y = TOP_Y - 0.85;
+      s.add(band);
+      const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, FLOOR_Y * -1 + TOP_Y - 1.3, 48), rimMat);
+      pedestal.position.y = (TOP_Y - 1.3 + FLOOR_Y) / 2;
+      s.add(pedestal);
+      const foot = new THREE.Mesh(new THREE.CylinderGeometry(7, 7.5, 0.5, 96), rimMat);
+      foot.position.y = FLOOR_Y + 0.25;
+      s.add(foot);
+      // real planar reflection of the board and stones in the polished marble: a translucent mirror laid over it
       const mirrorShader = {
-        name: 'LacquerReflector',
-        uniforms: { ...THREE.UniformsUtils.clone(Reflector.ReflectorShader.uniforms), opacity: { value: 0.34 } },
+        name: 'MarbleReflector',
+        uniforms: { ...THREE.UniformsUtils.clone(Reflector.ReflectorShader.uniforms), opacity: { value: 0.12 } },
         vertexShader: Reflector.ReflectorShader.vertexShader,
         fragmentShader: Reflector.ReflectorShader.fragmentShader
           .replace('uniform vec3 color;', 'uniform vec3 color;\n\t\tuniform float opacity;')
           .replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * color, opacity );'),
       };
-      this.mirror = new Reflector(new THREE.CircleGeometry(40, 64), { clipBias: 0.003, textureWidth: 1024, textureHeight: 1024, color: 0xffffff, shader: mirrorShader });
+      this.mirror = new Reflector(new THREE.CircleGeometry(TABLE_R, 128), { clipBias: 0.003, textureWidth: 1024, textureHeight: 1024, color: 0xffffff, shader: mirrorShader });
       this.mirror.material.transparent = true;
       this.mirror.material.depthWrite = false;
-      this.mirror.rotation.x = -Math.PI / 2; this.mirror.position.y = -0.898;
+      this.mirror.rotation.x = -Math.PI / 2; this.mirror.position.y = TOP_Y + 0.002;
       s.add(this.mirror);
-      const boardTex = woodTexture(1024, 7, null, 4.5, WALNUT);
-      const wood = new THREE.MeshPhysicalMaterial({ map: boardTex, color: 0xbfb0a0, roughness: 0.48, metalness: 0.0, clearcoat: 0.3, clearcoatRoughness: 0.4, envMapIntensity: 0.4 }); // dark walnut, satin lacquer
+      // the board is one slab of walnut: trunk axis along the grain just above the top face and off-centre (as on the
+      // Goban), so the top shows straight grain and the angled sides cut across the growth rings
+      const ga = GRAIN_ANGLE * Math.PI / 180;
+      const wood = solidWoodMaterial({ ...WALNUT_OPTS, axisOrigin: new THREE.Vector3(0, 0.35, 5.5), axisDir: new THREE.Vector3(Math.cos(ga), 0, Math.sin(ga)), roughness: 0.5 });
       const board = new THREE.Mesh(new THREE.CylinderGeometry(9.2, 9.5, 1.05, 6), wood);
       board.position.y = 0.07 - 1.05 / 2; board.rotation.y = Math.PI / 6; // top face below the bottom of the tile dishes (0.09)
       board.receiveShadow = true; board.castShadow = true;
       s.add(board);
-      const brass = new THREE.MeshStandardMaterial({ color: 0x8c6a33, metalness: 0.85, roughness: 0.5, envMapIntensity: 0.9 }); // aged brass
       // brass moulding: one slightly oversized hex prism under every tile. The prisms tile seamlessly, so brass
       // shows only in the gaps between tiles and as a rim of the same width around the outside of the pattern.
       const gap = 1 - 0.93;                    // a tile is inset this much from its cell boundary
