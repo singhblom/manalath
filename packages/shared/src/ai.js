@@ -2,6 +2,11 @@ import { N, distFromCenter } from './hex.js';
 import { sizeIfPlaced, checkEnd, allGroups, MAX_GROUP } from './game.js';
 
 const WIN = 10000;
+const TIE_EPS = 1e-6;
+
+// Bump when a change to the search alters how the bots play, so scripts/rate-ai.js stops pooling
+// games played by the old engine. 2: exact ties at the root.
+export const ENGINE = 2;
 
 // What happens to `p` if p places colour c at i and ends the turn: 'won' | 'lost' | null
 function outcome(board, i, c, p) {
@@ -101,7 +106,9 @@ function rootSearch(board, p, depth, ctx) {
   let best = -Infinity, alpha = -Infinity, ties = [];
   for (const m of ordered(board, p, safe)) {
     board[m[0]] = m[1];
-    const v = -negamax(board, 3 - p, depth - 1, -Infinity, -alpha, ctx);
+    // Search against a bound just below alpha: a fail-soft cut-off at exactly alpha would otherwise
+    // report a worse move as a tie for best, and the random tie-break could pick it.
+    const v = -negamax(board, 3 - p, depth - 1, -Infinity, -alpha + TIE_EPS, ctx);
     board[m[0]] = 0;
     if (v > best) { best = v; ties = [m]; }
     else if (v === best) ties.push(m);

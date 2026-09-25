@@ -6,11 +6,11 @@
 // Plays bots at difficulties 0, step, 2·step, ... MAX_DIFFICULTY against their neighbours up to
 // `reach` steps away (close matches carry the most information), `games` per pairing with colours
 // alternating. Results are appended to scripts/ai-games.jsonl, so reruns add evidence rather than
-// start over; records made with a different TIERS table are ignored. All games so far are then fit
+// start over; records made with a different TIERS table or ENGINE version are ignored. All games so far are then fit
 // at once by maximum likelihood (Bradley-Terry with a first-move advantage term), which, unlike
 // incremental Elo, doesn't depend on game order and gives standard errors. The fit is written to
 // packages/shared/src/ai-ratings.json for the difficulty slider.
-import { TIERS, MAX_DIFFICULTY } from '../packages/shared/src/ai.js';
+import { TIERS, MAX_DIFFICULTY, ENGINE } from '../packages/shared/src/ai.js';
 import { cpus } from 'node:os';
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 
@@ -45,7 +45,7 @@ if (jobs.length) {
     };
     w.onmessage = ({ data: { id, score, moves } }) => {
       const { first, second, seed } = jobs[id];
-      appendFileSync(LOG, JSON.stringify({ tiers, first, second, seed, score, moves }) + '\n');
+      appendFileSync(LOG, JSON.stringify({ tiers, engine: ENGINE, first, second, seed, score, moves }) + '\n');
       if (++done % 50 === 0 || done === jobs.length)
         process.stdout.write(`\r${done}/${jobs.length} games, ${((performance.now() - t0) / 1000).toFixed(0)}s`);
       feed();
@@ -57,7 +57,7 @@ if (jobs.length) {
 
 // --- fit ---
 const games = existsSync(LOG)
-  ? readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(g => g.tiers === tiers)
+  ? readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(g => g.tiers === tiers && (g.engine ?? 1) === ENGINE)
   : [];
 const players = [...new Set(games.flatMap(g => [g.first, g.second]))].sort((a, b) => a - b);
 if (players[0] !== 0) throw new Error('no games involving the random anchor (difficulty 0)');
@@ -129,5 +129,5 @@ console.log('difficulty    elo     ±   games');
 for (const t of table)
   console.log(`${t.difficulty.toFixed(2).padStart(10)} ${String(t.elo).padStart(6)} ${String(t.se).padStart(5)} ${String(t.games).padStart(7)}`);
 
-writeFileSync(OUT, JSON.stringify({ anchor: 'uniform random play = 0', tiers: TIERS, firstMove, points: table }, null, 2) + '\n');
+writeFileSync(OUT, JSON.stringify({ anchor: 'uniform random play = 0', engine: ENGINE, tiers: TIERS, firstMove, points: table }, null, 2) + '\n');
 console.log(`\nwrote ${OUT}`);
