@@ -169,6 +169,7 @@ export const TIERS = [
   { kind: 'search', nodes: 3000,  maxDepth: 8 },
   { kind: 'search', nodes: 12000, maxDepth: 8 },
   { kind: 'search', nodes: 50000, maxDepth: 8 },
+  { kind: 'search', nodes: 150000, maxDepth: 8 },
 ];
 export const MAX_DIFFICULTY = TIERS.length - 1;
 const MAX_MS = 4000;

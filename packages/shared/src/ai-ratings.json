@@ -1,5 +1,6 @@
 {
   "anchor": "uniform random play = 0",
+  "engine": 3,
   "tiers": [
     {
       "kind": "random"
@@ -28,90 +29,133 @@
       "kind": "search",
       "nodes": 50000,
       "maxDepth": 8
+    },
+    {
+      "kind": "search",
+      "nodes": 150000,
+      "maxDepth": 8
     }
   ],
-  "firstMove": {
-    "elo": 9,
-    "se": 12
-  },
   "points": [
     {
       "difficulty": 0,
       "elo": 0,
       "se": 0,
-      "games": 80
+      "firstMove": 18,
+      "firstMoveSe": 31,
+      "games": 800
     },
     {
       "difficulty": 0.5,
-      "elo": 338,
-      "se": 64,
-      "games": 120
+      "elo": 297,
+      "se": 20,
+      "firstMove": 8,
+      "firstMoveSe": 20,
+      "games": 1200
     },
     {
       "difficulty": 1,
-      "elo": 404,
-      "se": 66,
-      "games": 160
+      "elo": 419,
+      "se": 21,
+      "firstMove": 1,
+      "firstMoveSe": 19,
+      "games": 1600
     },
     {
       "difficulty": 1.5,
-      "elo": 455,
-      "se": 72,
-      "games": 160
+      "elo": 511,
+      "se": 23,
+      "firstMove": -3,
+      "firstMoveSe": 19,
+      "games": 1600
     },
     {
       "difficulty": 2,
-      "elo": 756,
-      "se": 83,
-      "games": 160
+      "elo": 814,
+      "se": 27,
+      "firstMove": -15,
+      "firstMoveSe": 19,
+      "games": 1600
     },
     {
       "difficulty": 2.5,
-      "elo": 857,
-      "se": 88,
-      "games": 160
+      "elo": 915,
+      "se": 29,
+      "firstMove": 32,
+      "firstMoveSe": 18,
+      "games": 1600
     },
     {
       "difficulty": 3,
-      "elo": 874,
-      "se": 91,
-      "games": 160
+      "elo": 976,
+      "se": 30,
+      "firstMove": 16,
+      "firstMoveSe": 18,
+      "games": 1600
     },
     {
       "difficulty": 3.5,
-      "elo": 926,
-      "se": 94,
-      "games": 160
+      "elo": 1145,
+      "se": 32,
+      "firstMove": 29,
+      "firstMoveSe": 18,
+      "games": 1600
     },
     {
       "difficulty": 4,
-      "elo": 1048,
-      "se": 98,
-      "games": 160
+      "elo": 1266,
+      "se": 33,
+      "firstMove": 52,
+      "firstMoveSe": 17,
+      "games": 1600
     },
     {
       "difficulty": 4.5,
-      "elo": 1033,
-      "se": 101,
-      "games": 160
+      "elo": 1310,
+      "se": 34,
+      "firstMove": 44,
+      "firstMoveSe": 17,
+      "games": 1600
     },
     {
       "difficulty": 5,
-      "elo": 1092,
-      "se": 104,
-      "games": 160
+      "elo": 1364,
+      "se": 35,
+      "firstMove": -17,
+      "firstMoveSe": 17,
+      "games": 1600
     },
     {
       "difficulty": 5.5,
-      "elo": 1078,
-      "se": 107,
-      "games": 120
+      "elo": 1455,
+      "se": 36,
+      "firstMove": 75,
+      "firstMoveSe": 18,
+      "games": 1400
     },
     {
       "difficulty": 6,
-      "elo": 1061,
-      "se": 110,
-      "games": 80
+      "elo": 1497,
+      "se": 37,
+      "firstMove": 156,
+      "firstMoveSe": 20,
+      "games": 1200
+    },
+    {
+      "difficulty": 6.5,
+      "elo": 1584,
+      "se": 40,
+      "firstMove": 194,
+      "firstMoveSe": 24,
+      "games": 600
+    },
+    {
+      "difficulty": 7,
+      "elo": 1615,
+      "se": 43,
+      "firstMove": 223,
+      "firstMoveSe": 33,
+      "games": 400
     }
   ]
 }

@@ -43,7 +43,7 @@ const settings = Object.assign(
   JSON.parse(localStorage.getItem('manalath.settings') || '{}')
 );
 // AI strength in Elo (random play = 0). Older settings saved a named level instead.
-const STRENGTH_MIN = 750, STRENGTH_MAX = 1100;
+const STRENGTH_MIN = 800, STRENGTH_MAX = 1600;
 settings.strength ??= settings.level ? Math.round(eloForDifficulty(settings.level) / 25) * 25 : 900;
 settings.strength = Math.min(STRENGTH_MAX, Math.max(STRENGTH_MIN, settings.strength));
 delete settings.level;
