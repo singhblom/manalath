@@ -6,8 +6,9 @@
 // Plays bots at difficulties 0, step, 2·step, ... MAX_DIFFICULTY against their neighbours up to
 // `reach` steps away (close matches carry the most information), `games` per pairing with colours
 // alternating. Results are appended to scripts/ai-games.jsonl, so reruns add evidence rather than
-// start over; records made with a different TIERS table or ENGINE version are ignored. All games so far are then fit
-// at once by maximum likelihood (Bradley-Terry with a first-move advantage term), which, unlike
+// start over; records from another ENGINE version, or whose bots used tiers that have since changed,
+// are ignored. All games so far are then fit
+// at once by maximum likelihood (Bradley-Terry with a first-move advantage per difficulty), which, unlike
 // incremental Elo, doesn't depend on game order and gives standard errors. The fit is written to
 // packages/shared/src/ai-ratings.json for the difficulty slider.
 import { TIERS, MAX_DIFFICULTY, ENGINE } from '../packages/shared/src/ai.js';
@@ -56,8 +57,18 @@ if (jobs.length) {
 }
 
 // --- fit ---
+// A game still counts if both its bots would play the same tiers today. Difficulty x mixes tiers
+// floor(x) and ceil(x), so games recorded under an older TIERS table that differs only elsewhere
+// (say, before a stronger tier was added at the top) are kept.
+const parsed = new Map();
+const tiersOf = (json, x) => {
+  if (!parsed.has(json)) parsed.set(json, JSON.parse(json));
+  const t = parsed.get(json);
+  return JSON.stringify([t[Math.floor(x)], t[Math.ceil(x)]]);
+};
+const current = g => (g.engine ?? 1) === ENGINE && [g.first, g.second].every(x => x <= MAX_DIFFICULTY && tiersOf(g.tiers, x) === tiersOf(tiers, x));
 const games = existsSync(LOG)
-  ? readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(g => g.tiers === tiers && (g.engine ?? 1) === ENGINE)
+  ? readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(current)
   : [];
 const players = [...new Set(games.flatMap(g => [g.first, g.second]))].sort((a, b) => a - b);
 if (players[0] !== 0) throw new Error('no games involving the random anchor (difficulty 0)');
@@ -70,32 +81,39 @@ const add = (a, b, s, n) => { const k = `${a},${b}`; const c = cells.get(k) ?? [
 for (const g of games) add(idx.get(g.first), idx.get(g.second), g.score, 1);
 for (const [, [a, b]] of [...cells]) { add(a, b, 0.25, 0.5); add(b, a, 0.25, 0.5); }
 
-// Parameters: ratings of players 1..n-1 (player 0 is pinned at 0) and the first-move advantage h,
-// all in Elo points. Newton's method on the log-likelihood.
-const K = Math.LN10 / 400;
-const n = players.length, dim = n; // n-1 ratings + h
-const r = new Float64Array(n);
-let h = 0;
-const col = i => i - 1; // rating i's column; h is column n-1
+// Parameters, all in Elo points: ratings of players 1..n-1 (player 0 is pinned at 0), and a first-move
+// advantage per player. A game's first-move advantage is the mean of its two players' terms: it is
+// near zero between weak bots but grows to ~200 once both search three plies, so one shared term
+// would bend every rating. Each difficulty plays neighbours on both sides, and those triangles of
+// pairings make the per-player terms identifiable. A smoothness prior (neighbouring difficulties'
+// terms differ by about FM_SD) steadies them. Newton's method on the penalised log-likelihood.
+const K = Math.LN10 / 400, FM_SD = 50;
+const n = players.length, dim = 2 * n - 1;
+const r = new Float64Array(n), fm = new Float64Array(n);
+const col = i => i - 1, fmCol = i => n - 1 + i;
 let cov;
 for (let iter = 0; iter < 100; iter++) {
   const grad = new Float64Array(dim), H = Array.from({ length: dim }, () => new Float64Array(dim));
   for (const [a, b, s, cnt] of cells.values()) {
-    const p = 1 / (1 + Math.exp(-K * (r[a] - r[b] + h)));
+    const p = 1 / (1 + Math.exp(-K * (r[a] - r[b] + (fm[a] + fm[b]) / 2)));
     const gsc = K * (s - cnt * p), w = K * K * cnt * p * (1 - p);
-    // d/d r_a = +1, d/d r_b = -1, d/d h = +1
-    const terms = [[a === 0 ? -1 : col(a), 1], [b === 0 ? -1 : col(b), -1], [n - 1, 1]].filter(t => t[0] >= 0);
+    const terms = [[a === 0 ? -1 : col(a), 1], [b === 0 ? -1 : col(b), -1], [fmCol(a), 0.5], [fmCol(b), 0.5]].filter(t => t[0] >= 0);
     for (const [i, si] of terms) {
       grad[i] += si * gsc;
       for (const [j, sj] of terms) H[i][j] += si * sj * w; // negative Hessian (Fisher information)
     }
+  }
+  for (let i = 0; i + 1 < n; i++) {
+    const a = fmCol(i), b = fmCol(i + 1), d = (fm[i] - fm[i + 1]) / FM_SD ** 2, w = 1 / FM_SD ** 2;
+    grad[a] -= d; grad[b] += d;
+    H[a][a] += w; H[b][b] += w; H[a][b] -= w; H[b][a] -= w;
   }
   cov = invert(H);
   let step = 0;
   for (let i = 0; i < dim; i++) {
     let d = 0;
     for (let j = 0; j < dim; j++) d += cov[i][j] * grad[j];
-    if (i === n - 1) h += d; else r[i + 1] += d;
+    if (i >= n - 1) fm[i - (n - 1)] += d; else r[i + 1] += d;
     step = Math.max(step, Math.abs(d));
   }
   if (step < 1e-6) break;
@@ -120,14 +138,15 @@ const table = players.map((x, i) => ({
   difficulty: x,
   elo: Math.round(r[i]),
   se: i === 0 ? 0 : Math.round(Math.sqrt(cov[col(i)][col(i)])),
+  firstMove: Math.round(fm[i]),
+  firstMoveSe: Math.round(Math.sqrt(cov[fmCol(i)][fmCol(i)])),
   games: played.get(x),
 }));
-const firstMove = { elo: Math.round(h), se: Math.round(Math.sqrt(cov[n - 1][n - 1])) };
 
-console.log(`${games.length} games. First-move advantage: ${firstMove.elo} ± ${firstMove.se}\n`);
-console.log('difficulty    elo     ±   games');
+console.log(`${games.length} games\n`);
+console.log('difficulty    elo     ±   first-move     ±   games');
 for (const t of table)
-  console.log(`${t.difficulty.toFixed(2).padStart(10)} ${String(t.elo).padStart(6)} ${String(t.se).padStart(5)} ${String(t.games).padStart(7)}`);
+  console.log(`${t.difficulty.toFixed(2).padStart(10)} ${String(t.elo).padStart(6)} ${String(t.se).padStart(5)} ${String(t.firstMove).padStart(12)} ${String(t.firstMoveSe).padStart(5)} ${String(t.games).padStart(7)}`);
 
-writeFileSync(OUT, JSON.stringify({ anchor: 'uniform random play = 0', engine: ENGINE, tiers: TIERS, firstMove, points: table }, null, 2) + '\n');
+writeFileSync(OUT, JSON.stringify({ anchor: 'uniform random play = 0', engine: ENGINE, tiers: TIERS, points: table }, null, 2) + '\n');
 console.log(`\nwrote ${OUT}`);
