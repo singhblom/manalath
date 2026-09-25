@@ -1,5 +1,6 @@
 import { Game, checkEnd, groupAt } from '@manalath/shared/game.js';
 import { chooseMove } from '@manalath/shared/ai.js';
+import { eloForDifficulty, difficultyForElo } from '@manalath/shared/ai-strength.js';
 import { ThreeRenderer } from './renderers/three.js';
 import { TerracesRenderer } from './renderers/terraces.js';
 import { PaperRenderer } from './renderers/paper.js';
@@ -38,9 +39,14 @@ const THEME_HINTS = {
 };
 
 const settings = Object.assign(
-  { mode: 'hotseat', level: 'normal', side: '1', theme: 'terraces' },
+  { mode: 'hotseat', side: '1', theme: 'terraces' },
   JSON.parse(localStorage.getItem('manalath.settings') || '{}')
 );
+// AI strength in Elo (random play = 0). Older settings saved a named level instead.
+const STRENGTH_MIN = 750, STRENGTH_MAX = 1100;
+settings.strength ??= settings.level ? Math.round(eloForDifficulty(settings.level) / 25) * 25 : 900;
+settings.strength = Math.min(STRENGTH_MAX, Math.max(STRENGTH_MIN, settings.strength));
+delete settings.level;
 function saveSettings() { localStorage.setItem('manalath.settings', JSON.stringify(settings)); }
 
 const game = new Game();
@@ -355,7 +361,7 @@ function scheduleAi() {
   thinking = true;
   render();
   const id = aiRequest;
-  const search = requestAiMove(game.board, game.player, settings.level);
+  const search = requestAiMove(game.board, game.player, difficultyForElo(settings.strength));
   const pause = new Promise(resolve => { aiTimer = setTimeout(resolve, 500 + Math.random() * 800); });
   Promise.all([search, pause]).then(([m]) => {
     if (id !== aiRequest) return; // a new game, undo or mode change superseded this move
@@ -388,12 +394,17 @@ function undo() {
 
 // --- wire up UI ---
 $('#mode').value = settings.mode;
-$('#level').value = settings.level;
+const strength = $('#strength');
+strength.min = STRENGTH_MIN;
+strength.max = STRENGTH_MAX;
+strength.value = settings.strength;
+const showStrength = () => { $('#strength-out').textContent = strength.value; };
+showStrength();
 $('#side').value = settings.side;
 $('#ai-opts').style.display = settings.mode === 'ai' ? '' : 'none';
 
 $('#mode').addEventListener('change', e => { settings.mode = e.target.value; $('#ai-opts').style.display = settings.mode === 'ai' ? '' : 'none'; saveSettings(); newGame(); });
-$('#level').addEventListener('change', e => { settings.level = e.target.value; saveSettings(); });
+strength.addEventListener('input', () => { settings.strength = +strength.value; showStrength(); saveSettings(); });
 $('#side').addEventListener('change', e => { settings.side = e.target.value; saveSettings(); newGame(); });
 $('#new').addEventListener('click', newGame);
 const panel = $('#panel');

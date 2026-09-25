@@ -69,7 +69,7 @@ function ordered(board, p, safe) {
 }
 
 function negamax(board, p, depth, alpha, beta, ctx) {
-  if ((++ctx.nodes & 255) === 0 && performance.now() > ctx.deadline) throw new Timeout();
+  if (++ctx.nodes > ctx.maxNodes || ((ctx.nodes & 255) === 0 && performance.now() > ctx.deadline)) throw new Timeout();
   const moves = legalMoves(board);
   if (!moves.length) {
     // forced pass: end conditions for p still apply
@@ -97,7 +97,7 @@ function rootSearch(board, p, depth, ctx) {
   if (!moves.length) return { move: null, score: 0 };
   const { wins, safe } = classify(board, p, moves);
   if (wins.length) return { move: wins[0], score: WIN };
-  if (!safe.length) return { move: moves[Math.floor(Math.random() * moves.length)], score: -WIN };
+  if (!safe.length) return { move: moves[Math.floor(ctx.rand() * moves.length)], score: -WIN };
   let best = -Infinity, alpha = -Infinity, ties = [];
   for (const m of ordered(board, p, safe)) {
     board[m[0]] = m[1];
@@ -107,23 +107,53 @@ function rootSearch(board, p, depth, ctx) {
     else if (v === best) ties.push(m);
     if (v > alpha) alpha = v;
   }
-  return { move: ties[Math.floor(Math.random() * ties.length)], score: best };
+  return { move: ties[Math.floor(ctx.rand() * ties.length)], score: best };
+}
+
+// Difficulty is a continuous number over a ladder of tiers. Each move, a bot at difficulty x plays
+// as tier ceil(x) with probability frac(x) and as tier floor(x) otherwise, so strength moves
+// smoothly between neighbouring tiers. Search tiers are budgeted in nodes rather than time so a
+// bot is equally strong on every device (and its measured rating means something); MAX_MS is only a
+// safety cap for slow devices. Ratings for each point are measured by scripts/rate-ai.js.
+export const TIERS = [
+  { kind: 'random' },                     // 0: any legal move, uniformly
+  { kind: 'safe' },                       // 1: takes an immediate win, never loses on the spot
+  { kind: 'quiet' },                      // 2: ...and doesn't hand the opponent an immediate win
+  { kind: 'search', maxDepth: 1 },
+  { kind: 'search', nodes: 3000,  maxDepth: 8 },
+  { kind: 'search', nodes: 12000, maxDepth: 8 },
+  { kind: 'search', nodes: 50000, maxDepth: 8 },
+];
+export const MAX_DIFFICULTY = TIERS.length - 1;
+const MAX_MS = 4000;
+
+// Named levels from before the slider (saved settings may still hold them).
+const NAMED = { easy: 2, medium: 3.5, normal: 5, hard: 6 };
+export function difficultyOf(level) {
+  const x = typeof level === 'number' ? level : NAMED[level] ?? NAMED.normal;
+  return Math.min(MAX_DIFFICULTY, Math.max(0, x));
 }
 
 // Returns { cell, color } or null if no legal move (caller should pass).
-export function chooseMove(boardIn, p, level = 'normal') {
-  const board = Int8Array.from(boardIn);
-  const timeBudget = level === 'hard' ? 1800 : level === 'normal' ? 400 : 60;
-  const maxDepth = level === 'hard' ? 8 : level === 'normal' ? 3 : 1;
-  const ctx = { nodes: 0, deadline: performance.now() + timeBudget };
+// `level` is a difficulty in [0, MAX_DIFFICULTY] or a legacy level name.
+export function chooseMove(boardIn, p, level = 'normal', rand = Math.random) {
+  const x = difficultyOf(level);
+  const lo = Math.floor(x);
+  const tier = TIERS[rand() < x - lo ? lo + 1 : lo];
+  return playTier(Int8Array.from(boardIn), p, tier, rand);
+}
 
+function playTier(board, p, tier, rand) {
+  const pick = a => a[Math.floor(rand() * a.length)];
   const moves = legalMoves(board);
   if (!moves.length) return null;
+  if (tier.kind === 'random') return toMove(pick(moves));
   const { wins, safe } = classify(board, p, moves);
   if (wins.length) return toMove(wins[0]);
-  if (!safe.length) return toMove(moves[Math.floor(Math.random() * moves.length)]);
+  if (!safe.length) return toMove(pick(moves));
+  if (tier.kind === 'safe') return toMove(pick(safe));
 
-  if (level === 'easy') {
+  if (tier.kind === 'quiet') {
     // Don't hand the opponent an immediate win if avoidable; otherwise random.
     const o = 3 - p;
     const quiet = safe.filter(([i, c]) => {
@@ -132,12 +162,12 @@ export function chooseMove(boardIn, p, level = 'normal') {
       board[i] = 0;
       return !oppWins;
     });
-    const pool = quiet.length ? quiet : safe;
-    return toMove(pool[Math.floor(Math.random() * pool.length)]);
+    return toMove(pick(quiet.length ? quiet : safe));
   }
 
-  let result = rootSearch(board, p, 1, ctx);
-  for (let d = 2; d <= maxDepth; d++) {
+  const ctx = { nodes: 0, maxNodes: tier.nodes ?? Infinity, deadline: performance.now() + MAX_MS, rand };
+  let result = rootSearch(board, p, 1, { ...ctx, maxNodes: Infinity });
+  for (let d = 2; d <= tier.maxDepth; d++) {
     try {
       const r = rootSearch(board, p, d, ctx);
       result = r;

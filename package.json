@@ -8,7 +8,8 @@
     "start": "NODE_ENV=production bun apps/server/src/index.ts",
     "lex": "lex gen-server --yes packages/shared/src/lexicon lexicons/com/atproto/repo/strongRef.json lexicons/top/manalath/*.json && rm packages/shared/src/lexicon/index.ts",
     "test": "bun test",
-    "gen-key": "bun apps/server/scripts/gen-oauth-key.ts"
+    "gen-key": "bun apps/server/scripts/gen-oauth-key.ts",
+    "rate-ai": "bun scripts/rate-ai.js"
   },
   "devDependencies": {
     "@atproto/lex-cli": "^0.9.0",

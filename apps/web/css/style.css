@@ -28,6 +28,9 @@ section { border-top: 1px solid var(--border); padding-top: 12px; }
 label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 label.check { display: flex; gap: 8px; align-items: flex-start; line-height: 1.3; }
 label.check input { margin-top: 2px; }
+input[type="range"] { display: block; width: 100%; margin-top: 4px; accent-color: var(--accent); }
+label .range-ends { display: flex; justify-content: space-between; font-size: 12px; margin-top: 2px; }
+label output { color: var(--fg); font-variant-numeric: tabular-nums; }
 select { display: block; width: 100%; margin-top: 4px; padding: 6px 8px; background: var(--input); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; background: var(--btn); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 13px; cursor: pointer; }
@@ -47,6 +50,7 @@ dialog.sheet, #toolbar { transition: background 0.3s, color 0.3s, border-color 0
 .sw-paper { background: repeating-linear-gradient(0deg, transparent 0 6px, rgba(90,130,190,0.25) 6px 7px), #f6efdc; }
 .sw-terminal { background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0 1px, transparent 1px 3px), #0a100a; box-shadow: inset 0 0 12px #1f5a2a; }
 .hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+label .hint { display: block; margin-top: 4px; }
 #status { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; min-height: 24px; }
 #status .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,0.35); flex: none; }
 #status.over { color: var(--accent); }

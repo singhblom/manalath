@@ -38,12 +38,10 @@
         </select>
       </label>
       <div id="ai-opts">
-        <label>Difficulty
-          <select id="level">
-            <option value="easy">Easy</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hard">Hard</option>
-          </select>
+        <label>Strength <output id="strength-out"></output>
+          <input type="range" id="strength" step="25">
+          <span class="range-ends"><span>Easy</span><span>Pro</span></span>
+          <span class="hint">Elo, where a player moving at random is 0.</span>
         </label>
         <label>You play as
           <select id="side">

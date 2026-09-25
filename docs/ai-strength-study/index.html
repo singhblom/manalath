@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Strength Ladder</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s1-wash: rgba(42,120,214,.12); --s2-wash: rgba(235,104,52,.12);
+  --code-bg: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
+    --code-bg: #242422;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
+  --code-bg: #242422;
+}
+* { box-sizing: border-box; }
+html { background: var(--page); }
+body {
+  margin: 0; padding: 0 16px 80px; background: var(--page); color: var(--ink);
+  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; }
+header { padding: 64px 0 24px; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
+h1 { font-size: 40px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
+.sub { color: var(--ink-2); font-size: 19px; margin: 0 0 16px; }
+.meta { color: var(--muted); font-size: 14px; }
+h2 { font-size: 26px; margin: 56px 0 12px; letter-spacing: -.005em; }
+p, li { color: var(--ink); }
+a { color: var(--s1); }
+code { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+figure { margin: 28px 0; }
+figcaption { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin-top: 10px; }
+.chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px 8px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font-weight: 600; font-size: 15px; margin: 0 6px 2px; }
+.chart-sub { color: var(--ink-2); font-size: 13px; margin: 0 6px 10px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 6px 0; font-size: 13px; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); border: 2px solid var(--b, var(--c)); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 16px 0; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.half td { color: var(--ink-2); }
+tr.band td:first-child { box-shadow: inset 3px 0 0 var(--s1); }
+.hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.tile .l { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
+.tile .d { color: var(--muted); font-size: 13px; }
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); font-size: 13px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 10; white-space: nowrap; }
+.note { color: var(--muted); font-size: 14px; }
+@media (max-width: 520px) { h1 { font-size: 32px; } body { font-size: 16px; } th, td { padding: 6px 5px; } table { font-size: 14px; } }
+</style>
+</head>
+<body>
+<div class="tip" id="tip"></div>
+<main>
+<header>
+  <h1>How strong is the Manalath AI?</h1>
+  <p class="sub">A short memo on rating the AI's difficulty ladder in Elo, with a uniformly random player fixed at 0, and on where the new strength slider should start and stop.</p>
+  <p class="meta">Martin Singh-Blom with Claude · September 2026 · 920 self-play games</p>
+</header>
+
+<h2 id="summary">Summary</h2>
+<p>We rated the AI at thirteen points along its difficulty scale. Most of the strength comes from not blundering. Taking a win when one is on the board, never completing your own quart and never leaving the opponent an immediate quint is together worth about 750 Elo over random play. Searching ahead adds only another 300 or so, and then stops helping: the three strongest settings are statistically the same player.</p>
+
+<div class="hero">
+  <div class="tile"><div class="l">Blunder avoidance alone</div><div class="v">756</div><div class="d">Elo over random play, no lookahead</div></div>
+  <div class="tile"><div class="l">Best search setting</div><div class="v">1092</div><div class="d">12k nodes, roughly depth 2</div></div>
+  <div class="tile"><div class="l">Extra from 4× more search</div><div class="v">−31</div><div class="d">50k vs 12k nodes, within noise</div></div>
+</div>
+
+<p>Based on this we set the in-game slider to run from <b>750 (Easy)</b> to <b>1100 (Pro)</b>. Settings below 750 were too easy to be interesting in play, and 1100 is the most the current engine can reach.</p>
+
+<h2 id="ladder">The ladder</h2>
+<p>Difficulty is a number from 0 to 6 in <code>packages/shared/src/ai.js</code>. Each whole number is a tier:</p>
+<ol start="0">
+  <li><b>Random.</b> Any legal move, uniformly. This is the anchor, fixed at 0 Elo.</li>
+  <li><b>Safe.</b> Takes an immediate win if there is one, otherwise plays randomly among moves that don't lose on the spot.</li>
+  <li><b>Quiet.</b> Safe, and also avoids moves that leave the opponent an immediate win.</li>
+  <li><b>1-ply search</b> with the hand-written evaluation.</li>
+  <li><b>Search, 3,000 nodes,</b> with iterative deepening. In practice this reaches depth 2.</li>
+  <li><b>Search, 12,000 nodes.</b> About the old "normal" level's think time.</li>
+  <li><b>Search, 50,000 nodes.</b> About the old "hard" level's think time.</li>
+</ol>
+<p>A fractional difficulty mixes the two neighbouring tiers on each move. At 3.4, the bot plays as tier 4 on 40% of its moves and as tier 3 on the rest. Search is budgeted in nodes rather than milliseconds, so a given difficulty is equally strong on a fast desktop and a slow phone.</p>
+
+<h2 id="method">Method</h2>
+<p><code>scripts/rate-ai.js</code> played bots at every half step from 0 to 6 against their neighbours one half step and one full step away. Each pairing played 40 games with colours alternating, 920 games in all, averaging 20.5 moves each. All games were then fitted at once by maximum likelihood with a Bradley–Terry model (the model behind Elo), which also estimates a first-move advantage. That advantage came out at 9 ± 12 Elo, which is negligible. Fitting everything at once, rather than updating ratings game by game, means the result doesn't depend on the order the games were played and comes with standard errors.</p>
+
+<figure>
+  <div class="chart" id="fig-curve"></div>
+  <figcaption>Error bars are ±1 standard error relative to the random anchor, so they grow along the chain. Differences between neighbouring points are better determined than the bars suggest; see the table below. The shaded band is the range the in-game slider offers.</figcaption>
+</figure>
+
+<h2 id="results">Results</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Level</th><th>Plays as</th><th class="n">Elo</th><th class="n">±</th><th class="n">vs +½</th></tr></thead>
+  <tbody id="tbl-points"></tbody>
+</table>
+</div>
+<p class="note">"vs +½" is how the point half a step up scored against this row over their 40 games, and the Elo gap that score implies. A negative gap means the harder setting lost more than it won. Rows marked in blue fall inside the slider's range.</p>
+
+<p>Three things stand out.</p>
+<ul>
+  <li><b>The big steps are cheap.</b> Going from random to safe is worth about 400 Elo, and from safe to quiet another 350. Neither needs any search. The most lopsided pairing in the run was difficulty 2.5 against 1.5: 40 wins out of 40.</li>
+  <li><b>Mixing tiers isn't linear.</b> Half-random, half-safe play (difficulty 0.5) already rates 338, most of the way to fully safe. One suicidal move ends a game, so avoiding even half of them gains most of the benefit. Because the slider maps Elo to difficulty using the measured half steps, it absorbs this.</li>
+  <li><b>More search stops paying at about depth 2.</b> The engine searches about 30 nodes per millisecond. Every node recomputes the groups on the whole board, so even 50,000 nodes rarely finishes depth 3. Tiers 4, 5 and 6 all end up as depth-2 players and score around 50% against each other.</li>
+</ul>
+
+<h2 id="slider">What this means for the slider</h2>
+<p>The slider runs from 750 to 1100 Elo in steps of 25 and is converted to a difficulty by linear interpolation over the measured points. The Easy end is the quiet tier: it never throws a game away, but otherwise plays at random. The Pro end is the 12k-node search. Settings past the strongest measured point use the cheapest difficulty that reached it, so Pro never pays for tier 6's think time.</p>
+<p>The top of the scale is set by engine speed, not by any natural ceiling. Tracking group sizes as moves are made and undone, instead of flood-filling the whole board at every node, should let the same think time reach depth 3 or 4. Then the ladder can grow and be re-rated. Running <code>bun run rate-ai</code> again adds games to <code>scripts/ai-games.jsonl</code> and refits.</p>
+
+<h2 id="limits">Limitations</h2>
+<ul>
+  <li><b>40 games per pairing is thin.</b> The standard error at the top of the scale is about ±100 relative to random. The ordering of tiers 4 to 6 is not resolved and may never be, since they seem to play at the same strength.</li>
+  <li><b>These are self-play ratings.</b> They measure how the bots do against each other, not against people. A human rated 1000 on some future ladder won't necessarily win half their games against the 1000 bot, until the bots take part in rated human games and anchor that scale too.</li>
+  <li><b>Search is still capped by time on slow devices.</b> The 4-second cap only applies on hardware far slower than a current phone, but where it triggers, the bot plays below its measured strength.</li>
+</ul>
+</main>
+
+<script>
+// Fitted ratings (packages/shared/src/ai-ratings.json) and raw pairings (scripts/ai-games.jsonl),
+// as of the first full run. Pairings: [weaker, stronger, stronger's score, games].
+const POINTS = [{"difficulty":0,"elo":0,"se":0,"games":80},{"difficulty":0.5,"elo":338,"se":64,"games":120},{"difficulty":1,"elo":404,"se":66,"games":160},{"difficulty":1.5,"elo":455,"se":72,"games":160},{"difficulty":2,"elo":756,"se":83,"games":160},{"difficulty":2.5,"elo":857,"se":88,"games":160},{"difficulty":3,"elo":874,"se":91,"games":160},{"difficulty":3.5,"elo":926,"se":94,"games":160},{"difficulty":4,"elo":1048,"se":98,"games":160},{"difficulty":4.5,"elo":1033,"se":101,"games":160},{"difficulty":5,"elo":1092,"se":104,"games":160},{"difficulty":5.5,"elo":1078,"se":107,"games":120},{"difficulty":6,"elo":1061,"se":110,"games":80}];
+const PAIRS = [[0,0.5,34,40],[0,1,39,40],[0.5,1,18,40],[0.5,1.5,31,40],[1,1.5,21,40],[1,2,34,40],[1.5,2,34,40],[1.5,2.5,40,40],[2,2.5,29,40],[2,3,21,40],[2.5,3,25,40],[2.5,3.5,26,40],[3,3.5,22,40],[3,4,29,40],[3.5,4,30,40],[3.5,4.5,24,40],[4,4.5,17,40],[4,5,27,40],[4.5,5,21,40],[4.5,5.5,21,40],[5,5.5,20,40],[5,6,19,40],[5.5,6,18,40]];
+const TIER_NAMES = ['random', 'safe', 'quiet', '1-ply', '3k nodes', '12k nodes', '50k nodes'];
+const SLIDER = [750, 1100];
+
+const $ = s => document.querySelector(s);
+const tip = $('#tip');
+function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 28) + 'px'; }
+function hideTip() { tip.style.opacity = 0; }
+function attach(el) { el.querySelectorAll('[data-tip]').forEach(n => { n.addEventListener('mousemove', e => showTip(e, n.dataset.tip)); n.addEventListener('mouseleave', hideTip); }); }
+const elo = p => { p = Math.min(Math.max(p, .005), .995); return 400 * Math.log10(p / (1 - p)); };
+const plays = x => Number.isInteger(x) ? TIER_NAMES[x] : `${TIER_NAMES[Math.floor(x)]} + ${TIER_NAMES[Math.ceil(x)]}`;
+
+// ---------- figure: Elo by difficulty ----------
+(function () {
+  const W = 640, H = 360, L = 56, R = 64, T = 16, B = 52;
+  const x2p = x => L + x / 6 * (W - L - R);
+  const yMin = -100, yMax = 1300, v2y = e => T + (1 - (e - yMin) / (yMax - yMin)) * (H - T - B);
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  // slider band
+  s += `<rect x="${L}" y="${v2y(SLIDER[1])}" width="${W - L - R}" height="${v2y(SLIDER[0]) - v2y(SLIDER[1])}" fill="var(--s1-wash)"/>`;
+  s += `<text x="${W - R + 8}" y="${v2y(SLIDER[1]) + 4}" font-size="12" fill="var(--s1)">Pro ${SLIDER[1]}</text>`;
+  s += `<text x="${W - R + 8}" y="${v2y(SLIDER[0]) + 4}" font-size="12" fill="var(--s1)">Easy ${SLIDER[0]}</text>`;
+  for (const t of [0, 200, 400, 600, 800, 1000, 1200]) {
+    const y = v2y(t);
+    s += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${t === 0 ? 'var(--axis)' : 'var(--grid)'}"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" font-size="12" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${t}</text>`;
+  }
+  for (let k = 0; k <= 6; k++) {
+    s += `<text x="${x2p(k)}" y="${H - 30}" text-anchor="middle" font-size="12" fill="var(--ink-2)">${k}</text>`;
+    s += `<text x="${x2p(k)}" y="${H - 14}" text-anchor="middle" font-size="11" fill="var(--muted)">${TIER_NAMES[k]}</text>`;
+  }
+  s += `<path d="${POINTS.map((p, i) => (i ? 'L' : 'M') + x2p(p.difficulty) + ',' + v2y(p.elo)).join(' ')}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>`;
+  for (const p of POINTS) {
+    const cx = x2p(p.difficulty), cy = v2y(p.elo), whole = Number.isInteger(p.difficulty);
+    s += `<g data-tip="difficulty ${p.difficulty} (${plays(p.difficulty)}): ${p.elo} ± ${p.se} Elo, ${p.games} games">`
+      + (p.se ? `<line x1="${cx}" x2="${cx}" y1="${v2y(p.elo - p.se)}" y2="${v2y(p.elo + p.se)}" stroke="var(--s1)" stroke-width="1.5"/>` : '')
+      + `<circle cx="${cx}" cy="${cy}" r="12" fill="transparent"/><circle cx="${cx}" cy="${cy}" r="5" fill="${whole ? 'var(--s1)' : 'var(--surface)'}" stroke="var(--s1)" stroke-width="2"/></g>`;
+  }
+  s += '</svg>';
+  const el = $('#fig-curve');
+  el.innerHTML = `<div class="chart-title">Rated strength by difficulty</div><div class="chart-sub">Elo, with uniformly random play fixed at 0</div>${s}<div class="legend"><span style="--c:var(--s1)">whole tier</span><span style="--c:var(--surface);--b:var(--s1)">half step: two tiers mixed move by move</span></div>`;
+  attach(el);
+})();
+
+// ---------- table ----------
+$('#tbl-points').innerHTML = POINTS.map(p => {
+  const pair = PAIRS.find(([a, b]) => a === p.difficulty && b === p.difficulty + .5);
+  const vs = pair ? `${pair[2]}/${pair[3]} (${Math.round(elo(pair[2] / pair[3])) >= 0 ? '+' : ''}${Math.round(elo(pair[2] / pair[3]))})` : '';
+  const cls = [Number.isInteger(p.difficulty) ? '' : 'half', p.elo >= SLIDER[0] && p.elo <= SLIDER[1] ? 'band' : ''].join(' ').trim();
+  return `<tr class="${cls}"><td>${p.difficulty}</td><td>${plays(p.difficulty)}</td><td class="n">${p.elo}</td><td class="n">${p.se || '—'}</td><td class="n">${vs}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>
