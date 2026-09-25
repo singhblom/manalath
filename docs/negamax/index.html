@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the Manalath AI thinks</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s1-wash: rgba(42,120,214,.12); --s2-wash: rgba(235,104,52,.12);
+  --p1: #f4f1e8; --p2: #2b2b2b; --cell: #ece9df; --cell-stroke: #c9c4b4; --dead: #e34948;
+  --code-bg: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
+    --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
+    --code-bg: #242422;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
+  --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
+  --code-bg: #242422;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0 16px 80px; background: var(--page); color: var(--ink);
+  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; }
+header { padding: 64px 0 24px; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
+h1 { font-size: 40px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
+.sub { color: var(--ink-2); font-size: 19px; margin: 0 0 16px; }
+.meta { color: var(--muted); font-size: 14px; }
+h2 { font-size: 26px; margin: 56px 0 12px; letter-spacing: -.005em; }
+h3 { font-size: 19px; margin: 32px 0 8px; }
+p, li { color: var(--ink); }
+a { color: var(--s1); }
+code, pre { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+figure { margin: 28px 0; }
+figcaption { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin-top: 10px; }
+figcaption b { color: var(--ink); font-weight: 600; }
+.chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px 12px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font-weight: 600; font-size: 15px; margin: 0 6px 2px; }
+.chart-sub { color: var(--ink-2); font-size: 13px; margin: 0 6px 10px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 6px 0; font-size: 13px; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); border: 1.5px solid var(--b, var(--c)); }
+.legend span.x::before { content: "✕"; background: none; border: none; width: auto; height: auto; color: var(--dead); font-size: 12px; vertical-align: 0; }
+.legend span.ring::before { background: transparent; border: 2px var(--style, solid) var(--c); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 16px 0; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.muted td { color: var(--muted); }
+tr.total td { font-weight: 600; border-bottom: none; }
+.hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.tile .l { color: var(--ink-2); font-size: 13px; }
+.tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
+.tile .d { color: var(--muted); font-size: 13px; }
+.callout { border-left: 3px solid var(--s1); padding: 4px 16px; margin: 20px 0; color: var(--ink-2); }
+.note { color: var(--muted); font-size: 14px; }
+.toc { columns: 2; gap: 24px; font-size: 15px; padding-left: 20px; margin: 0 0 8px; }
+.toc li { margin: 2px 0; }
+/* widgets */
+.ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 6px 10px; font-size: 14px; color: var(--ink-2); }
+.ctrl .grow { flex: 1; }
+button, select { font: 500 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--page); color: var(--ink); cursor: pointer; }
+button:hover:not(:disabled), select:hover { border-color: var(--axis); }
+button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+button:disabled { opacity: .4; cursor: default; }
+button.primary { background: var(--s1); border-color: var(--s1); color: #fff; }
+.seg { display: inline-flex; }
+.seg button { border-radius: 0; }
+.seg button:first-child { border-radius: 8px 0 0 8px; }
+.seg button:last-child { border-radius: 0 8px 8px 0; margin-left: -1px; }
+label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.status { min-height: 4.6em; font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 8px 6px 0; }
+.status b { color: var(--ink); font-weight: 600; }
+.tree-wrap { overflow-x: auto; }
+.tree-wrap svg { min-width: 540px; }
+.lab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.lab .board svg .cell.open { cursor: pointer; }
+.lab .board svg .cell.open:hover { fill: var(--grid); }
+.lab .panel { font-size: 14px; }
+.lab .panel table { font-size: 14px; margin: 4px 0 8px; }
+.lab .panel th, .lab .panel td { padding: 5px 6px; }
+.lab .turn { margin: 0 6px 8px; font-size: 14px; color: var(--ink-2); }
+.lab .turn b { color: var(--ink); }
+.over { color: var(--ink); font-weight: 600; }
+@media (max-width: 640px) { .lab { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { h1 { font-size: 32px; } .toc { columns: 1; } body { font-size: 16px; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>How the Manalath AI thinks</h1>
+  <p class="sub">An explainer for the negamax search in <code>packages/shared/src/ai.js</code>: the textbook algorithm, what Manalath adds to it, and a tie-breaking bug that turned up while writing this, now fixed.</p>
+  <p class="meta">Martin Singh-Blom with Claude · September 2026</p>
+</header>
+
+<ol class="toc">
+  <li><a href="#summary">Summary</a></li>
+  <li><a href="#problem">The problem</a></li>
+  <li><a href="#negamax">Negamax</a></li>
+  <li><a href="#alphabeta">Alpha-beta pruning</a></li>
+  <li><a href="#manalath">What Manalath adds</a></li>
+  <li><a href="#eval">The evaluation</a></li>
+  <li><a href="#ordering">Move ordering</a></li>
+  <li><a href="#budget">Deepening on a budget</a></li>
+  <li><a href="#ties">A tie-breaking bug</a></li>
+  <li><a href="#next">Where the time goes</a></li>
+</ol>
+
+<h2 id="summary">Summary</h2>
+<p>The search tiers of the AI are a standard game-tree search: negamax with alpha-beta pruning, iterative deepening, and a hand-written evaluation at the leaves. Three things make it Manalath-specific. Every node checks for wins and suicides one move ahead before it does anything else. Suicidal moves are never searched at all. And the evaluation counts safe moves and small groups rather than material, because in Manalath a stone is as likely to be a liability as an asset.</p>
+
+<div class="hero">
+  <div class="tile"><div class="l">Moves to choose from</div><div class="v">≤ 122</div><div class="d">61 cells × 2 colours, fewer as the board fills</div></div>
+  <div class="tile"><div class="l">Search speed</div><div class="v">~220</div><div class="d">nodes per millisecond, 35× faster since engine 3 (§10)</div></div>
+  <div class="tile"><div class="l">Found wins not played</div><div class="v">58%</div><div class="d">chance before the fix in §9, once the search had found a forced win</div></div>
+</div>
+
+<p>The figures below are live. They run a copy of the real engine in your browser, with switches for turning its parts on and off.</p>
+
+<h2 id="problem">The problem</h2>
+<p>A quick recap of the rules as <code>packages/shared/src/game.js</code> implements them. The board has 61 hexagonal cells. On your turn you place one stone of <em>either</em> colour. No group may ever grow beyond five stones. At the end of your turn, if a group of your own colour has exactly four stones (a <em>quart</em>), you lose. If it has exactly five (a <em>quint</em>), you win. A quart beats a quint, so you can't escape a quart by making a quint somewhere else.</p>
+<p>A move is a cell and a colour, so the opening position has 122 of them. Games between the bots average about 20 moves. Looking even three moves ahead naively means a million positions, and each one needs its groups checked. The job of the search is to look as far ahead as it can afford and to spend that budget on the lines that matter.</p>
+
+<h2 id="negamax">Negamax</h2>
+<p>The classic formulation is <em>minimax</em>. Build a tree of positions, score the leaves from one player's point of view, then work upwards. At a node where that player moves, take the highest child score. Where the opponent moves, take the lowest. The value at the root is what the player can guarantee against best play, as far as the tree reaches.</p>
+<p><em>Negamax</em> is the same algorithm with one trick. Score every position from the point of view of <b>the player to move there</b>. Then a node's value is the best child value <em>negated</em>, because a position worth +5 to my opponent is worth −5 to me:</p>
+<pre><code>value(node) = max over moves m of  −value(child after m)</code></pre>
+<p>This works because <code>min(a, b) = −max(−a, −b)</code>. There's no separate min branch, and one function handles both players. The only requirement is that the leaf evaluation is from the side to move, which is how <code>evaluate()</code> is written.</p>
+
+<figure>
+  <div class="chart" id="fig-nega"></div>
+  <figcaption><b>Figure 1. Negamax on a toy tree.</b> White moves at the root, then Black, then White, and each leaf is scored for Black, who would be next to move. Step through to watch values come back up the tree and flip sign at each level. Switch to <b>Minimax view</b> to see the same search with every number from White's side, where the levels alternate between taking the highest and the lowest. The two views always agree about which move is best.</figcaption>
+</figure>
+
+<h2 id="alphabeta">Alpha-beta pruning</h2>
+<p>Most of the tree in Figure 1 doesn't need to be looked at. Suppose White has already found a move worth +3. While exploring a second move, White sees that Black has a reply leaving White only −4. There's no need to look at Black's other replies. They could only make this move worse for White, and it is already worse than +3.</p>
+<p>Alpha-beta makes that bookkeeping systematic by passing a window <code>(α, β)</code> down the tree, from the point of view of the player to move:</p>
+<ul>
+  <li><b>α</b> is the score the player to move is already guaranteed elsewhere. Anything below it is not interesting.</li>
+  <li><b>β</b> is the most the opponent will allow. If this node reaches β, the opponent will steer away from it one level up.</li>
+</ul>
+<p>A child is searched with the window <code>(−β, −α)</code>, the same window seen from the other side. As soon as <code>α ≥ β</code>, the remaining moves at the node are skipped: a <em>cut-off</em>. The value at the root doesn't change. Only the amount of work does.</p>
+
+<figure>
+  <div class="chart" id="fig-ab"></div>
+  <figcaption><b>Figure 2. Alpha-beta on the same tree.</b> Faded, dashed branches are never searched. The window is shown for each node as it is entered. Press <b>Best move first</b> to sort every node's moves by their true value and watch the leaf count fall. With perfect ordering alpha-beta visits roughly the square root of the nodes plain negamax does, which is why <a href="#ordering">move ordering</a> matters so much.</figcaption>
+</figure>
+
+<p>Here is the whole search function from <code>ai.js</code>. Apart from the Manalath checks at the top, it is the textbook version:</p>
+<pre><code>function negamax(board, p, depth, alpha, beta, ctx) {
+  if (++ctx.nodes &gt; ctx.maxNodes || ((ctx.nodes &amp; 255) === 0 &amp;&amp; performance.now() &gt; ctx.deadline)) throw new Timeout();
+  const a = analyse(board);
+  const moves = legalMoves(a);
+  if (!moves.length) {
+    // forced pass: end conditions for p still apply
+    return a.quarts[p] ? -(WIN + depth) : a.quints[p] ? WIN + depth : 0;
+  }
+  const mine = classify(a, p, moves);
+  if (mine.wins.length) return WIN + depth;
+  if (!mine.safe.length) return -(WIN + depth);
+  if (depth === 0) return evaluate(a, p, moves, mine);
+  let best = -Infinity;
+  for (const [i, c] of ordered(a, p, mine.safe)) {
+    board[i] = c;
+    const v = -negamax(board, 3 - p, depth - 1, -beta, -alpha, ctx);
+    board[i] = 0;
+    if (v &gt; best) best = v;
+    if (v &gt; alpha) alpha = v;
+    if (alpha &gt;= beta) break;
+  }
+  return best;
+}</code></pre>
+<p>It is <em>fail-soft</em>: when it cuts off it returns the best score it found, which may lie outside the window, rather than clamping it to α or β. The board is mutated in place and restored after each move, so no positions are copied.</p>
+
+<h2 id="manalath">What Manalath adds</h2>
+<h3>A free extra ply of tactics</h3>
+<p>Before recursing, every node sorts its legal moves into three piles with <code>classify()</code>. For each move it works out what the end-of-turn check would say for the player who placed it:</p>
+<ul>
+  <li><b>Wins</b> make a quint (and no quart). If there is one, the node is decided and the search stops here.</li>
+  <li><b>Losing moves</b> leave a quart of your own colour. They are dropped, never searched.</li>
+  <li><b>Safe moves</b> are everything else. Only these are searched.</li>
+</ul>
+<p>If there are no safe moves, the node is lost. This is Manalath's zugzwang: the player who runs out of safe moves loses, even with plenty of empty cells left.</p>
+<p>So every node, leaves included, sees one move further ahead than its depth says, for the cost of a few lookups per move (see §10). It also shrinks the tree. Late in the game many placements are suicidal, and discarding them before recursion is pruning that costs nothing.</p>
+<p>One consequence is worth spelling out. <code>classify</code> checks <em>all</em> of the mover's groups, not just the one touched. If your opponent leaves you a quart, every move that doesn't deal with it loses. A move that grows it to five is a win, since a quint without a quart wins. That's why handing someone a quart only works if it is sealed, so that every extension would make an illegal group of six (see Figure 3 of the <a href="../handicap-study/">handicap study</a>).</p>
+
+<h3>Scoring wins by distance</h3>
+<p>A decided node returns <code>WIN + depth</code> or <code>−(WIN + depth)</code>, with <code>WIN = 10000</code> and <code>depth</code> the plies remaining. A win found higher in the tree has more depth remaining, so it scores higher. The search prefers the fastest win and, when losing, the slowest loss, which gives a human opponent the most chances to go wrong. Evaluation scores stay far below 10,000, so any score above <code>WIN − 100</code> means "forced".</p>
+
+<h3>Passes</h3>
+<p>When no cell accepts either colour the player must pass, and the end-of-turn check still applies to them. This is rare enough that the search just scores it and stops.</p>
+
+<h2 id="eval">The evaluation</h2>
+<p>When the depth runs out, <code>evaluate()</code> scores the position for the player to move. It adds up five hand-tuned terms:</p>
+<table>
+  <thead><tr><th>Term</th><th class="n">Weight</th><th>Reasoning</th></tr></thead>
+  <tbody>
+    <tr><td>Opponent's immediate wins</td><td class="n">−40 each</td><td>Placements that would give the opponent a quint if it were their move. These are threats you have to answer.</td></tr>
+    <tr><td>Safe moves, yours minus theirs</td><td class="n">+0.5 each</td><td>Mobility. The endgame is decided by who runs out of safe moves first.</td></tr>
+    <tr><td>Groups of 3 / 2 / 1</td><td class="n">+6 / +2 / +1</td><td>Your colour counts for you, theirs against. A three can't be grown by its owner (that makes a quart) and won't be grown by the opponent (that offers a quint), so it is a lasting threat.</td></tr>
+    <tr><td>Groups of 4 or 5</td><td class="n">0</td><td>Already decided by the one-move-ahead check.</td></tr>
+    <tr><td>Centrality</td><td class="n">+0.3 × (4 − d)</td><td>For each of your stones, <code>d</code> steps from the centre. Central stones have more room around them.</td></tr>
+  </tbody>
+</table>
+<p>The evaluation is not symmetric. The centrality term only counts the mover's stones, and the threat term only counts the opponent's wins, since the mover's own wins were already caught above. Negamax doesn't need symmetry. It only needs every leaf scored from the side to move, and it negates on the way up.</p>
+
+<figure>
+  <div class="chart" id="fig-eval"></div>
+  <figcaption><b>Figure 3. The evaluation, term by term.</b> Click an empty cell to place a stone of the selected colour. The side to move alternates as in a real game, whichever colour is placed. Cell markers show what <code>classify()</code> makes of placing the selected colour there, for the player to move: <span style="color:var(--s3)">green rings</span> win on the spot, <span style="color:var(--dead)">red crosses</span> lose on the spot, and grey dots are illegal. Switch colours to see the other half of the move list. Cells are named by row, a to i from the top, and position in the row from the left.</figcaption>
+</figure>
+
+<h2 id="ordering">Move ordering</h2>
+<p>Alpha-beta only cuts off when a good move comes early. <code>ordered()</code> gives each safe move a quick score and sorts them best first:</p>
+<ul>
+  <li><b>−distance from the centre</b>, so central moves go first.</li>
+  <li><b>+30</b> if the opponent could win by placing the same colour on the same cell. Taking it first removes that option.</li>
+  <li><b>−1</b> for placing the opponent's colour, as a tie-breaker. Your own colour is usually the more constructive choice.</li>
+</ul>
+<p>This is cheap and crude. It doesn't reuse anything from earlier iterations, such as the best move found at the previous depth. Even so, it pays for itself. On a sample of 25 early-game positions, finishing depth 2 took these median node counts:</p>
+<table>
+  <thead><tr><th>Search</th><th class="n">Nodes for depth 2</th><th class="n">Depth 3 within 50k nodes</th></tr></thead>
+  <tbody>
+    <tr><td>Alpha-beta with ordering</td><td class="n">620</td><td class="n">18 of 25</td></tr>
+    <tr><td>Alpha-beta, moves in board order</td><td class="n">1,190</td><td class="n">3 of 25</td></tr>
+    <tr><td>Plain negamax</td><td class="n">10,700</td><td class="n">0 of 25</td></tr>
+  </tbody>
+</table>
+<p class="note">Positions after 4 to 15 moves of the quiet tier, skipping any with a forced result at depth 2. You can repeat the comparison on any position in Figure 4.</p>
+
+<h2 id="budget">Deepening on a budget</h2>
+<p>The search doesn't pick a depth up front. <code>playTier()</code> uses <em>iterative deepening</em>: it searches to depth 1, then 2, then 3, keeping the result of the last depth that finished.</p>
+<ul>
+  <li>Depth 1 always runs to completion, with no node limit, so there is always a move to play.</li>
+  <li>Deeper iterations share one node budget: 3,000, 12,000, 50,000 or 150,000 nodes for difficulty tiers 4 to 7. When the budget is spent, <code>negamax</code> throws <code>Timeout</code>. The unfinished iteration is thrown away and the previous depth's move is played.</li>
+  <li>A 4-second wall-clock cap is a backstop for slow devices. Budgeting in nodes means a given difficulty plays at the same strength on a phone and a desktop.</li>
+  <li>If an iteration finds a forced win or loss, deepening stops. Looking further can't change the result.</li>
+</ul>
+<p>At the root, <code>rootSearch()</code> does what <code>negamax</code> does, but keeps every move that ties for the best score and picks one at random, so the bot doesn't play the same game twice.</p>
+
+<figure>
+  <div class="chart" id="fig-search"></div>
+  <figcaption><b>Figure 4. Watch it think.</b> <b>Think</b> runs the real tier-4 to tier-7 search on the position and lists each iteration of the deepening. <b>Play it</b> makes the chosen move. Turn off alpha-beta or ordering to see how many nodes each saves. Untick <b>Exact ties</b> to bring back the bug described in the next section. The starting position is one where it shows up.</figcaption>
+</figure>
+
+<h2 id="ties">A tie-breaking bug</h2>
+<p>Writing this doc turned up a bug in how the root collected ties. It is fixed as of engine version 2 (<code>ENGINE</code> in <code>ai.js</code>), but it is a good lesson in what alpha-beta bounds do and don't tell you. After the first root move sets α, each later move is searched with the window <code>(α, ∞)</code> from the root's side. That search only answers <em>"is this move better than α?"</em>. When the answer is no, fail-soft returns an upper bound, and nothing stops that bound from being <em>exactly</em> α. The root then compares with <code>v === best</code>, sees a tie, and adds the move to the list for the random pick, even if its true score is much lower.</p>
+<p>This happens most with forced wins, because those scores are whole numbers. Say the first root move wins by force at depth 2, so α = 10,000. For any later move, if the opponent's first reply the search tries leaves you an immediate win, that reply scores exactly −10,000 for the opponent. That reaches the child's β = −α, so the child cuts off and the root sees exactly 10,000: a "tie". It doesn't matter that another reply would have defended.</p>
+
+<div class="hero">
+  <div class="tile"><div class="l">Forced wins found</div><div class="v">66</div><div class="d">of 154 depth-2 and depth-3 root searches</div></div>
+  <div class="tile"><div class="l">Random pick doesn't win</div><div class="v">58%</div><div class="d">average over those 66 positions</div></div>
+  <div class="tile"><div class="l">Cost of the fix</div><div class="v">+14%</div><div class="d">nodes, with no false ties left</div></div>
+</div>
+
+<p class="note">Measured on positions reached by 8 to 21 moves of the quiet tier. Every tied move was re-searched with a full window to find its true score.</p>
+
+<p>The fix is a one-line change in <code>rootSearch</code>: search later moves against a window just below α, so that a move which really ties has to prove it:</p>
+<pre><code>const v = -negamax(board, 3 - p, depth - 1, -Infinity, -alpha + TIE_EPS, ctx);</code></pre>
+<p>A move whose true score is α now returns α exactly. A worse one fails low, strictly below α, and drops out of <code>ties</code>. A cheaper alternative is to drop the random tie-break once the score is a forced win, and play the first winning move found. We went with the exact window, since it also keeps the variety of the random pick.</p>
+<p>The <a href="../ai-strength-study/">strength study</a> was measured with the bug in place, so we re-rated the ladder afterwards with another 920 games. (These are engine 2 figures; §10 has the current ones.) The tiers without search came out the same within noise, as they should. The search tiers gained a lot:</p>
+<table>
+  <thead><tr><th>Difficulty</th><th>Budget</th><th class="n">Engine 1</th><th class="n">Engine 2</th><th class="n">Change</th></tr></thead>
+  <tbody>
+    <tr><td>4</td><td>3k nodes</td><td class="n">1048</td><td class="n">1104</td><td class="n">+56</td></tr>
+    <tr><td>5</td><td>12k nodes</td><td class="n">1092</td><td class="n">1221</td><td class="n">+129</td></tr>
+    <tr><td>6</td><td>50k nodes</td><td class="n">1061</td><td class="n">1288</td><td class="n">+227</td></tr>
+  </tbody>
+</table>
+<p class="note">Elo relative to uniform random play, from <code>packages/shared/src/ai-ratings.json</code>. Standard errors are about ±100 relative to the anchor, but smaller between neighbours.</p>
+<p>The gain grows with the budget. Deeper searches find more forced wins, so under the bug they also threw away more of them. That is probably why the original study found more search stopped paying above 12k nodes.</p>
+
+<h2 id="next">Where the time goes</h2>
+<p>Engine 2 spent most of its time checking group sizes. Every <code>classify</code> placed each of up to 122 moves and flood-filled the whole board to judge it, and at depth 0 <code>evaluate</code> classified the mover's moves a second time. In midgame positions it managed about 6 nodes per millisecond. The 50,000-node tier needed six seconds per move and hit the 4-second safety cap on 22 of 27 moves we timed, so its rating was really a rating for four seconds on one Mac.</p>
+<p>Engine 3 makes two changes:</p>
+<ul>
+  <li><b>One group labelling per node.</b> <code>analyse()</code> flood-fills the board once, recording each group's size and how many quarts and quints each colour has. A move's effect then follows from its neighbours: the group it makes is one stone plus the distinct neighbouring groups of that colour, and the mover's quart and quint counts change by what it absorbs and creates. Legality, classification and move ordering become a few lookups per move.</li>
+  <li><b>No second classification at the leaves.</b> <code>evaluate</code> now receives the analysis, move list and classification that <code>negamax</code> has already computed.</li>
+</ul>
+<p>The search makes exactly the same decisions as before. 1,476 root searches at depths 1 to 3 returned identical scores, moves and node counts. It now runs at about 220 nodes per millisecond, 35 times faster, so the 50,000-node tier thinks for about a quarter of a second and never meets the time cap.</p>
+<p>Because the top tier now gets its full budget, we re-rated the ladder, and with games now cheap we added a tier above it: 150,000 nodes, about 0.85 seconds per move at the median. The ratings below pool 10,000 engine-3 games, with 200 to 400 per pairing.</p>
+<table>
+  <thead><tr><th>Difficulty</th><th>Plays as</th><th class="n">Elo</th><th class="n">±</th><th class="n">First move</th></tr></thead>
+  <tbody>
+    <tr><td>2</td><td>quiet, no search</td><td class="n">814</td><td class="n">27</td><td class="n">−15</td></tr>
+    <tr><td>3</td><td>1-ply search</td><td class="n">976</td><td class="n">30</td><td class="n">+16</td></tr>
+    <tr><td>4</td><td>3k nodes</td><td class="n">1266</td><td class="n">33</td><td class="n">+52</td></tr>
+    <tr><td>5</td><td>12k nodes</td><td class="n">1364</td><td class="n">35</td><td class="n">−17</td></tr>
+    <tr><td>6</td><td>50k nodes</td><td class="n">1497</td><td class="n">37</td><td class="n">+156</td></tr>
+    <tr><td>7</td><td>150k nodes</td><td class="n">1615</td><td class="n">43</td><td class="n">+223</td></tr>
+  </tbody>
+</table>
+<p class="note">Engine 3, from <code>packages/shared/src/ai-ratings.json</code>. Elo errors are relative to the random anchor. "First move" is each difficulty's first-move advantage in Elo; a game's advantage is the mean of its two players' values. Standard errors on it are about ±20, rising to ±33 at the top.</p>
+<p>Two things came out of the re-rating besides the numbers. First, the first-move advantage is not one number. Up to difficulty 5 it is small, around 0 to 50 Elo. Once both bots reliably search three plies it jumps to about 200, so between two difficulty-7 bots the first player wins roughly three games in four. The rating fit now gives each difficulty its own first-move term. It is also a result about the game: strong Manalath may be strongly biased towards the first player, and a swap rule or other balancing may be worth a look.</p>
+<p>Second, the absolute scale is only as good as its lowest links. Every rating is chained up from random play, so noise in the easiest pairings shifts every rating above them. Two independent runs of about 5,000 games disagreed by up to 160 at the top, mostly because random play against difficulty 0.5 came out differently. Pooling both runs, which <code>rate-ai.js</code> now does whenever a game's two bots still play the same tiers, halves that risk. Gaps between neighbouring difficulties are much better determined than the absolute values.</p>
+<p>What could make it stronger still, roughly in order of effort:</p>
+<ul>
+  <li><b>Bigger budgets.</b> The 150,000-node tier finishes depth 4 in 10 of the 12 positions we sampled. Much beyond that, slow phones start hitting the 4-second cap again, so further gains have to come from searching smarter.</li>
+  <li><b>Keep the partial iteration.</b> When the budget runs out mid-iteration, the root moves already searched at the new depth are thrown away. Searching the previous best move first and keeping its result would make every budget worth a little more.</li>
+  <li><b>A transposition table.</b> Manalath has a lot of transpositions: the same stones placed in a different order give the same position. Caching scores by a Zobrist hash, and using the stored best move to order the search, is the standard next step for any alpha-beta engine.</li>
+  <li><b>Tune the evaluation.</b> The weights in the evaluation table were set by hand. With self-play games now cheap, they could be fitted instead.</li>
+</ul>
+
+</main>
+
+<script>
+// ---------- engine: a copy of packages/shared/src/{hex,game,ai}.js, with switches for the figures ----------
+const RADIUS = 4, CELLS = [], KEY = new Map();
+for (let r = -RADIUS; r <= RADIUS; r++) for (let q = Math.max(-RADIUS, -r - RADIUS); q <= Math.min(RADIUS, -r + RADIUS); q++) { KEY.set(q + ',' + r, CELLS.length); CELLS.push({ q, r, i: CELLS.length }); }
+const N = CELLS.length, MAX_GROUP = 5, WIN = 10000;
+const STEP = CELLS.map(({ q, r }) => [[1, 0], [0, 1], [1, -1], [-1, 0], [0, -1], [-1, 1]].map(([dq, dr]) => KEY.get((q + dq) + ',' + (r + dr)) ?? -1));
+const dist = i => { const { q, r } = CELLS[i]; return Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)); };
+const ROWS = []; for (let r = -RADIUS; r <= RADIUS; r++) ROWS.push(CELLS.filter(c => c.r === r).map(c => c.i));
+const cellName = i => { const row = CELLS[i].r + RADIUS; return String.fromCharCode(97 + row) + (ROWS[row].indexOf(i) + 1); };
+
+function groupAt(board, i, seen = new Uint8Array(N)) {
+  const c = board[i], cells = [i], stack = [i]; seen[i] = 1;
+  while (stack.length) { const cur = stack.pop(); for (const j of STEP[cur]) if (j !== -1 && !seen[j] && board[j] === c) { seen[j] = 1; cells.push(j); stack.push(j); } }
+  return cells;
+}
+function allGroups(board) {
+  const seen = new Uint8Array(N), out = [];
+  for (let i = 0; i < N; i++) if (board[i] && !seen[i]) { const cells = groupAt(board, i, seen); out.push({ color: board[i], cells, size: cells.length }); }
+  return out;
+}
+function sizeIfPlaced(board, i, c) { board[i] = c; const n = groupAt(board, i).length; board[i] = 0; return n; }
+function checkEnd(board, p) {
+  const gs = allGroups(board).filter(g => g.color === p);
+  return gs.some(g => g.size === 4) ? 'lost' : gs.some(g => g.size === 5) ? 'won' : null;
+}
+// Placing a stone and checking the whole board, as game.js does. Only Figure 3's cell markers use it.
+function placeOutcome(board, i, c, p) { board[i] = c; const r = checkEnd(board, p); board[i] = 0; return r; }
+
+// From here on, the search as in ai.js (engine 3): one group labelling per node, and each move's
+// result read off the groups around its cell.
+function analyse(board) {
+  const gid = new Int16Array(N).fill(-1), size = [], color = [], quarts = [0, 0, 0], quints = [0, 0, 0], stack = [];
+  for (let i = 0; i < N; i++) {
+    if (!board[i] || gid[i] !== -1) continue;
+    const g = size.length, c = board[i]; let n = 0;
+    gid[i] = g; stack.push(i);
+    while (stack.length) { const cur = stack.pop(); n++; for (const j of STEP[cur]) if (j !== -1 && gid[j] === -1 && board[j] === c) { gid[j] = g; stack.push(j); } }
+    size.push(n); color.push(c);
+    if (n === 4) quarts[c]++; else if (n === 5) quints[c]++;
+  }
+  return { board, gid, size, color, quarts, quints };
+}
+// Moves are [cell, colour, size of the group it makes, quarts it absorbs].
+function legalMoves(a) {
+  const { board, gid, size } = a, out = [], seen = [];
+  for (let i = 0; i < N; i++) if (!board[i]) for (let c = 1; c <= 2; c++) {
+    let s = 1, q = 0; seen.length = 0;
+    for (const j of STEP[i]) if (j !== -1 && board[j] === c && !seen.includes(gid[j])) { seen.push(gid[j]); s += size[gid[j]]; if (size[gid[j]] === 4) q++; }
+    if (s <= MAX_GROUP) out.push([i, c, s, q]);
+  }
+  return out;
+}
+function outcome(a, m, p) {
+  let q4 = a.quarts[p], q5 = a.quints[p];
+  if (m[1] === p) { q4 += (m[2] === 4) - m[3]; q5 += m[2] === 5; }
+  return q4 ? 'lost' : q5 ? 'won' : null;
+}
+function classify(a, p, moves) {
+  const wins = [], safe = [], loses = [];
+  for (const m of moves) { const r = outcome(a, m, p); (r === 'won' ? wins : r === null ? safe : loses).push(m); }
+  return { wins, safe, loses };
+}
+// Same arithmetic as ai.js evaluate(), but also returns the terms for Figure 3.
+function evaluate(a, p, moves, mine, terms) {
+  const o = 3 - p, theirs = classify(a, o, moves);
+  const t = { oppWins: theirs.wins.length, mySafe: mine.safe.length, oppSafe: theirs.safe.length, g: { 1: [0, 0, 0, 0], 2: [0, 0, 0, 0] }, centre: 0 };
+  let score = -theirs.wins.length * 40 + (mine.safe.length - theirs.safe.length) * 0.5;
+  for (let g = 0; g < a.size.length; g++) {
+    const n = a.size[g], v = n === 3 ? 6 : n === 2 ? 2 : n === 1 ? 1 : 0;
+    score += a.color[g] === p ? v : -v;
+    if (n <= 3) t.g[a.color[g]][n]++;
+  }
+  for (let i = 0; i < N; i++) if (a.board[i] === p) { score += 0.3 * (4 - dist(i)); t.centre += 0.3 * (4 - dist(i)); }
+  if (terms) Object.assign(terms, t);
+  return score;
+}
+// What negamax does at depth 0, for Figure 3.
+function evaluatePosition(board, p, terms) {
+  const a = analyse(board), moves = legalMoves(a), mine = classify(a, p, moves);
+  if (mine.wins.length) return WIN - 10;
+  if (!mine.safe.length) return -(WIN - 10);
+  return evaluate(a, p, moves, mine, terms);
+}
+function ordered(a, p, safe) {
+  const o = 3 - p;
+  return safe.map(m => {
+    let s = -dist(m[0]);
+    if (outcome(a, m, o) === 'won') s += 30;
+    if (m[1] === o) s -= 1;
+    return [s, m];
+  }).sort((x, y) => y[0] - x[0]).map(x => x[1]);
+}
+const TIMEOUT = { timeout: true };
+function negamax(board, p, depth, alpha, beta, ctx) {
+  if (++ctx.nodes > ctx.maxNodes || ((ctx.nodes & 255) === 0 && performance.now() > ctx.deadline)) throw TIMEOUT;
+  const a = analyse(board), moves = legalMoves(a);
+  if (!moves.length) return a.quarts[p] ? -(WIN + depth) : a.quints[p] ? WIN + depth : 0;
+  const mine = classify(a, p, moves);
+  if (mine.wins.length) return WIN + depth;
+  if (!mine.safe.length) return -(WIN + depth);
+  if (depth === 0) return evaluate(a, p, moves, mine);
+  let best = -Infinity;
+  for (const [i, c] of ctx.order ? ordered(a, p, mine.safe) : mine.safe) {
+    board[i] = c;
+    const v = -negamax(board, 3 - p, depth - 1, -beta, -alpha, ctx);
+    board[i] = 0;
+    if (v > best) best = v;
+    if (v > alpha) alpha = v;
+    if (ctx.ab && alpha >= beta) break;
+  }
+  return best;
+}
+// rootSearch() from ai.js. Turning ctx.exact off brings back engine 1's bug, where a cut-off at exactly alpha counted as a tie.
+const EPS = 1e-6;
+function rootSearch(board, p, depth, ctx) {
+  const a = analyse(board), moves = legalMoves(a);
+  if (!moves.length) return { move: null, score: 0, ties: [] };
+  const { wins, safe } = classify(a, p, moves);
+  if (wins.length) return { move: wins[0], score: WIN, ties: [wins[0]], immediate: true };
+  if (!safe.length) return { move: moves[0], score: -WIN, ties: [moves[0]], lost: true };
+  let best = -Infinity, alpha = -Infinity, ties = [];
+  for (const m of ctx.order ? ordered(a, p, safe) : safe) {
+    board[m[0]] = m[1];
+    const v = -negamax(board, 3 - p, depth - 1, -Infinity, ctx.exact ? -alpha + EPS : -alpha, ctx);
+    board[m[0]] = 0;
+    if (v > best) { best = v; ties = [m]; } else if (v === best) ties.push(m);
+    if (v > alpha) alpha = v;
+  }
+  return { move: ties[Math.floor(ctx.rand() * ties.length)], score: best, ties };
+}
+// playTier() from ai.js for a search tier, keeping a row per iteration.
+function think(boardIn, p, { budget, ab = true, order = true, exact = false, maxDepth = 8, rand = Math.random }) {
+  const board = Int8Array.from(boardIn), rows = [];
+  let t = performance.now();
+  const ctx = { nodes: 0, maxNodes: budget, deadline: t + 4000, ab, order, exact, rand };
+  const c1 = { ...ctx, maxNodes: Infinity };
+  let result = rootSearch(board, p, 1, c1);
+  rows.push({ depth: 1, nodes: c1.nodes, ms: performance.now() - t, ...result });
+  if (result.immediate || result.lost) return { result, rows, depth: 1 };
+  let depth = 1;
+  for (let d = 2; d <= maxDepth; d++) {
+    const before = ctx.nodes; t = performance.now();
+    try {
+      const r = rootSearch(board, p, d, ctx);
+      result = r; depth = d;
+      rows.push({ depth: d, nodes: ctx.nodes - before, ms: performance.now() - t, ...r });
+      if (Math.abs(r.score) >= WIN - 100) break;
+    } catch (e) {
+      if (e !== TIMEOUT) throw e;
+      rows.push({ depth: d, nodes: Math.min(ctx.nodes, budget) - before, ms: performance.now() - t, aborted: true });
+      break;
+    }
+  }
+  return { result, rows, depth };
+}
+// Full-window value of one root move, for checking which ties are real.
+function exactValue(board, p, m, depth, cap) {
+  const ctx = { nodes: 0, maxNodes: cap, deadline: Infinity, ab: true, order: true };
+  board[m[0]] = m[1];
+  try { return -negamax(board, 3 - p, depth - 1, -Infinity, Infinity, ctx); }
+  catch (e) { if (e !== TIMEOUT) throw e; return null; }
+  finally { board[m[0]] = 0; }
+}
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+// A position reached by `plies` moves of the "quiet" tier that never ends the game.
+function randomHistory(plies, rand) {
+  for (let tries = 0; tries < 50; tries++) {
+    const board = new Int8Array(N), hist = []; let p = 1, ok = true;
+    for (let k = 0; k < plies && ok; k++) {
+      const a0 = analyse(board), { safe } = classify(a0, p, legalMoves(a0));
+      const quiet = safe.filter(([i, c]) => { board[i] = c; const a = analyse(board); const bad = legalMoves(a).some(m => outcome(a, m, 3 - p) === 'won'); board[i] = 0; return !bad; });
+      const pool = quiet.length ? quiet : safe;
+      if (!pool.length) { ok = false; break; }
+      const m = pool[Math.floor(rand() * pool.length)];
+      board[m[0]] = m[1]; hist.push([m[0], m[1]]); p = 3 - p;
+    }
+    if (ok) return hist;
+  }
+  return [];
+}
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const SQ3 = Math.sqrt(3);
+const fmt = v => v === Infinity ? '+∞' : v === -Infinity ? '−∞' : v > 0 ? '+' + v : v < 0 ? '−' + (-v) : '0';
+const fmtScore = s => s >= WIN - 100 ? 'forced win' : s <= -(WIN - 100) ? 'forced loss' : (s > 0 ? '+' : s < 0 ? '−' : '') + Math.abs(s).toFixed(1);
+const fmtMove = m => m ? `${cellName(m[0])} ${m[1] === 1 ? '○' : '●'}` : '—';
+const NAME = { 1: 'White', 2: 'Black' };
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+
+// ---------- Figures 1 and 2: toy tree ----------
+function treeWidget(el, { ab: abInit, abToggle, title, sub }) {
+  const SPEC = [[[3, -2], [5, 1], [-4, 6]], [[-1, 4], [7, 2], [0, -3]], [[2, 8], [-5, -6], [1, 3]]];
+  let spec = SPEC, view = 'nega', ab = abInit, root, gen, cur, msg, leaves, nLeaves, finished, timer = null;
+  const sign = d => d % 2 ? -1 : 1;
+  const who = d => d % 2 ? 'Black' : 'White';
+  // value "for the mover at depth d" shown in the current view
+  const shown = (v, d) => view === 'nega' ? v : sign(d) * v;
+  const sc = (v, d) => view === 'nega' ? `<b>${fmt(v)}</b> for ${who(d)}` : `<b>${fmt(sign(d) * v)}</b> for White`;
+
+  function build() {
+    let x = 0;
+    const mk = (s, d, parent) => {
+      const n = { d, parent, kids: [], state: 'idle', val: null, best: null, alpha: null, beta: null };
+      if (typeof s === 'number') { n.leaf = s; n.x = x++; }
+      else { n.kids = s.map(c => mk(c, d + 1, n)); n.x = (n.kids[0].x + n.kids.at(-1).x) / 2; }
+      return n;
+    };
+    root = mk(spec, 0, null); nLeaves = x;
+    gen = search(root, -Infinity, Infinity);
+    cur = null; leaves = 0; finished = false;
+    msg = () => `Press <b>Step</b> to start at the root, where White is to move.`;
+  }
+  const prune = n => { n.state = 'pruned'; n.kids.forEach(prune); };
+  function windowText(n) {
+    if (!ab) return '';
+    if (view === 'nega') return ` Window for ${who(n.d)}: α = ${fmt(n.alpha)}, β = ${fmt(n.beta)}.`;
+    const [lo, hi] = n.d % 2 ? [-n.beta, -n.alpha] : [n.alpha, n.beta];
+    return ` White's score only matters here if it lands between ${fmt(lo)} and ${fmt(hi)}.`;
+  }
+  function* search(n, alpha, beta) {
+    n.state = 'active'; n.alpha = alpha; n.beta = beta; cur = n;
+    if (n.leaf !== undefined) {
+      n.val = sign(n.d) * n.leaf; n.state = 'done'; leaves++;
+      msg = () => view === 'nega'
+        ? `Leaf, Black to move. The evaluation scores it ${sc(n.val, n.d)}.`
+        : `Leaf. The evaluation scores it <b>${fmt(n.leaf)}</b> for White.`;
+      yield; return n.val;
+    }
+    msg = () => (view === 'nega'
+      ? `${who(n.d)} to move. Try each move and keep the best, negating each child's score.`
+      : `${who(n.d)} to move, looking for the ${n.d % 2 ? 'lowest' : 'highest'} score for White.`) + windowText(n);
+    yield;
+    let best = -Infinity;
+    for (let k = 0; k < n.kids.length; k++) {
+      const c = n.kids[k];
+      const v = -(yield* search(c, -beta, -alpha));
+      cur = n;
+      if (v > best) { best = v; n.best = c; }
+      n.val = best;
+      if (v > alpha) alpha = v;
+      n.alpha = alpha;
+      const rest = n.kids.slice(k + 1), cut = ab && alpha >= beta && rest.length > 0, last = k === n.kids.length - 1 || cut;
+      const bestNow = best;
+      if (cut) rest.forEach(prune);
+      if (last) n.state = 'done';
+      msg = () => {
+        let s = view === 'nega'
+          ? `That move is worth ${sc(v, n.d)}, the negation of ${sc(-v, c.d)}. Best so far: <b>${fmt(bestNow)}</b>.`
+          : `That move gives White <b>${fmt(sign(n.d) * v)}</b>. ${who(n.d)}'s best so far: <b>${fmt(sign(n.d) * bestNow)}</b>.`;
+        if (cut) s += view === 'nega'
+          ? ` <b>Cut-off:</b> ${fmt(bestNow)} ≥ β = ${fmt(beta)}, so ${who(n.d - 1)} already has something better elsewhere. Skipping ${plural(rest.length, 'move')}.`
+          : ` <b>Cut-off:</b> ${who(n.d - 1)} already has a better option elsewhere, so ${who(n.d)}'s other ${plural(rest.length, 'move')} can't matter.`;
+        if (last && n === root) s += ` <b>Done.</b> The root is worth ${sc(bestNow, 0)}. Leaves evaluated: <b>${leaves} of ${nLeaves}</b>.`;
+        else if (last) s += ` This node is done.`;
+        return s;
+      };
+      yield;
+      if (cut) break;
+    }
+    return best;
+  }
+  function step() {
+    if (finished) return;
+    if (gen.next().done) finished = true;
+    if (root.state === 'done') { finished = true; cur = null; stop(); }
+    render();
+  }
+  function stop() { clearInterval(timer); timer = null; }
+  function render() {
+    const W = 640, H = 262, mx = 22, ys = [26, 94, 162, 230];
+    const X = x => mx + x * (W - 2 * mx) / (nLeaves - 1);
+    let edges = '', nodes = '';
+    const walk = n => {
+      for (const c of n.kids) {
+        const hot = n.best === c && (n.state === 'done' || n.state === 'active') && c.state === 'done';
+        edges += `<line x1="${X(n.x)}" y1="${ys[n.d]}" x2="${X(c.x)}" y2="${ys[c.d]}" stroke="${hot ? 'var(--s1)' : 'var(--axis)'}" stroke-width="${hot ? 3 : 1.5}" ${c.state === 'pruned' ? 'stroke-dasharray="3 4" opacity=".45"' : ''}/>`;
+        walk(c);
+      }
+      const r = n.leaf !== undefined ? 12 : 15, black = n.d % 2 === 1;
+      const val = n.state === 'idle' || n.state === 'pruned'
+        ? (n.leaf !== undefined ? shown(sign(n.d) * n.leaf, n.d) : null) : n.val;
+      const faint = n.state === 'idle' || n.state === 'pruned';
+      const isCur = n === cur;
+      nodes += `<g opacity="${n.state === 'pruned' ? .35 : 1}">`;
+      if (isCur) nodes += `<circle cx="${X(n.x)}" cy="${ys[n.d]}" r="${r + 5}" fill="none" stroke="var(--s2)" stroke-width="3"/>`;
+      nodes += `<circle cx="${X(n.x)}" cy="${ys[n.d]}" r="${r}" fill="${black ? 'var(--p2)' : 'var(--p1)'}" stroke="var(--ink)" stroke-opacity=".45" stroke-width="1"/>`;
+      if (val !== null && val !== -Infinity) {
+        const v = (n.leaf !== undefined && faint) ? val : shown(val, n.d);
+        nodes += `<text x="${X(n.x)}" y="${ys[n.d] + 4.5}" text-anchor="middle" font-size="${r > 12 ? 13 : 12}" font-weight="${faint ? 400 : 600}" fill="${black ? 'var(--p1)' : 'var(--p2)'}" opacity="${faint ? .55 : 1}" style="font-variant-numeric:tabular-nums">${fmt(v)}</text>`;
+      }
+      nodes += '</g>';
+    };
+    walk(root);
+    el.querySelector('.tree-wrap').innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Game tree">${edges}${nodes}</svg>`;
+    el.querySelector('.status').innerHTML = msg();
+    el.querySelector('[data-a=step]').disabled = finished;
+    el.querySelector('[data-a=play]').disabled = finished;
+    el.querySelector('[data-a=play]').textContent = timer ? 'Pause' : 'Play';
+    el.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view));
+  }
+  // true negamax value of a spec subtree, for the mover at depth d
+  const value = (s, d) => typeof s === 'number' ? sign(d) * s : Math.max(...s.map(c => -value(c, d + 1)));
+  const sortBest = (s, d) => typeof s === 'number' ? s : s.map(c => sortBest(c, d + 1)).sort((a, b) => value(a, d + 1) - value(b, d + 1));
+  const randomSpec = () => [0, 1, 2].map(() => [0, 1, 2].map(() => [0, 1].map(() => Math.floor(Math.random() * 19) - 9)));
+
+  el.innerHTML = `<div class="chart-title">${title}</div><div class="chart-sub">${sub}</div>
+    <div class="ctrl">
+      <button class="primary" data-a="step">Step</button><button data-a="play">Play</button><button data-a="reset">Reset</button>
+      <span class="grow"></span>
+      <span class="seg"><button data-view="nega">Negamax view</button><button data-view="mini">Minimax view</button></span>
+    </div>
+    <div class="tree-wrap"></div>
+    <div class="status" aria-live="polite"></div>
+    <div class="ctrl" style="margin-top:8px">
+      <button data-a="new">New numbers</button><button data-a="sort">Best move first</button>
+      ${abToggle ? '<label class="chk"><input type="checkbox" data-a="ab"' + (ab ? ' checked' : '') + '> Alpha-beta</label>' : ''}
+      <span class="grow"></span>
+      <span class="legend" style="margin:0"><span style="--c:var(--p1);--b:var(--ink-2)">White to move</span><span style="--c:var(--p2);--b:var(--p2)">Black to move</span></span>
+    </div>`;
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.view) { view = b.dataset.view; render(); return; }
+    const a = b.dataset.a;
+    if (a === 'step') { stop(); step(); }
+    else if (a === 'play') { if (timer) stop(); else { timer = setInterval(step, 420); step(); } render(); }
+    else if (a === 'reset') { stop(); build(); render(); }
+    else if (a === 'new') { stop(); spec = randomSpec(); build(); render(); }
+    else if (a === 'sort') { stop(); spec = sortBest(spec, 0); build(); render(); }
+  });
+  el.addEventListener('change', e => { if (e.target.dataset.a === 'ab') { stop(); ab = e.target.checked; build(); render(); } });
+  build(); render();
+}
+
+treeWidget($('#fig-nega'), { ab: false, abToggle: false, title: 'Negamax, step by step', sub: 'Three moves deep; leaves are static scores' });
+treeWidget($('#fig-ab'), { ab: true, abToggle: true, title: 'Negamax with alpha-beta pruning', sub: 'Same tree; dashed branches are skipped' });
+
+// ---------- Figures 3 and 4: board labs ----------
+function drawBoard(b, { marks = {}, rings = {}, ghost = null, last = -1, open = false }) {
+  const s = 100 / 17, cx = 50, cy = 50;
+  let out = `<svg viewBox="-6 0 106 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Manalath board">`;
+  ROWS.forEach((row, k) => { const c = CELLS[row[0]], y = cy + s * 1.5 * c.r, x = cx + s * SQ3 * (c.q + c.r / 2) - s * 1.35; out += `<text x="${x}" y="${y + 1.1}" text-anchor="end" font-size="3.2" fill="var(--muted)">${String.fromCharCode(97 + k)}</text>`; });
+  for (const c of CELLS) {
+    const x = cx + s * SQ3 * (c.q + c.r / 2), y = cy + s * 1.5 * c.r, i = c.i;
+    const pts = []; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k - 30); pts.push((x + s * .96 * Math.cos(a)).toFixed(2) + ',' + (y + s * .96 * Math.sin(a)).toFixed(2)); }
+    out += `<polygon class="cell${open && !b[i] ? ' open' : ''}" data-i="${i}" points="${pts.join(' ')}" fill="var(--cell)" stroke="var(--cell-stroke)" stroke-width=".6"><title>${cellName(i)}</title></polygon>`;
+    const stone = b[i] || (ghost && ghost[0] === i ? ghost[1] : 0);
+    if (stone) out += `<circle cx="${x}" cy="${y}" r="${s * .66}" fill="${stone === 1 ? 'var(--p1)' : 'var(--p2)'}" stroke="var(--ink)" stroke-width=".5" stroke-opacity=".5" opacity="${b[i] ? 1 : .5}" pointer-events="none"/>`;
+    if (i === last) out += `<circle cx="${x}" cy="${y}" r="${s * .16}" fill="${b[i] === 1 ? 'var(--p2)' : 'var(--p1)'}" pointer-events="none"/>`;
+    const m = marks[i];
+    if (m === 'win') out += `<circle cx="${x}" cy="${y}" r="${s * .38}" fill="none" stroke="var(--s3)" stroke-width="1.1" pointer-events="none"/>`;
+    else if (m === 'lose') { const d = s * .28; out += `<path d="M${x - d},${y - d}L${x + d},${y + d}M${x + d},${y - d}L${x - d},${y + d}" stroke="var(--dead)" stroke-width=".9" stroke-linecap="round" pointer-events="none"/>`; }
+    else if (m === 'dead') out += `<circle cx="${x}" cy="${y}" r="${s * .14}" fill="var(--muted)" pointer-events="none"/>`;
+    const r = rings[i];
+    if (r) out += `<circle cx="${x}" cy="${y}" r="${s * .82}" fill="none" stroke="${r === 'fake' ? 'var(--s2)' : 'var(--s1)'}" stroke-width="${r === 'pick' ? 1.6 : 1}" ${r === 'fake' ? 'stroke-dasharray="1.4 1.2"' : ''} pointer-events="none"/>`;
+  }
+  return out + '</svg>';
+}
+
+function boardLab(el, { seed, plies, title, sub, panel }) {
+  const lab = { hist: randomHistory(plies, mulberry(seed)), colour: 1 };
+  lab.board = () => { const b = new Int8Array(N); lab.hist.forEach(m => b[m[0]] = m[1]); return b; };
+  lab.toMove = () => lab.hist.length % 2 ? 2 : 1;
+  lab.over = () => {
+    if (!lab.hist.length) return null;
+    const placer = (lab.hist.length - 1) % 2 ? 2 : 1, r = checkEnd(lab.board(), placer);
+    return r && { placer, r };
+  };
+  el.innerHTML = `<div class="chart-title">${title}</div><div class="chart-sub">${sub}</div>
+    <div class="ctrl">
+      <span class="seg"><button data-c="1">Place ○</button><button data-c="2">Place ●</button></span>
+      <button data-a="undo">Undo</button><button data-a="random">Random position</button><button data-a="clear">Clear</button>
+    </div>
+    <div class="lab"><div><div class="turn"></div><div class="board"></div></div><div class="panel"></div></div>`;
+  lab.render = extra => {
+    const b = lab.board(), over = lab.over(), p = lab.toMove();
+    el.querySelector('.turn').innerHTML = over
+      ? `<span class="over">${NAME[over.placer]} ${over.r === 'won' ? 'made a quint and wins' : 'made a quart and loses'}.</span> Undo to go back.`
+      : `<b>${NAME[p]}</b> to move · ${plural(lab.hist.length, 'stone')} on the board`;
+    el.querySelector('.board').innerHTML = drawBoard(b, { ...extra, last: lab.hist.length ? lab.hist.at(-1)[0] : -1, open: !over });
+    el.querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', +x.dataset.c === lab.colour));
+    el.querySelector('[data-a=undo]').disabled = !lab.hist.length;
+  };
+  el.addEventListener('click', e => {
+    const cell = e.target.closest('.cell.open');
+    if (cell) {
+      const i = +cell.dataset.i, b = lab.board();
+      if (sizeIfPlaced(b, i, lab.colour) > MAX_GROUP) { flash(el, `${NAME[lab.colour]} can't go on ${cellName(i)}: it would make a group of six or more.`); return; }
+      lab.hist.push([i, lab.colour]); panel.update(lab); return;
+    }
+    const btn = e.target.closest('button'); if (!btn) return;
+    if (btn.dataset.c) { lab.colour = +btn.dataset.c; if (panel.recolour) panel.update(lab); else lab.render(panel.overlay()); }
+    else if (btn.dataset.a === 'undo') { lab.hist.pop(); panel.update(lab); }
+    else if (btn.dataset.a === 'random') { lab.hist = randomHistory(10 + Math.floor(Math.random() * 10), Math.random); panel.update(lab); }
+    else if (btn.dataset.a === 'clear') { lab.hist = []; panel.update(lab); }
+  });
+  panel.init(el.querySelector('.panel'), lab);
+  panel.update(lab);
+}
+function flash(el, text) { const t = el.querySelector('.turn'); t.innerHTML = `<span style="color:var(--dead)">${text}</span>`; }
+
+// Figure 3: evaluation breakdown
+boardLab($('#fig-eval'), {
+  seed: 100, plies: 15, title: 'What the evaluation sees', sub: 'Scored for the player to move, as at a leaf of the search',
+  panel: {
+    recolour: true,
+    init(el) { this.el = el; },
+    update(lab) {
+      const b = lab.board(), p = lab.toMove(), o = 3 - p, over = lab.over();
+      const marks = {};
+      if (!over) for (let i = 0; i < N; i++) if (!b[i]) {
+        const c = lab.colour, r = sizeIfPlaced(b, i, c) > MAX_GROUP ? 'dead' : placeOutcome(b, i, c, p);
+        marks[i] = r === 'dead' ? 'dead' : r === 'won' ? 'win' : r === 'lost' ? 'lose' : null;
+      }
+      lab.render({ marks });
+      if (over) { this.el.innerHTML = `<p class="note">The game is over, so there's nothing to evaluate.</p>`; return; }
+      const t = {}, v = evaluatePosition(b, p, t);
+      const legend = `<div class="legend" style="margin:0 0 8px"><span class="ring" style="--c:var(--s3)">wins now</span><span class="x">loses now</span><span style="--c:var(--muted)">illegal</span></div>`;
+      if (Math.abs(v) >= WIN - 100) {
+        this.el.innerHTML = legend + `<p><b>${v > 0 ? `${NAME[p]} has an immediate win` : `${NAME[p]} has no safe move`}</b>, so the score is ${fmt(v)} and none of the terms below are computed. Inside the search, <code>negamax</code> catches this before calling <code>evaluate</code>.</p>`;
+        return;
+      }
+      const g = t.g, row = (label, count, w, pts, cls = '') => `<tr class="${cls}"><td>${label}</td><td class="n">${count}</td><td class="n">${w}</td><td class="n">${fmtScore(pts)}</td></tr>`;
+      const gp = g[p][3] * 6 + g[p][2] * 2 + g[p][1], go = g[o][3] * 6 + g[o][2] * 2 + g[o][1];
+      this.el.innerHTML = legend + `<table><thead><tr><th>Term</th><th class="n">Count</th><th class="n">×</th><th class="n">Pts</th></tr></thead><tbody>
+        ${row(`${NAME[o]}'s immediate wins`, t.oppWins, '−40', -40 * t.oppWins)}
+        ${row(`Safe moves, ${NAME[p][0]} − ${NAME[o][0]}`, `${t.mySafe} − ${t.oppSafe}`, '0.5', .5 * (t.mySafe - t.oppSafe))}
+        ${row(`${NAME[p]} groups of 3/2/1`, `${g[p][3]}/${g[p][2]}/${g[p][1]}`, '6/2/1', gp)}
+        ${row(`${NAME[o]} groups of 3/2/1`, `${g[o][3]}/${g[o][2]}/${g[o][1]}`, '6/2/1', -go)}
+        ${row(`Centrality of ${NAME[p]}'s stones`, '', '0.3', t.centre)}
+        ${row(`Score for ${NAME[p]}`, '', '', v, 'total')}
+      </tbody></table>
+      <p class="note" style="margin:0">Place a stone and the evaluation switches sides. The same board isn't worth the negation to the other player, because the terms aren't symmetric.</p>`;
+    },
+  },
+});
+
+// Figure 4: the search
+boardLab($('#fig-search'), {
+  seed: 2, plies: 14, title: 'The real search, iteration by iteration', sub: 'Iterative deepening under a node budget, as in playTier()',
+  panel: {
+    init(el, lab) {
+      this.el = el; this.lab = lab; this.res = null;
+      el.innerHTML = `<div class="ctrl" style="margin:0 0 8px">
+          <select data-k="budget" aria-label="Node budget"><option value="3000">Tier 4 · 3k nodes</option><option value="12000" selected>Tier 5 · 12k nodes</option><option value="50000">Tier 6 · 50k nodes</option><option value="150000">Tier 7 · 150k nodes</option></select>
+          <button class="primary" data-k="think">Think</button><button data-k="play" disabled>Play it</button>
+        </div>
+        <div class="ctrl" style="margin:0 0 4px">
+          <label class="chk"><input type="checkbox" data-k="ab" checked> Alpha-beta</label>
+          <label class="chk"><input type="checkbox" data-k="order" checked> Ordering</label>
+          <label class="chk"><input type="checkbox" data-k="exact" checked> Exact ties</label>
+        </div>
+        <div class="out"></div>`;
+      el.addEventListener('click', e => {
+        const k = e.target.closest('button')?.dataset.k;
+        if (k === 'think') this.think();
+        if (k === 'play' && this.res?.result.move) { lab.hist.push(this.res.result.move); this.update(lab); }
+      });
+      el.addEventListener('change', () => { if (this.res) this.think(); });
+    },
+    overlay() { return this.extra || {}; },
+    update(lab) {
+      this.res = null; this.extra = {};
+      this.el.querySelector('[data-k=play]').disabled = true;
+      const over = lab.over();
+      this.el.querySelector('[data-k=think]').disabled = !!over;
+      this.el.querySelector('.out').innerHTML = over ? '' : `<p class="note">Press <b>Think</b> to search this position for ${NAME[lab.toMove()]}.</p>`;
+      lab.render({});
+    },
+    think() {
+      const el = this.el, lab = this.lab, q = k => el.querySelector(`[data-k=${k}]`);
+      const opts = { budget: +q('budget').value, ab: q('ab').checked, order: q('order').checked, exact: q('exact').checked };
+      el.querySelector('.out').innerHTML = `<p class="note">Thinking…</p>`;
+      q('think').disabled = true;
+      setTimeout(() => {
+        const b = lab.board(), p = lab.toMove();
+        const res = think(b, p, opts), { result, rows, depth } = res;
+        this.res = res;
+        let rings = {}, tail = '';
+        if (result.immediate) tail = `There's a win on the board, so no search is needed.`;
+        else if (result.lost) tail = `Every move loses on the spot, so the bot plays any legal move.`;
+        else if (!result.move) tail = `No legal moves: ${NAME[p]} must pass.`;
+        else {
+          const aborted = rows.at(-1).aborted;
+          tail = `Kept depth ${depth}${aborted ? `; depth ${depth + 1} ran out of budget and was thrown away` : Math.abs(result.score) >= WIN - 100 ? ', where it found a forced result' : ''}. `;
+          if (result.ties.length > 1) {
+            const vals = result.ties.map(m => exactValue(b, p, m, depth, 20000));
+            const real = result.ties.filter((m, k) => vals[k] !== null && Math.abs(vals[k] - result.score) < 1e-4);
+            const fake = result.ties.filter((m, k) => vals[k] !== null && Math.abs(vals[k] - result.score) >= 1e-4);
+            result.ties.forEach((m, k) => rings[m[0]] = vals[k] === null ? 'real' : fake.includes(m) ? 'fake' : 'real');
+            tail += `<b>${result.ties.length} moves</b> tie at the top${result.score >= WIN - 100 ? ', all apparently forced wins' : ` with ${fmtScore(result.score)}`}. A full-window search of each shows `
+              + (fake.length ? `only <b>${real.length}</b> really score${real.length === 1 ? 's' : ''} that. The other ${fake.length} (dashed orange) only looked tied because their search was cut off at exactly that bound.` : `they all really do.`);
+            if (fake.includes(result.move)) tail += ` <b>The random pick landed on one of the fake ties.</b>`;
+          } else tail += `No other move scores as well.`;
+          rings[result.move[0]] = rings[result.move[0]] === 'fake' ? 'fake' : 'pick';
+        }
+        this.extra = { rings, ghost: result.move };
+        const total = rows.reduce((s, r) => s + (r.depth > 1 ? r.nodes : 0), 0);
+        el.querySelector('.out').innerHTML = `<table><thead><tr><th class="n">Depth</th><th class="n">Nodes</th><th>Best</th><th class="n">Score</th><th class="n">ms</th></tr></thead><tbody>
+          ${rows.map(r => r.aborted
+            ? `<tr class="muted"><td class="n">${r.depth}</td><td class="n">${r.nodes.toLocaleString()}</td><td colspan="2">out of budget</td><td class="n">${Math.round(r.ms)}</td></tr>`
+            : `<tr><td class="n">${r.depth}</td><td class="n">${r.nodes.toLocaleString()}</td><td>${fmtMove(r.move)}</td><td class="n">${fmtScore(r.score)}</td><td class="n">${Math.round(r.ms)}</td></tr>`).join('')}
+          </tbody></table>
+          <p style="margin:0 0 6px">Chose <b>${fmtMove(result.move)}</b>. ${tail}</p>
+          <p class="note" style="margin:0">Depth 1 runs outside the budget. Deeper iterations used ${total.toLocaleString()} of ${opts.budget.toLocaleString()} nodes.</p>
+          <div class="legend" style="margin:8px 0 0"><span class="ring" style="--c:var(--s1)">chosen or real tie</span><span class="ring" style="--c:var(--s2);--style:dashed">false tie</span></div>`;
+        q('think').disabled = false;
+        q('play').disabled = !result.move;
+        lab.render({ rings, ghost: result.move });
+      }, 30);
+    },
+  },
+});
+</script>
+</body>
+</html>

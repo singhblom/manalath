@@ -67,6 +67,7 @@ tr.band td:first-child { box-shadow: inset 3px 0 0 var(--s1); }
 .tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
 .tile .d { color: var(--muted); font-size: 13px; }
 .tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); font-size: 13px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 10; white-space: nowrap; }
+.callout { border-left: 3px solid var(--s1); padding: 4px 16px; margin: 20px 0; color: var(--ink-2); }
 .note { color: var(--muted); font-size: 14px; }
 @media (max-width: 520px) { h1 { font-size: 32px; } body { font-size: 16px; } th, td { padding: 6px 5px; } table { font-size: 14px; } }
 </style>
@@ -79,6 +80,8 @@ tr.band td:first-child { box-shadow: inset 3px 0 0 var(--s1); }
   <p class="sub">A short memo on rating the AI's difficulty ladder in Elo, with a uniformly random player fixed at 0, and on where the new strength slider should start and stop.</p>
   <p class="meta">Martin Singh-Blom with Claude · September 2026 · 920 self-play games</p>
 </header>
+
+<p class="callout"><b>Update, engine 3.</b> These ratings were measured with a tie-breaking bug that made the search tiers throw away forced wins, and with a search slow enough that the top tier ran into its 4-second time cap (see <a href="../negamax/#next">the negamax explainer</a>). After both fixes, a new 150,000-node tier, and 10,000 games, the quiet tier rates 814 and difficulties 4 to 7 rate 1266, 1364, 1497 and 1615. More search now helps all the way up, and the slider runs from 800 to 1600. The numbers below are the original run; <code>packages/shared/src/ai-ratings.json</code> has the current ones.</p>
 
 <h2 id="summary">Summary</h2>
 <p>We rated the AI at thirteen points along its difficulty scale. Most of the strength comes from not blundering. Taking a win when one is on the board, never completing your own quart and never leaving the opponent an immediate quint is together worth about 750 Elo over random play. Searching ahead adds only another 300 or so, and then stops helping: the three strongest settings are statistically the same player.</p>
