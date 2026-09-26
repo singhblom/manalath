@@ -4,113 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How the Manalath AI thinks</title>
-<style>
-:root {
-  color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
-  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
-  --s1-wash: rgba(42,120,214,.12); --s2-wash: rgba(235,104,52,.12);
-  --p1: #f4f1e8; --p2: #2b2b2b; --cell: #ece9df; --cell-stroke: #c9c4b4; --dead: #e34948;
-  --code-bg: #f0efec;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-    --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
-    --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
-    --code-bg: #242422;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-  --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
-  --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
-  --code-bg: #242422;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0; padding: 0 16px 80px; background: var(--page); color: var(--ink);
-  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-main { max-width: 760px; margin: 0 auto; }
-header { padding: 64px 0 24px; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
-h1 { font-size: 40px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
-.sub { color: var(--ink-2); font-size: 19px; margin: 0 0 16px; }
-.meta { color: var(--muted); font-size: 14px; }
-h2 { font-size: 26px; margin: 56px 0 12px; letter-spacing: -.005em; }
-h3 { font-size: 19px; margin: 32px 0 8px; }
-p, li { color: var(--ink); }
-a { color: var(--s1); }
-code, pre { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
-pre code { background: none; padding: 0; }
-figure { margin: 28px 0; }
-figcaption { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin-top: 10px; }
-figcaption b { color: var(--ink); font-weight: 600; }
-.chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px 12px; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-.chart-title { font-weight: 600; font-size: 15px; margin: 0 6px 2px; }
-.chart-sub { color: var(--ink-2); font-size: 13px; margin: 0 6px 10px; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 6px 0; font-size: 13px; color: var(--ink-2); }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); border: 1.5px solid var(--b, var(--c)); }
-.legend span.x::before { content: "✕"; background: none; border: none; width: auto; height: auto; color: var(--dead); font-size: 12px; vertical-align: 0; }
-.legend span.ring::before { background: transparent; border: 2px var(--style, solid) var(--c); }
-table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 16px 0; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-th { color: var(--ink-2); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
-td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr.muted td { color: var(--muted); }
-tr.total td { font-weight: 600; border-bottom: none; }
-.hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-.tile .l { color: var(--ink-2); font-size: 13px; }
-.tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
-.tile .d { color: var(--muted); font-size: 13px; }
-.callout { border-left: 3px solid var(--s1); padding: 4px 16px; margin: 20px 0; color: var(--ink-2); }
-.note { color: var(--muted); font-size: 14px; }
-.toc { columns: 2; gap: 24px; font-size: 15px; padding-left: 20px; margin: 0 0 8px; }
-.toc li { margin: 2px 0; }
-/* widgets */
-.ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 6px 10px; font-size: 14px; color: var(--ink-2); }
-.ctrl .grow { flex: 1; }
-button, select { font: 500 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--page); color: var(--ink); cursor: pointer; }
-button:hover:not(:disabled), select:hover { border-color: var(--axis); }
-button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
-button:disabled { opacity: .4; cursor: default; }
-button.primary { background: var(--s1); border-color: var(--s1); color: #fff; }
-.seg { display: inline-flex; }
-.seg button { border-radius: 0; }
-.seg button:first-child { border-radius: 8px 0 0 8px; }
-.seg button:last-child { border-radius: 0 8px 8px 0; margin-left: -1px; }
-label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
-.status { min-height: 4.6em; font-size: 14px; line-height: 1.5; color: var(--ink-2); margin: 8px 6px 0; }
-.status b { color: var(--ink); font-weight: 600; }
-.tree-wrap { overflow-x: auto; }
-.tree-wrap svg { min-width: 540px; }
-.lab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.lab .board svg .cell.open { cursor: pointer; }
-.lab .board svg .cell.open:hover { fill: var(--grid); }
-.lab .panel { font-size: 14px; }
-.lab .panel table { font-size: 14px; margin: 4px 0 8px; }
-.lab .panel th, .lab .panel td { padding: 5px 6px; }
-.lab .turn { margin: 0 6px 8px; font-size: 14px; color: var(--ink-2); }
-.lab .turn b { color: var(--ink); }
-.over { color: var(--ink); font-weight: 600; }
-@media (max-width: 640px) { .lab { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { h1 { font-size: 32px; } .toc { columns: 1; } body { font-size: 16px; } }
-</style>
+<link rel="stylesheet" href="../shared/docs.css">
+<script src="../shared/theme.js"></script>
 </head>
 <body>
 <main>
 <header>
+  <a class="back" href="../index.html">← All articles</a>
   <h1>How the Manalath AI thinks</h1>
   <p class="sub">An explainer for the negamax search in <code>packages/shared/src/ai.js</code>: the textbook algorithm, what Manalath adds to it, and a tie-breaking bug that turned up while writing this, now fixed.</p>
   <p class="meta">Martin Singh-Blom with Claude · September 2026</p>
@@ -170,7 +70,7 @@ label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer
 </figure>
 
 <p>Here is the whole search function from <code>ai.js</code>. Apart from the Manalath checks at the top, it is the textbook version:</p>
-<pre><code>function negamax(board, p, depth, alpha, beta, ctx) {
+<pre><code class="language-js">function negamax(board, p, depth, alpha, beta, ctx) {
   if (++ctx.nodes &gt; ctx.maxNodes || ((ctx.nodes &amp; 255) === 0 &amp;&amp; performance.now() &gt; ctx.deadline)) throw new Timeout();
   const a = analyse(board);
   const moves = legalMoves(a);
@@ -205,7 +105,7 @@ label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer
 </ul>
 <p>If there are no safe moves, the node is lost. This is Manalath's zugzwang: the player who runs out of safe moves loses, even with plenty of empty cells left.</p>
 <p>So every node, leaves included, sees one move further ahead than its depth says, for the cost of a few lookups per move (see §10). It also shrinks the tree. Late in the game many placements are suicidal, and discarding them before recursion is pruning that costs nothing.</p>
-<p>One consequence is worth spelling out. <code>classify</code> checks <em>all</em> of the mover's groups, not just the one touched. If your opponent leaves you a quart, every move that doesn't deal with it loses. A move that grows it to five is a win, since a quint without a quart wins. That's why handing someone a quart only works if it is sealed, so that every extension would make an illegal group of six (see Figure 3 of the <a href="../handicap-study/">handicap study</a>).</p>
+<p>One consequence is worth spelling out. <code>classify</code> checks <em>all</em> of the mover's groups, not just the one touched. If your opponent leaves you a quart, every move that doesn't deal with it loses. A move that grows it to five is a win, since a quint without a quart wins. That's why handing someone a quart only works if it is sealed, so that every extension would make an illegal group of six (see Figure 3 of the <a href="../handicap-study/index.html">handicap study</a>).</p>
 
 <h3>Scoring wins by distance</h3>
 <p>A decided node returns <code>WIN + depth</code> or <code>−(WIN + depth)</code>, with <code>WIN = 10000</code> and <code>depth</code> the plies remaining. A win found higher in the tree has more depth remaining, so it scores higher. The search prefers the fastest win and, when losing, the slowest loss, which gives a human opponent the most chances to go wrong. Evaluation scores stay far below 10,000, so any score above <code>WIN − 100</code> means "forced".</p>
@@ -278,9 +178,9 @@ label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer
 <p class="note">Measured on positions reached by 8 to 21 moves of the quiet tier. Every tied move was re-searched with a full window to find its true score.</p>
 
 <p>The fix is a one-line change in <code>rootSearch</code>: search later moves against a window just below α, so that a move which really ties has to prove it:</p>
-<pre><code>const v = -negamax(board, 3 - p, depth - 1, -Infinity, -alpha + TIE_EPS, ctx);</code></pre>
+<pre><code class="language-js">const v = -negamax(board, 3 - p, depth - 1, -Infinity, -alpha + TIE_EPS, ctx);</code></pre>
 <p>A move whose true score is α now returns α exactly. A worse one fails low, strictly below α, and drops out of <code>ties</code>. A cheaper alternative is to drop the random tie-break once the score is a forced win, and play the first winning move found. We went with the exact window, since it also keeps the variety of the random pick.</p>
-<p>The <a href="../ai-strength-study/">strength study</a> was measured with the bug in place, so we re-rated the ladder afterwards with another 920 games. (These are engine 2 figures; §10 has the current ones.) The tiers without search came out the same within noise, as they should. The search tiers gained a lot:</p>
+<p>The <a href="../ai-strength-study/index.html">strength study</a> was measured with the bug in place, so we re-rated the ladder afterwards with another 920 games. (These are engine 2 figures; §10 has the current ones.) The tiers without search came out the same within noise, as they should. The search tiers gained a lot:</p>
 <table>
   <thead><tr><th>Difficulty</th><th>Budget</th><th class="n">Engine 1</th><th class="n">Engine 2</th><th class="n">Change</th></tr></thead>
   <tbody>
@@ -325,15 +225,12 @@ label.chk { display: inline-flex; gap: 6px; align-items: center; cursor: pointer
 
 </main>
 
+<script src="../shared/docs.js"></script>
+<script src="../shared/board.js"></script>
 <script>
-// ---------- engine: a copy of packages/shared/src/{hex,game,ai}.js, with switches for the figures ----------
-const RADIUS = 4, CELLS = [], KEY = new Map();
-for (let r = -RADIUS; r <= RADIUS; r++) for (let q = Math.max(-RADIUS, -r - RADIUS); q <= Math.min(RADIUS, -r + RADIUS); q++) { KEY.set(q + ',' + r, CELLS.length); CELLS.push({ q, r, i: CELLS.length }); }
-const N = CELLS.length, MAX_GROUP = 5, WIN = 10000;
-const STEP = CELLS.map(({ q, r }) => [[1, 0], [0, 1], [1, -1], [-1, 0], [0, -1], [-1, 1]].map(([dq, dr]) => KEY.get((q + dq) + ',' + (r + dr)) ?? -1));
-const dist = i => { const { q, r } = CELLS[i]; return Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)); };
-const ROWS = []; for (let r = -RADIUS; r <= RADIUS; r++) ROWS.push(CELLS.filter(c => c.r === r).map(c => c.i));
-const cellName = i => { const row = CELLS[i].r + RADIUS; return String.fromCharCode(97 + row) + (ROWS[row].indexOf(i) + 1); };
+// ---------- engine: a copy of packages/shared/src/{game,ai}.js, with switches for the figures ----------
+// The board geometry (CELLS, N, STEP, dist, cellName) comes from ../shared/board.js.
+const MAX_GROUP = 5, WIN = 10000;
 
 function groupAt(board, i, seen = new Uint8Array(N)) {
   const c = board[i], cells = [i], stack = [i]; seen[i] = 1;
@@ -507,13 +404,10 @@ function randomHistory(plies, rand) {
 }
 
 // ---------- helpers ----------
-const $ = s => document.querySelector(s);
-const SQ3 = Math.sqrt(3);
 const fmt = v => v === Infinity ? '+∞' : v === -Infinity ? '−∞' : v > 0 ? '+' + v : v < 0 ? '−' + (-v) : '0';
 const fmtScore = s => s >= WIN - 100 ? 'forced win' : s <= -(WIN - 100) ? 'forced loss' : (s > 0 ? '+' : s < 0 ? '−' : '') + Math.abs(s).toFixed(1);
 const fmtMove = m => m ? `${cellName(m[0])} ${m[1] === 1 ? '○' : '●'}` : '—';
 const NAME = { 1: 'White', 2: 'Black' };
-const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
 // ---------- Figures 1 and 2: toy tree ----------
 function treeWidget(el, { ab: abInit, abToggle, title, sub }) {
@@ -664,24 +558,21 @@ treeWidget($('#fig-ab'), { ab: true, abToggle: true, title: 'Negamax with alpha-
 
 // ---------- Figures 3 and 4: board labs ----------
 function drawBoard(b, { marks = {}, rings = {}, ghost = null, last = -1, open = false }) {
-  const s = 100 / 17, cx = 50, cy = 50;
-  let out = `<svg viewBox="-6 0 106 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Manalath board">`;
-  ROWS.forEach((row, k) => { const c = CELLS[row[0]], y = cy + s * 1.5 * c.r, x = cx + s * SQ3 * (c.q + c.r / 2) - s * 1.35; out += `<text x="${x}" y="${y + 1.1}" text-anchor="end" font-size="3.2" fill="var(--muted)">${String.fromCharCode(97 + k)}</text>`; });
-  for (const c of CELLS) {
-    const x = cx + s * SQ3 * (c.q + c.r / 2), y = cy + s * 1.5 * c.r, i = c.i;
-    const pts = []; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k - 30); pts.push((x + s * .96 * Math.cos(a)).toFixed(2) + ',' + (y + s * .96 * Math.sin(a)).toFixed(2)); }
-    out += `<polygon class="cell${open && !b[i] ? ' open' : ''}" data-i="${i}" points="${pts.join(' ')}" fill="var(--cell)" stroke="var(--cell-stroke)" stroke-width=".6"><title>${cellName(i)}</title></polygon>`;
-    const stone = b[i] || (ghost && ghost[0] === i ? ghost[1] : 0);
-    if (stone) out += `<circle cx="${x}" cy="${y}" r="${s * .66}" fill="${stone === 1 ? 'var(--p1)' : 'var(--p2)'}" stroke="var(--ink)" stroke-width=".5" stroke-opacity=".5" opacity="${b[i] ? 1 : .5}" pointer-events="none"/>`;
-    if (i === last) out += `<circle cx="${x}" cy="${y}" r="${s * .16}" fill="${b[i] === 1 ? 'var(--p2)' : 'var(--p1)'}" pointer-events="none"/>`;
-    const m = marks[i];
-    if (m === 'win') out += `<circle cx="${x}" cy="${y}" r="${s * .38}" fill="none" stroke="var(--s3)" stroke-width="1.1" pointer-events="none"/>`;
-    else if (m === 'lose') { const d = s * .28; out += `<path d="M${x - d},${y - d}L${x + d},${y + d}M${x + d},${y - d}L${x - d},${y + d}" stroke="var(--dead)" stroke-width=".9" stroke-linecap="round" pointer-events="none"/>`; }
-    else if (m === 'dead') out += `<circle cx="${x}" cy="${y}" r="${s * .14}" fill="var(--muted)" pointer-events="none"/>`;
-    const r = rings[i];
-    if (r) out += `<circle cx="${x}" cy="${y}" r="${s * .82}" fill="none" stroke="${r === 'fake' ? 'var(--s2)' : 'var(--s1)'}" stroke-width="${r === 'pick' ? 1.6 : 1}" ${r === 'fake' ? 'stroke-dasharray="1.4 1.2"' : ''} pointer-events="none"/>`;
-  }
-  return out + '</svg>';
+  return boardSVG({
+    stones: b, labels: true, open: open ? i => !b[i] : null,
+    overlay(i, x, y, s) {
+      let out = '';
+      if (ghost && ghost[0] === i && !b[i]) out += `<circle cx="${x}" cy="${y}" r="${s * .64}" fill="${ghost[1] === 1 ? 'var(--p1)' : 'var(--p2)'}" stroke="var(--ink)" stroke-width=".5" stroke-opacity=".5" opacity=".5" pointer-events="none"/>`;
+      if (i === last) out += `<circle cx="${x}" cy="${y}" r="${s * .16}" fill="${b[i] === 1 ? 'var(--p2)' : 'var(--p1)'}" pointer-events="none"/>`;
+      const m = marks[i];
+      if (m === 'win') out += `<circle cx="${x}" cy="${y}" r="${s * .38}" fill="none" stroke="var(--s3)" stroke-width="1.1" pointer-events="none"/>`;
+      else if (m === 'lose') { const d = s * .28; out += `<path d="M${x - d},${y - d}L${x + d},${y + d}M${x + d},${y - d}L${x - d},${y + d}" stroke="var(--dead)" stroke-width=".9" stroke-linecap="round" pointer-events="none"/>`; }
+      else if (m === 'dead') out += `<circle cx="${x}" cy="${y}" r="${s * .14}" fill="var(--muted)" pointer-events="none"/>`;
+      const r = rings[i];
+      if (r) out += `<circle cx="${x}" cy="${y}" r="${s * .82}" fill="none" stroke="${r === 'fake' ? 'var(--s2)' : 'var(--s1)'}" stroke-width="${r === 'pick' ? 1.6 : 1}" ${r === 'fake' ? 'stroke-dasharray="1.4 1.2"' : ''} pointer-events="none"/>`;
+      return out;
+    },
+  });
 }
 
 function boardLab(el, { seed, plies, title, sub, panel }) {

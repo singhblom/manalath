@@ -4,95 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Handicaps for Manalath</title>
-<style>
-:root {
-  color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
-  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
-  --s1-wash: rgba(42,120,214,.12); --s2-wash: rgba(235,104,52,.12);
-  --p1: #f4f1e8; --p2: #2b2b2b; --cell: #ece9df; --cell-stroke: #c9c4b4; --dead: #e34948;
-  --code-bg: #f0efec;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-    --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
-    --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
-    --code-bg: #242422;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-  --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
-  --p1: #e8e4d8; --p2: #111; --cell: #242422; --cell-stroke: #3a3a37; --dead: #e66767;
-  --code-bg: #242422;
-}
-* { box-sizing: border-box; }
-html { background: var(--page); }
-body {
-  margin: 0; padding: 0 16px 80px; background: var(--page); color: var(--ink);
-  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-main { max-width: 760px; margin: 0 auto; }
-header { padding: 64px 0 24px; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
-h1 { font-size: 40px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
-.sub { color: var(--ink-2); font-size: 19px; margin: 0 0 16px; }
-.meta { color: var(--muted); font-size: 14px; }
-h2 { font-size: 26px; margin: 56px 0 12px; letter-spacing: -.005em; }
-h3 { font-size: 19px; margin: 32px 0 8px; }
-p, li { color: var(--ink); }
-a { color: var(--s1); }
-code, pre { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
-figure { margin: 28px 0; }
-figcaption { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin-top: 10px; }
-figcaption b { color: var(--ink); font-weight: 600; }
-.chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px 8px; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-.chart-title { font-weight: 600; font-size: 15px; margin: 0 6px 2px; }
-.chart-sub { color: var(--ink-2); font-size: 13px; margin: 0 6px 10px; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 6px 0; font-size: 13px; color: var(--ink-2); }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); }
-.boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 12px; }
-.boards figure { margin: 0; text-align: center; }
-.boards svg { width: 100%; height: auto; }
-.boards figcaption { margin-top: 4px; font-size: 13px; }
-.boards figcaption small { display: block; color: var(--muted); font-size: 12px; }
-table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 16px 0; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-th { color: var(--ink-2); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
-td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
-tr.base td { color: var(--ink-2); }
-.hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-.tile .l { color: var(--ink-2); font-size: 13px; }
-.tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
-.tile .d { color: var(--muted); font-size: 13px; }
-.callout { border-left: 3px solid var(--s1); padding: 4px 16px; margin: 20px 0; color: var(--ink-2); }
-.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); font-size: 13px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 10; white-space: nowrap; }
-.note { color: var(--muted); font-size: 14px; }
-details { margin: 16px 0; }
-summary { cursor: pointer; color: var(--ink-2); }
-.toc { columns: 2; gap: 24px; font-size: 15px; padding-left: 20px; margin: 0 0 8px; }
-.toc li { margin: 2px 0; }
-@media (max-width: 520px) { h1 { font-size: 32px; } .toc { columns: 1; } body { font-size: 16px; } }
-</style>
+<link rel="stylesheet" href="../shared/docs.css">
+<script src="../shared/theme.js"></script>
 </head>
 <body>
-<div class="tip" id="tip"></div>
 <main>
 <header>
+  <a class="back" href="../index.html">← All articles</a>
   <h1>Handicaps for Manalath</h1>
-  <p class="sub">What self-play says about giving a weaker player a fair game, and why the answer is empty cells rather than extra stones.</p>
-  <p class="meta">Martin Singh-Blom with Claude · September 2026 · 26,400 self-play games</p>
+  <p class="sub">What self-play says about giving a weaker player a fair game, and why the answer is empty cells rather than extra stones. Plus the other side of fairness: which first move leaves two equal players even.</p>
+  <p class="meta">Martin Singh-Blom with Claude · September 2026 · 29,400 self-play games</p>
 </header>
 
 <ol class="toc">
@@ -104,6 +25,7 @@ summary { cursor: pointer; color: var(--ink-2); }
   <li><a href="#ladder">The star-point ladder</a></li>
   <li><a href="#elo">Mapping to Elo</a></li>
   <li><a href="#ratings">Implications for ratings</a></li>
+  <li><a href="#opening">The first move</a></li>
   <li><a href="#limits">Limitations</a></li>
   <li><a href="#appendix">Appendix: all runs</a></li>
 </ol>
@@ -118,6 +40,7 @@ summary { cursor: pointer; color: var(--ink-2); }
 </div>
 
 <p>The catch that matters for ratings: the same handicap is worth about twice as much Elo between stronger players as between weaker ones. A fixed points-per-level table would be wrong. The offset has to scale with the pair's rating, or be fitted from real results.</p>
+<p>A second question came up later: between two <em>equal</em> players, how much is moving first worth? Between the game's stronger bots it is worth a lot, and the first stone decides much of it. A white stone on one of the six star points next to the centre, <b>c3</b>, is the only opening we found that stays close to even at both strengths we tested. It is the natural choice for a fixed opening. Every first stone of the opponent's colour loses badly against the stronger bot, which narrows what a swap rule would have to work with (<a href="#opening">§ The first move</a>).</p>
 
 <h2 id="why">Why go stones don't transfer</h2>
 <p>A quick recap of the rules as implemented in <code>packages/shared/src/game.js</code>. The board is a hexagon of 61 cells. On your turn you place one stone of <em>either</em> colour. No group may ever exceed five stones. At the end of your own turn, a group of your colour of exactly four (a <em>quart</em>) loses you the game, and a group of exactly five (a <em>quint</em>) wins it; a quart takes precedence over a quint.</p>
@@ -134,7 +57,7 @@ summary { cursor: pointer; color: var(--ink-2); }
 
 <figure>
   <div class="chart" id="fig-baseline"></div>
-  <figcaption><b>Figure 1. The strength ladder.</b> Win rate of the row player against the column player, colour-averaged. Depth 1 crushes depth 0, but is itself outscored 64 to 36 by depth 2, a gap of roughly 100 Elo. That 100-point gap is the mismatch most of the handicap tests try to close. First-move advantage at equal strength is small, 50 to 55%.</figcaption>
+  <figcaption><b>Figure 1. The strength ladder.</b> Win rate of the row player against the column player, colour-averaged. Depth 1 crushes depth 0, but is itself outscored 64 to 36 by depth 2, a gap of roughly 100 Elo. That 100-point gap is the mismatch most of the handicap tests try to close. First-move advantage at equal strength is small, 50 to 55%, for players this shallow. It is much larger between stronger ones (<a href="#opening">§ The first move</a>).</figcaption>
 </figure>
 
 <p>Win rates are converted to Elo differences with the standard logistic, <code>Δ = 400·log₁₀(p / (1 − p))</code>. Error bars on Elo figures are the win-rate standard error pushed through the same function, which is why they widen sharply above 80%.</p>
@@ -223,12 +146,49 @@ summary { cursor: pointer; color: var(--ink-2); }
 <p>We recommend route 1. It costs one field on the match record, one lookup in the rating fold, and a version bump on the algorithm id when the table changes. The offset is a function of the level and of the pair's average rating; a linear interpolation between a "weak" and a "strong" table is enough to start.</p>
 <p>The rule change itself is small: a per-player mask in the legality check and in the AI's move generation, the seven patterns as data, and a handicap field on the match lexicon that the accept record pins by CID like the other terms.</p>
 
+<h2 id="opening">The first move</h2>
+<p>Handicaps balance unequal players. Between equal players the imbalance is the first move. At depth 2 it is small (Figure 1), but it grows with strength. The <a href="../ai-strength-study/index.html">strength study</a> fits the first player's edge at about +156 Elo between two difficulty-6 bots and +223 between two difficulty-7 bots, where the first player wins roughly three games in four. Both bots always open the same way, with a white stone in the centre.</p>
+<p>Connection games handle this in two standard ways. A <b>fixed opening</b> places the first stone by rule, so the second player really moves first on a board that already has one stone. A <b>swap rule</b> (the pie rule) lets the first player place any stone, and the second player then decides which side to take. Both depend on the same number: how good each first move is for the player who made it. For a fixed opening we want the move closest to 50%. Under a swap rule, the first player wants a move the second player cannot profit from taking, so again one close to 50%, and the rule is only interesting if there are several.</p>
+<p>The board has twelve symmetries, so the 122 possible first moves reduce to 9 cells times 2 colours. Colour matters because colours belong to players: a white first stone is the first player's own, a black one is the opponent's. From each of the 18 openings we played 100 games between two copies of the game's difficulty-6 bot (a 50,000-node search, usually three plies deep), then reran the 11 closest to even with difficulty 7 (150,000 nodes, usually four plies). That is 3,000 games. With 100 games the standard error near 50% is 5 points, so treat differences under about 10 points as noise.</p>
+
+<figure>
+  <div class="boards" id="fig-opening-key" style="grid-template-columns: 1fr; max-width: 320px; margin: 0 auto;"></div>
+  <figcaption><b>Figure 8. The nine kinds of first move.</b> Each label marks one cell of a class; the other cells of the class are its rotations and reflections. The six shaded cells are c3 and its equivalents, the star points next to the centre and the same cells the handicap ladder uses.</figcaption>
+</figure>
+
+<figure>
+  <div class="chart" id="fig-opening"></div>
+  <figcaption><b>Figure 9. The first player's score from each first move.</b> Two equal bots from each opening, 100 games per point, ±1 standard error. Hollow dots are difficulty 6, filled dots difficulty 7 (run only for openings that were close to even at difficulty 6, plus b2 as a check). Left: the first stone is white, the first player's own colour. Right: it is black, the opponent's.</figcaption>
+</figure>
+
+<p>Three things stand out.</p>
+<ul>
+  <li><b>The centre is the strongest white opening.</b> White on e5 scored 82% at difficulty 6, the same as the bot's own games, since that is always what it plays. Moving the stone outwards generally lowers the score.</li>
+  <li><b>An opening in the opponent's colour loses.</b> At difficulty 6 the black openings were all over the place: interior ones lost 6 to 9%, edge and corner ones looked fine, and b2 in black won 100 games out of 100. Difficulty 7 lost with all five it played, scoring 0 to 12%, in short games of 12 to 16 moves. The b2 result was the weaker bot's mistake, not the opening's. After b2 in black it almost always joined it with a second black stone in the corner, and 100 games produced only 8 distinct six-move starts. Difficulty 7 doesn't fall for it.</li>
+  <li><b>c3 in white is the only opening near even at both strengths</b>: 56% at difficulty 6, 48% at difficulty 7. Next come b3 (59%, 58%) and b2 (14%, 59%, another difficulty-6 artefact that disappears at difficulty 7). The corner and the edge next to it moved from about even to 63% and 70%.</li>
+</ul>
+<p>The stronger bot raised the score of most white openings and lowered every black one. If that trend continues with stronger play, the fair point will drift, and it may drift further from the rim. Figure 9 is a measurement of these two bots, not a solution of the game.</p>
+
+<h3>Fixed opening or swap rule</h3>
+<p><b>A fixed opening at c3 is the simpler fix and the one we'd start with.</b> Opening with a white stone on any of the six star points next to the centre was worth 48 to 56% to the first player, against 82% for the bots' usual centre opening at difficulty 6. The rule is easy to state, the cells are already marked on the goban board, and it needs no new decision in the interface. Because it is always the same position, it also gives human play a single standard opening to learn.</p>
+<p><b>A swap rule works, but offers the first player less choice than it seems.</b> Every black first stone is a gift the second player would decline, and the white ones range from even to lopsided. At difficulty 7 the sensible first moves are c3, b3 and b2 in white, 24 of the 122 first moves, with a1 as an outsider. That is enough for the rule to function. It also means a swap rule rewards knowing this table, which a new player won't. It is probably better as an option for experienced players than as the default.</p>
+<p>Either rule interacts with the handicap ladder, since c3 is one of its star points. The two are meant for different situations. Handicap games are already balanced by the handicap, and the weaker player can simply move first, so they should skip the fixed opening.</p>
+<details>
+  <summary>All opening results</summary>
+  <table>
+    <thead><tr><th>Opening</th><th class="n">Cells</th><th class="n">Diff. 6</th><th class="n">Diff. 7</th><th class="n">Moves (diff. 7)</th></tr></thead>
+    <tbody id="tbl-opening"></tbody>
+  </table>
+  <p class="note">First player's score, 100 games per entry, no draws. "Cells" is the number of first moves in the class. Moves is the average game length including the opening stone. The harness is <a href="../../scripts/opening-study.js">scripts/opening-study.js</a>, run as <code>bun scripts/opening-study.js --level 7 --games 100 --only c3w,b3w</code> from the repository root; results accumulate in <code>scripts/opening-games.jsonl</code>.</p>
+</details>
+
 <h2 id="limits">Limitations</h2>
 <ul>
   <li><b>The players are shallow.</b> Depth 2 is a weak player by human standards, and the AI's evaluation is hand-written. The <em>ordering</em> and <em>monotonicity</em> of the dead-cell results are structural and should carry over to people. The specific Elo values will not, and the strength dependence in Figure 7 says they will be larger between good players.</li>
   <li><b>Both sides know about the dead cells.</b> The search on both sides was told about the mask. That is the right model, since a human stronger player also knows, but it means the AI is exploiting the handicap as well as a depth-2 player can.</li>
   <li><b>200 games per cell.</b> Enough to see effects of 10 points and to establish monotonicity; not enough to separate levels 5, 6 and 7 or to pin any Elo figure closer than ±30.</li>
   <li><b>The asymmetric rule was not tested.</b> A variant in which the weaker player's quart does not lose would need the AI to understand the variant on both sides before self-play could say anything about it.</li>
+  <li><b>The opening results come from two bots and 100 games each.</b> They are stronger players than the depth-2 players used for the handicaps, but the fair opening moved noticeably between difficulty 6 and 7 and may move again with stronger play. A few hundred more games on c3, b3 and b2 in white would pin those down to about ±2.5 points. Real games with a fixed opening are the better test.</li>
   <li><b>Random play is unrescuable.</b> Depth 0 lost every game to depth 2 with 16 dead cells or all seven star points. No handicap compensates for blundering into immediate losses, which is a reminder that the ladder is for players who have learned the rules.</li>
 </ul>
 
@@ -241,17 +201,14 @@ summary { cursor: pointer; color: var(--ink-2); }
 
 </main>
 
+<script src="../shared/docs.js"></script>
+<script src="../shared/board.js"></script>
 <script>
 // ---------- data ----------
 const RUNS = [{"d":[0,0],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":211,"p2":189,"draw":0},{"d":[0,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":1,"p2":399,"draw":0},{"d":[1,0],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":400,"p2":0,"draw":0},{"d":[2,0],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":200,"p2":0,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":400,"p1":201,"p2":199,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":131,"p2":69,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":77,"p2":123,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":109,"p2":91,"draw":0},{"d":[1,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":62,"p2":138,"draw":0},{"d":[2,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":107,"p2":93,"draw":0},{"d":[2,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":111,"p2":89,"draw":0},{"d":[2,2],"pass":[0,1],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":108,"p2":92,"draw":0},{"d":[2,2],"pass":[0,2],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":106,"p2":94,"draw":0},{"d":[1,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":75,"p2":125,"draw":0},{"d":[0,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[1,2],"pass":[3,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":79,"p2":121,"draw":0},{"d":[0,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[0,2],"pass":[3,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":0,"p2":200,"draw":0},{"d":[2,1],"pass":[0,1],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":134,"p2":66,"draw":0},{"d":[2,1],"pass":[0,2],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":132,"p2":68,"draw":0},{"d":[2,1],"pass":[0,3],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":137,"p2":63,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,3],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":51,"p2":149,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[2,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":124,"p2":76,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,1],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":53,"p2":147,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,2],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":59,"p2":141,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[1,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":129,"p2":71,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,3],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":48,"p2":152,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,2],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":84,"p2":116,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,1],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":156,"p2":44,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[1,0],"dead":[0,0],"mode":"-","g":200,"p1":73,"p2":127,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[2,0],"dead":[0,0],"mode":"-","g":200,"p1":86,"p2":114,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[1,0],"dead":[0,0],"mode":"-","g":200,"p1":140,"p2":60,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[2,0],"dead":[0,0],"mode":"-","g":200,"p1":129,"p2":71,"draw":0},{"d":[1,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":78,"p2":122,"draw":0},{"d":[1,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":69,"p2":131,"draw":0},{"d":[2,1],"pass":[0,1],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":136,"p2":64,"draw":0},{"d":[2,1],"pass":[0,3],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":131,"p2":69,"draw":0},{"d":[1,2],"pass":[3,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":77,"p2":123,"draw":0},{"d":[2,1],"pass":[0,2],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":126,"p2":74,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[3,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":118,"p2":82,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[2,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":47,"p2":153,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,3],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":82,"p2":118,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[1,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":113,"p2":87,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,2],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":175,"p2":25,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,1],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":200,"p2":0,"draw":0},{"d":[2,2],"pass":[1,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":95,"p2":105,"draw":0},{"d":[2,2],"pass":[2,0],"liab":[0,0],"tempo":[0,0],"dead":[0,0],"mode":"-","g":200,"p1":117,"p2":83,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[3,0],"dead":[0,0],"mode":"-","g":200,"p1":93,"p2":107,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,3],"dead":[0,0],"mode":"-","g":200,"p1":110,"p2":90,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[2,0],"dead":[0,0],"mode":"-","g":200,"p1":89,"p2":111,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,2],"dead":[0,0],"mode":"-","g":200,"p1":128,"p2":72,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[1,0],"dead":[0,0],"mode":"-","g":200,"p1":78,"p2":122,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,1],"dead":[0,0],"mode":"-","g":200,"p1":119,"p2":81,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,2],"dead":[0,0],"mode":"-","g":200,"p1":82,"p2":118,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,1],"dead":[0,0],"mode":"-","g":200,"p1":110,"p2":90,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,12],"mode":"random","g":200,"p1":166,"p2":34,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"edge","g":200,"p1":130,"p2":70,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"random","g":200,"p1":140,"p2":60,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"random","g":200,"p1":122,"p2":78,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"random","g":200,"p1":90,"p2":110,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"random","g":200,"p1":80,"p2":120,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"center","g":200,"p1":108,"p2":92,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"random","g":200,"p1":0,"p2":200,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,16],"mode":"random","g":200,"p1":0,"p2":200,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"center","g":200,"p1":111,"p2":89,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"random","g":200,"p1":59,"p2":141,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[12,0],"mode":"random","g":200,"p1":39,"p2":161,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"random","g":200,"p1":172,"p2":28,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"random","g":200,"p1":153,"p2":47,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"star","g":200,"p1":162,"p2":38,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"star","g":200,"p1":136,"p2":64,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"star","g":200,"p1":94,"p2":106,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"star","g":200,"p1":127,"p2":73,"draw":0},{"d":[0,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"star","g":200,"p1":0,"p2":200,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"star","g":200,"p1":30,"p2":170,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"star","g":200,"p1":99,"p2":101,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"star","g":200,"p1":179,"p2":21,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[2,0],"mode":"pattern","g":200,"p1":118,"p2":82,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"pattern","g":200,"p1":127,"p2":73,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"pattern","g":200,"p1":105,"p2":95,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"pattern","g":200,"p1":98,"p2":102,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"pattern","g":200,"p1":97,"p2":103,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"pattern","g":200,"p1":99,"p2":101,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[1,0],"mode":"pattern","g":200,"p1":116,"p2":84,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"pattern","g":200,"p1":98,"p2":102,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"pattern","g":200,"p1":160,"p2":40,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"pattern","g":200,"p1":37,"p2":163,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"pattern","g":200,"p1":144,"p2":56,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[5,0],"mode":"pattern","g":200,"p1":70,"p2":130,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,6],"mode":"pattern","g":200,"p1":142,"p2":58,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[6,0],"mode":"pattern","g":200,"p1":56,"p2":144,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":131,"p2":69,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":81,"p2":119,"draw":0},{"d":[2,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":119,"p2":81,"draw":0},{"d":[1,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":81,"p2":119,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"pattern","g":200,"p1":160,"p2":40,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"pattern","g":200,"p1":165,"p2":35,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"pattern","g":200,"p1":147,"p2":53,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[2,0],"mode":"pattern","g":200,"p1":88,"p2":112,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"pattern","g":200,"p1":59,"p2":141,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"pattern","g":200,"p1":55,"p2":145,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"pattern","g":200,"p1":142,"p2":58,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[1,0],"mode":"pattern","g":200,"p1":85,"p2":115,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,6],"mode":"pattern","g":200,"p1":179,"p2":21,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"pattern","g":200,"p1":168,"p2":32,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[5,0],"mode":"pattern","g":200,"p1":20,"p2":180,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"pattern","g":200,"p1":171,"p2":29,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,1],"mode":"pattern","g":200,"p1":111,"p2":89,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[1,0],"mode":"pattern","g":200,"p1":103,"p2":97,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[6,0],"mode":"pattern","g":200,"p1":55,"p2":145,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"pattern","g":200,"p1":31,"p2":169,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,2],"mode":"pattern","g":200,"p1":108,"p2":92,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[2,0],"mode":"pattern","g":200,"p1":103,"p2":97,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,3],"mode":"pattern","g":200,"p1":120,"p2":80,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[3,0],"mode":"pattern","g":200,"p1":75,"p2":125,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,4],"mode":"pattern","g":200,"p1":116,"p2":84,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,5],"mode":"pattern","g":200,"p1":136,"p2":64,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[4,0],"mode":"pattern","g":200,"p1":83,"p2":117,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":136,"p2":64,"draw":0},{"d":[2,2],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":103,"p2":97,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[5,0],"mode":"pattern","g":200,"p1":70,"p2":130,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,6],"mode":"pattern","g":200,"p1":141,"p2":59,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[6,0],"mode":"pattern","g":200,"p1":60,"p2":140,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,7],"mode":"pattern","g":200,"p1":137,"p2":63,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[7,0],"mode":"pattern","g":200,"p1":46,"p2":154,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[0,8],"mode":"pattern","g":200,"p1":112,"p2":88,"draw":0},{"d":[1,1],"pass":[0,0],"liab":[0,0],"tempo":[0,0],"dead":[8,0],"mode":"pattern","g":200,"p1":87,"p2":113,"draw":0}];
 
 // ---------- helpers ----------
-const $ = s => document.querySelector(s);
-const tip = $('#tip');
-function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 28) + 'px'; }
-function hideTip() { tip.style.opacity = 0; }
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-const elo = p => { p = Math.min(Math.max(p, .005), .995); return 400 * Math.log10(p / (1 - p)); };
 
 // Sum all runs matching a config (repeated seeds pool together).
 function agg(f) {
@@ -265,42 +222,6 @@ function mirrored(fA, fB) {
   const a = agg(fA), b = agg(fB); if (!a || !b) return null;
   const p = (a.p1rate + b.p2rate) / 2;
   return { first: a.p1rate, second: b.p2rate, avg: p, se: Math.sqrt(a.se ** 2 + b.se ** 2) / 2 };
-}
-const pct = x => Math.round(x * 100) + '%';
-
-// ---------- hex board ----------
-const R = 4, SQ3 = Math.sqrt(3);
-const CELLS = [];
-for (let r = -R; r <= R; r++) for (let q = Math.max(-R, -r - R); q <= Math.min(R, -r + R); q++) CELLS.push({ q, r, i: CELLS.length });
-const ROWS = []; for (let r = -R; r <= R; r++) ROWS.push(CELLS.filter(c => c.r === r).map(c => c.i));
-const cellOf = n => ROWS[n.charCodeAt(0) - 97][+n.slice(1) - 1];
-const idx = (q, r) => { const c = CELLS.find(c => c.q === q && c.r === r); return c ? c.i : -1; };
-function boardSVG(dead = [], stones = {}, size = 100, marks = {}) {
-  const s = size / 17, cx = size / 2, cy = size / 2;
-  let out = `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" role="img">`;
-  for (const c of CELLS) {
-    const x = cx + s * SQ3 * (c.q + c.r / 2), y = cy + s * 1.5 * c.r;
-    const pts = []; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k - 30); pts.push((x + s * .96 * Math.cos(a)).toFixed(2) + ',' + (y + s * .96 * Math.sin(a)).toFixed(2)); }
-    const isDead = dead.includes(c.i);
-    out += `<polygon points="${pts.join(' ')}" fill="${isDead ? 'var(--dead)' : 'var(--cell)'}" stroke="var(--cell-stroke)" stroke-width=".6"/>`;
-    if (stones[c.i]) out += `<circle cx="${x}" cy="${y}" r="${s * .62}" fill="${stones[c.i] === 1 ? 'var(--p1)' : 'var(--p2)'}" stroke="var(--ink)" stroke-width=".5" stroke-opacity=".5"/>`;
-    if (marks[c.i]) out += `<text x="${x}" y="${y + s * .32}" text-anchor="middle" font-size="${s * .9}" font-family="system-ui,sans-serif" fill="${stones[c.i] === 2 ? 'var(--p1)' : 'var(--ink)'}">${marks[c.i]}</text>`;
-  }
-  return out + '</svg>';
-}
-
-// ---------- generic chart scaffolding ----------
-function svgOpen(w, h) { return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`; }
-function yAxis(x0, x1, y, v2y, ticks, fmt) {
-  let s = '';
-  for (const t of ticks) { const yy = v2y(t); s += `<line x1="${x0}" x2="${x1}" y1="${yy}" y2="${yy}" stroke="var(--grid)" stroke-width="1"/><text x="${x0 - 8}" y="${yy + 4}" text-anchor="end" font-size="12" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${fmt(t)}</text>`; }
-  return s;
-}
-function attach(container, items) {
-  container.querySelectorAll('[data-tip]').forEach(el => {
-    el.addEventListener('mousemove', e => showTip(e, el.dataset.tip));
-    el.addEventListener('mouseleave', hideTip);
-  });
 }
 
 // ---------- Figure 1: baseline matrix ----------
@@ -325,7 +246,7 @@ function attach(container, items) {
     }
   }
   s += '</svg>';
-  const el = $('#fig-baseline'); el.innerHTML = `<div class="chart-title">Win rate of row player against column player</div><div class="chart-sub">Colour-averaged; diagonal shows first-move advantage</div>${s}`; attach(el);
+  renderChart($('#fig-baseline'), { title: 'Win rate of row player against column player', sub: 'Colour-averaged; diagonal shows first-move advantage', svg: s });
 })();
 
 // ---------- Figure 2: liability groups ----------
@@ -333,7 +254,7 @@ function attach(container, items) {
   const W = 640, H = 300, L = 48, Rr = 16, T = 20, B = 44, pw = (W - L - Rr) / 3;
   const v2y = p => T + (1 - p) * (H - T - B);
   let s = svgOpen(W, H);
-  s += yAxis(L, W - Rr, 0, v2y, [0, .25, .5, .75, 1], p => pct(p));
+  s += yAxis(L, W - Rr, v2y, [0, .25, .5, .75, 1], p => pct(p));
   const base = mirrored(x => eq(x.d, [1, 2]) && plain(x), x => eq(x.d, [2, 1]) && plain(x));
   s += `<line x1="${L}" x2="${W - Rr}" y1="${v2y(base.avg)}" y2="${v2y(base.avg)}" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="${W - Rr}" y="${v2y(base.avg) - 5}" text-anchor="end" font-size="11" fill="var(--muted)">baseline ${pct(base.avg)}</text>`;
   for (let k = 1; k <= 3; k++) {
@@ -355,17 +276,20 @@ function attach(container, items) {
     }
   }
   s += `<line x1="${L}" x2="${W - Rr}" y1="${H - B}" y2="${H - B}" stroke="var(--axis)"/></svg>`;
-  const el = $('#fig-liab'); el.innerHTML = `<div class="chart-title">Weaker player's win rate with pre-placed corner groups</div><div class="chart-sub">Depth 1 vs depth 2; pairs of dots are first and second mover</div>${s}<div class="legend"><span style="--c:var(--s1)">weaker player owns the groups</span><span style="--c:var(--s2)">stronger player owns the groups (hollow)</span></div>`; attach(el);
+  renderChart($('#fig-liab'), {
+    title: "Weaker player's win rate with pre-placed corner groups", sub: 'Depth 1 vs depth 2; pairs of dots are first and second mover', svg: s,
+    legend: [['weaker player owns the groups', '--c:var(--s1)'], ['stronger player owns the groups', '--c:var(--s2)', 'ring']],
+  });
 })();
 
 // ---------- Figure 3: the trap ----------
 (function () {
   // Replayed game: black pre-placed at (0,4),(-1,4),(1,3). Moves: 1:W@0,2  2:B@-2,3  1:B@-2,2  2:B@2,1  1:B@0,3  2:B@-4,4
   const stones = {}, marks = {};
-  for (const [q, r] of [[0, 4], [-1, 4], [1, 3]]) stones[idx(q, r)] = 2;
+  for (const [q, r] of [[0, 4], [-1, 4], [1, 3]]) stones[cellAt(q, r)] = 2;
   const moves = [[1, 0, 2], [2, -2, 3], [2, -2, 2], [2, 2, 1], [2, 0, 3], [2, -4, 4]];
-  moves.forEach(([c, q, r], n) => { stones[idx(q, r)] = c; marks[idx(q, r)] = n + 1; });
-  $('#fig-trap').innerHTML = `<figure>${boardSVG([], stones, 120, marks)}</figure>`;
+  moves.forEach(([c, q, r], n) => { stones[cellAt(q, r)] = c; marks[cellAt(q, r)] = n + 1; });
+  $('#fig-trap').innerHTML = `<figure>${boardSVG({ stones, text: marks })}</figure>`;
 })();
 
 // ---------- Figure 4: dead cells by count ----------
@@ -373,7 +297,7 @@ function attach(container, items) {
   const W = 640, H = 320, L = 48, Rr = 20, T = 20, B = 44;
   const xs = [0, 2, 4, 6, 8, 10, 12], v2x = k => L + (k / 12) * (W - L - Rr), v2y = p => T + (1 - p) * (H - T - B);
   let s = svgOpen(W, H);
-  s += yAxis(L, W - Rr, 0, v2y, [0, .25, .5, .75, 1], pct);
+  s += yAxis(L, W - Rr, v2y, [0, .25, .5, .75, 1], pct);
   for (const k of xs) s += `<text x="${v2x(k)}" y="${H - 16}" text-anchor="middle" font-size="12" fill="var(--muted)">${k}</text>`;
   s += `<text x="${(L + W - Rr) / 2}" y="${H - 2}" text-anchor="middle" font-size="12" fill="var(--ink-2)">cells dead for the stronger player</text>`;
   const base = mirrored(x => eq(x.d, [1, 2]) && plain(x), x => eq(x.d, [2, 1]) && plain(x));
@@ -398,13 +322,13 @@ function attach(container, items) {
   }
   s += `<g data-tip="no handicap: weaker player wins ${pct(base.avg)}"><circle cx="${v2x(0)}" cy="${v2y(base.avg)}" r="5" fill="var(--muted)" stroke="var(--surface)" stroke-width="2"/></g>` + marksOut;
   s += `<line x1="${L}" x2="${W - Rr}" y1="${H - B}" y2="${H - B}" stroke="var(--axis)"/></svg>`;
-  const el = $('#fig-deadcount'); el.innerHTML = `<div class="chart-title">Weaker player's win rate by number of dead cells</div><div class="chart-sub">Depth 1 vs depth 2, colour-averaged, ±1 standard error</div>${s}<div class="legend">${series.map(se => `<span style="--c:${se.c}">${se.name}</span>`).join('')}</div>`; attach(el);
+  renderChart($('#fig-deadcount'), { title: "Weaker player's win rate by number of dead cells", sub: 'Depth 1 vs depth 2, colour-averaged, ±1 standard error', svg: s, legend: series.map(se => [se.name, `--c:${se.c}`]) });
 })();
 
 // ---------- Figure 5: ladder boards ----------
 const PATTERNS = [[], ['e5'], ['e3', 'e7'], ['c3', 'e7', 'g3'], ['c3', 'c5', 'g3', 'g5'], ['c3', 'c5', 'e5', 'g3', 'g5'], ['c3', 'c5', 'e3', 'e7', 'g3', 'g5'], ['c3', 'c5', 'e3', 'e5', 'e7', 'g3', 'g5'], ['e3']];
 (function () {
-  $('#fig-ladder-boards').innerHTML = PATTERNS.slice(1, 8).map((p, i) => `<figure>${boardSVG(p.map(cellOf))}<figcaption>Level ${i + 1}<small>${p.join(' ')}</small></figcaption></figure>`).join('');
+  $('#fig-ladder-boards').innerHTML = PATTERNS.slice(1, 8).map((p, i) => `<figure>${boardSVG({ fills: Object.fromEntries(p.map(n => [cellIndex(n), 'var(--dead)'])) })}<figcaption>Level ${i + 1}<small>${p.join(' ')}</small></figcaption></figure>`).join('');
 })();
 
 // ---------- Figure 6: ladder results ----------
@@ -412,7 +336,7 @@ const PATTERNS = [[], ['e5'], ['e3', 'e7'], ['c3', 'e7', 'g3'], ['c3', 'c5', 'g3
   const W = 640, H = 320, L = 48, Rr = 20, T = 20, B = 44, n = 8, bw = (W - L - Rr) / n;
   const v2y = p => T + (1 - p) * (H - T - B);
   let s = svgOpen(W, H);
-  s += yAxis(L, W - Rr, 0, v2y, [0, .25, .5, .75, 1], pct);
+  s += yAxis(L, W - Rr, v2y, [0, .25, .5, .75, 1], pct);
   const base = mirrored(x => eq(x.d, [1, 2]) && plain(x), x => eq(x.d, [2, 1]) && plain(x));
   s += `<line x1="${L}" x2="${W - Rr}" y1="${v2y(base.avg)}" y2="${v2y(base.avg)}" stroke="var(--muted)" stroke-dasharray="3 4"/>`;
   const avgPts = [];
@@ -428,7 +352,7 @@ const PATTERNS = [[], ['e5'], ['e3', 'e7'], ['c3', 'e7', 'g3'], ['c3', 'c5', 'g3
     s += `<text x="${cx}" y="${Math.min(y, v2y(m.first), v2y(m.second)) - 9}" text-anchor="middle" font-size="12" fill="var(--ink-2)" style="font-variant-numeric:tabular-nums">${pct(m.avg)}</text>`;
   }
   s += `<line x1="${L}" x2="${W - Rr}" y1="${H - B}" y2="${H - B}" stroke="var(--axis)"/></svg>`;
-  const el = $('#fig-ladder'); el.innerHTML = `<div class="chart-title">Weaker player's win rate at each handicap level</div><div class="chart-sub">Depth 1 vs depth 2. Bar: colour average. Filled dot: weaker moves first. Hollow dot: weaker moves second. Dashed line: ${pct(base.avg)} baseline with no handicap.</div>${s}`; attach(el);
+  renderChart($('#fig-ladder'), { title: "Weaker player's win rate at each handicap level", sub: `Depth 1 vs depth 2. Bar: colour average. Filled dot: weaker moves first. Hollow dot: weaker moves second. Dashed line: ${pct(base.avg)} baseline with no handicap.`, svg: s });
 })();
 
 // ---------- Figure 7 + table: Elo at equal strength ----------
@@ -436,7 +360,7 @@ const PATTERNS = [[], ['e5'], ['e3', 'e7'], ['c3', 'e7', 'g3'], ['c3', 'c5', 'g3
   const W = 640, H = 340, L = 56, Rr = 20, T = 24, B = 44, n = 8, bw = (W - L - Rr) / n;
   const yMin = -50, yMax = 450, v2y = e => T + (1 - (e - yMin) / (yMax - yMin)) * (H - T - B);
   let s = svgOpen(W, H);
-  s += yAxis(L, W - Rr, 0, v2y, [0, 100, 200, 300, 400], e => '+' + e);
+  s += yAxis(L, W - Rr, v2y, [0, 100, 200, 300, 400], e => '+' + e);
   s += `<line x1="${L}" x2="${W - Rr}" y1="${v2y(0)}" y2="${v2y(0)}" stroke="var(--axis)"/>`;
   const series = [{ d: 2, c: 'var(--s1)', name: 'depth 2 vs depth 2' }, { d: 1, c: 'var(--s2)', name: 'depth 1 vs depth 1' }];
   const rows = [];
@@ -457,17 +381,66 @@ const PATTERNS = [[], ['e5'], ['e3', 'e7'], ['c3', 'e7', 'g3'], ['c3', 'c5', 'g3
   for (let k = 1; k <= 8; k++) s += `<text x="${L + (k - 1) * bw + bw / 2}" y="${H - 16}" text-anchor="middle" font-size="12" fill="var(--muted)">${k === 8 ? 'e3 alone' : 'L' + k}</text>`;
   s += `<line x1="${L + 7 * bw}" x2="${L + 7 * bw}" y1="${T}" y2="${H - B}" stroke="var(--grid)"/>`;
   s += `<text x="${(L + W - Rr) / 2}" y="${H - 2}" text-anchor="middle" font-size="12" fill="var(--ink-2)">handicap level</text></svg>`;
-  const el = $('#fig-elo'); el.innerHTML = `<div class="chart-title">Elo value of each level between equal players</div><div class="chart-sub">400·log₁₀(p/(1−p)) of the unrestricted player's colour-averaged win rate, ±1 standard error</div>${s}<div class="legend">${series.map(se => `<span style="--c:${se.c}">${se.name}</span>`).join('')}</div>`; attach(el);
+  renderChart($('#fig-elo'), { title: 'Elo value of each level between equal players', sub: "400·log₁₀(p/(1−p)) of the unrestricted player's colour-averaged win rate, ±1 standard error", svg: s, legend: series.map(se => [se.name, `--c:${se.c}`]) });
   // table
   const names = ['', 'e5', 'e3 e7', 'c3 e7 g3', 'c3 c5 g3 g5', 'c3 c5 e5 g3 g5', 'c3 c5 e3 e7 g3 g5', 'all seven', 'e3 alone'];
   $('#tbl-elo').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(k => { const r = rows[k]; return `<tr><td>${k === 8 ? 'single' : k}</td><td>${names[k]}</td><td class="n">${pct(r[2].avg)}</td><td class="n">+${Math.round(elo(r[2].avg))}</td><td class="n">${pct(r[1].avg)}</td><td class="n">+${Math.round(elo(r[1].avg))}</td></tr>`; }).join('');
+})();
+
+// ---------- Figures 8 and 9 + table: the first move ----------
+// First player's score from each first move: { opening: [games, first-player wins, mean moves] } per difficulty.
+const OPENINGS = {
+  6: { e5w: [100, 82, 18.1], e5b: [100, 27, 18.3], d4w: [100, 64, 18.9], d4b: [100, 9, 13.7], c4w: [100, 70, 19.2], c4b: [100, 7, 13.7], c3w: [100, 56, 18.8], c3b: [100, 6, 13.6], b3w: [100, 59, 17.5], b3b: [100, 57, 20.5], b2w: [100, 14, 19.9], b2b: [100, 100, 19], a3w: [100, 71, 19], a3b: [100, 8, 15], a2w: [100, 45, 19.2], a2b: [100, 59, 17.9], a1w: [100, 54, 20.5], a1b: [100, 41, 22] },
+  7: { e5b: [100, 10, 15.1], d4w: [100, 65, 18.8], c3w: [100, 48, 19.3], b3w: [100, 58, 19.1], b3b: [100, 0, 12], b2w: [100, 59, 19.9], b2b: [100, 8, 15.1], a2w: [100, 70, 21.1], a2b: [100, 10, 15.2], a1w: [100, 63, 20.4], a1b: [100, 12, 15.7] },
+};
+const OPEN_CELLS = ['e5', 'd4', 'c4', 'c3', 'b3', 'b2', 'a3', 'a2', 'a1'];
+// Cells equivalent to c under the board's twelve symmetries.
+const orbit = n => {
+  let { q, r } = CELLS[cellIndex(n)]; const out = new Set();
+  for (let k = 0; k < 6; k++) { out.add(cellAt(q, r)); out.add(cellAt(r, q)); [q, r] = [-r, q + r]; }
+  return [...out];
+};
+(function () {
+  const marks = {}, fills = {};
+  for (const n of OPEN_CELLS) marks[cellIndex(n)] = n;
+  for (const i of orbit('c3')) fills[i] = 'var(--s3)';
+  $('#fig-opening-key').innerHTML = `<figure>${boardSVG({ text: marks, fills })}</figure>`;
+})();
+(function () {
+  const W = 320, H = 300, L = 36, Rr = 16, T = 34, B = 36, pw = W - L - Rr, rh = (H - T - B) / OPEN_CELLS.length, v2x = p => L + p * pw;
+  const series = [{ lvl: 6, c: 'var(--s2)', dy: -4, hollow: true }, { lvl: 7, c: 'var(--s1)', dy: 4, hollow: false }];
+  const panels = [['w', 'White first stone (your colour)'], ['b', "Black first stone (opponent's)"]].map(([col, title]) => {
+    let s = svgOpen(W, H) + `<text x="${L}" y="16" font-size="13" font-weight="600" fill="var(--ink)">${title}</text>`;
+    for (const t of [0, .25, .5, .75, 1]) s += `<line x1="${v2x(t)}" x2="${v2x(t)}" y1="${T - 6}" y2="${H - B}" stroke="${t === .5 ? 'var(--axis)' : 'var(--grid)'}"${t === .5 ? ' stroke-dasharray="3 4"' : ''}/><text x="${v2x(t)}" y="${H - B + 16}" text-anchor="middle" font-size="12" fill="var(--muted)">${pct(t)}</text>`;
+    OPEN_CELLS.forEach((n, i) => {
+      const y = T + i * rh + rh / 2;
+      if (n === 'c3' && col === 'w') s += `<rect x="${L - 32}" y="${y - rh / 2 + 1}" width="${pw + 40}" height="${rh - 2}" rx="5" fill="var(--s1-wash)"/>`;
+      s += `<text x="${L - 10}" y="${y + 4}" text-anchor="end" font-size="13" fill="var(--ink-2)">${n}</text>`;
+      for (const se of series) {
+        const r = OPENINGS[se.lvl][n + col]; if (!r) continue;
+        const p = r[1] / r[0], e = Math.sqrt(Math.max(p * (1 - p), .01) / r[0]), yy = y + se.dy;
+        s += `<g data-tip="${n} ${col === 'w' ? 'white' : 'black'}, difficulty ${se.lvl}: first player scores ${pct(p)} in ${r[0]} games"><line x1="${v2x(Math.max(0, p - e))}" x2="${v2x(Math.min(1, p + e))}" y1="${yy}" y2="${yy}" stroke="${se.c}" stroke-width="1.5"/><circle cx="${v2x(p)}" cy="${yy}" r="10" fill="transparent"/><circle cx="${v2x(p)}" cy="${yy}" r="4.5" fill="${se.hollow ? 'var(--surface)' : se.c}" stroke="${se.c}" stroke-width="2"/></g>`;
+      }
+    });
+    return s + `<text x="${L + pw / 2}" y="${H - 2}" text-anchor="middle" font-size="12" fill="var(--ink-2)">first player's score</text></svg>`;
+  });
+  const s = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 20px">${panels.map(p => `<div>${p}</div>`).join('')}</div>`;
+  renderChart($('#fig-opening'), {
+    title: "First player's score by first move", sub: 'Equal bots, 100 games per point, ±1 standard error; the dashed line is an even game', svg: s,
+    legend: [['difficulty 6', '--c:var(--s2)', 'ring'], ['difficulty 7', '--c:var(--s1)']],
+  });
+  const cell = r => r ? pct(r[1] / r[0]) : '–';
+  $('#tbl-opening').innerHTML = OPEN_CELLS.flatMap(n => ['w', 'b'].map(col => {
+    const a = OPENINGS[6][n + col], b = OPENINGS[7][n + col];
+    return `<tr><td>${n} ${col === 'w' ? 'white' : 'black'}</td><td class="n">${orbit(n).length}</td><td class="n">${cell(a)}</td><td class="n">${cell(b)}</td><td class="n">${b ? b[2].toFixed(1) : '–'}</td></tr>`;
+  })).join('');
 })();
 
 // ---------- Appendix table ----------
 (function () {
   const f = a => a.join('/');
   const sorted = [...RUNS].sort((a, b) => f(a.d).localeCompare(f(b.d)) || a.mode.localeCompare(b.mode) || f(a.dead).localeCompare(f(b.dead)) || f(a.pass).localeCompare(f(b.pass)) || f(a.liab).localeCompare(f(b.liab)) || f(a.tempo).localeCompare(f(b.tempo)));
-  $('#tbl-all tbody').innerHTML = sorted.map(r => `<tr${plain(r) ? ' class="base"' : ''}><td>${f(r.d)}</td><td>${f(r.pass)}</td><td>${f(r.liab)}</td><td>${f(r.tempo)}</td><td>${f(r.dead)}</td><td>${r.mode === '-' ? '' : r.mode}</td><td class="n">${r.g}</td><td class="n">${r.p1}</td><td class="n">${r.p2}</td><td class="n">${(100 * r.p1 / r.g).toFixed(1)}</td></tr>`).join('');
+  $('#tbl-all tbody').innerHTML = sorted.map(r => `<tr${plain(r) ? ' class="quiet"' : ''}><td>${f(r.d)}</td><td>${f(r.pass)}</td><td>${f(r.liab)}</td><td>${f(r.tempo)}</td><td>${f(r.dead)}</td><td>${r.mode === '-' ? '' : r.mode}</td><td class="n">${r.g}</td><td class="n">${r.p1}</td><td class="n">${r.p2}</td><td class="n">${(100 * r.p1 / r.g).toFixed(1)}</td></tr>`).join('');
 })();
 </script>
 </body>

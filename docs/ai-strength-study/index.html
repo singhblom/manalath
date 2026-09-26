@@ -4,179 +4,162 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Strength Ladder</title>
+<link rel="stylesheet" href="../shared/docs.css">
+<script src="../shared/theme.js"></script>
 <style>
-:root {
-  color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
-  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
-  --s1-wash: rgba(42,120,214,.12); --s2-wash: rgba(235,104,52,.12);
-  --code-bg: #f0efec;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-    --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
-    --code-bg: #242422;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
-  --s1-wash: rgba(57,135,229,.16); --s2-wash: rgba(217,89,38,.16);
-  --code-bg: #242422;
-}
-* { box-sizing: border-box; }
-html { background: var(--page); }
-body {
-  margin: 0; padding: 0 16px 80px; background: var(--page); color: var(--ink);
-  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-main { max-width: 760px; margin: 0 auto; }
-header { padding: 64px 0 24px; border-bottom: 1px solid var(--grid); margin-bottom: 32px; }
-h1 { font-size: 40px; line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
-.sub { color: var(--ink-2); font-size: 19px; margin: 0 0 16px; }
-.meta { color: var(--muted); font-size: 14px; }
-h2 { font-size: 26px; margin: 56px 0 12px; letter-spacing: -.005em; }
-p, li { color: var(--ink); }
-a { color: var(--s1); }
-code { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-figure { margin: 28px 0; }
-figcaption { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin-top: 10px; }
-.chart { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px 8px; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-.chart-title { font-weight: 600; font-size: 15px; margin: 0 6px 2px; }
-.chart-sub { color: var(--ink-2); font-size: 13px; margin: 0 6px 10px; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 6px 0; font-size: 13px; color: var(--ink-2); }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); border: 2px solid var(--b, var(--c)); }
-.table-wrap { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 16px 0; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-th { color: var(--ink-2); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
-td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr.half td { color: var(--ink-2); }
-tr.band td:first-child { box-shadow: inset 3px 0 0 var(--s1); }
-.hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-.tile .l { color: var(--ink-2); font-size: 13px; }
-.tile .v { font-size: 34px; font-weight: 600; line-height: 1.15; margin: 2px 0; }
-.tile .d { color: var(--muted); font-size: 13px; }
-.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); font-size: 13px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 10; white-space: nowrap; }
-.callout { border-left: 3px solid var(--s1); padding: 4px 16px; margin: 20px 0; color: var(--ink-2); }
-.note { color: var(--muted); font-size: 14px; }
-@media (max-width: 520px) { h1 { font-size: 32px; } body { font-size: 16px; } th, td { padding: 6px 5px; } table { font-size: 14px; } }
+.tile.key { border-left: 3px solid var(--s1); padding: 18px 22px; }
+.tile.key .l { font-size: 15px; color: var(--s1); }
+.tile.key .v { font-size: 48px; }
+.tile.key .d { font-size: 16px; color: var(--ink-2); line-height: 1.45; }
 </style>
 </head>
 <body>
-<div class="tip" id="tip"></div>
 <main>
 <header>
+  <a class="back" href="../index.html">← All articles</a>
   <h1>How strong is the Manalath AI?</h1>
-  <p class="sub">A short memo on rating the AI's difficulty ladder in Elo, with a uniformly random player fixed at 0, and on where the new strength slider should start and stop.</p>
-  <p class="meta">Martin Singh-Blom with Claude · September 2026 · 920 self-play games</p>
+  <p class="sub">Rating the AI's difficulty ladder in Elo, with a uniformly random player fixed at 0. The headline: the stronger the players, the more moving first decides the game.</p>
+  <p class="meta">Martin Singh-Blom with Claude · September 2026 · 10,000 self-play games, engine 3</p>
 </header>
 
-<p class="callout"><b>Update, engine 3.</b> These ratings were measured with a tie-breaking bug that made the search tiers throw away forced wins, and with a search slow enough that the top tier ran into its 4-second time cap (see <a href="../negamax/#next">the negamax explainer</a>). After both fixes, a new 150,000-node tier, and 10,000 games, the quiet tier rates 814 and difficulties 4 to 7 rate 1266, 1364, 1497 and 1615. More search now helps all the way up, and the slider runs from 800 to 1600. The numbers below are the original run; <code>packages/shared/src/ai-ratings.json</code> has the current ones.</p>
+<ol class="toc">
+  <li><a href="#summary">Summary</a></li>
+  <li><a href="#ladder">The ladder</a></li>
+  <li><a href="#method">Method</a></li>
+  <li><a href="#results">Results</a></li>
+  <li><a href="#search">What search buys</a></li>
+  <li><a href="#first">Moving first</a></li>
+  <li><a href="#history">What changed since the first run</a></li>
+  <li><a href="#slider">The slider</a></li>
+  <li><a href="#limits">Limitations</a></li>
+</ol>
 
 <h2 id="summary">Summary</h2>
-<p>We rated the AI at thirteen points along its difficulty scale. Most of the strength comes from not blundering. Taking a win when one is on the board, never completing your own quart and never leaving the opponent an immediate quint is together worth about 750 Elo over random play. Searching ahead adds only another 300 or so, and then stops helping: the three strongest settings are statistically the same player.</p>
-
 <div class="hero">
-  <div class="tile"><div class="l">Blunder avoidance alone</div><div class="v">756</div><div class="d">Elo over random play, no lookahead</div></div>
-  <div class="tile"><div class="l">Best search setting</div><div class="v">1092</div><div class="d">12k nodes, roughly depth 2</div></div>
-  <div class="tile"><div class="l">Extra from 4× more search</div><div class="v">−31</div><div class="d">50k vs 12k nodes, within noise</div></div>
+  <div class="tile key"><div class="l">Key finding: the stronger the players, the more moving first decides the game</div><div class="v">3 games in 4</div><div class="d">won by the first player between two of the strongest bots, a first-move edge of about +223 Elo. Between weak bots the edge is close to zero.</div></div>
 </div>
 
-<p>Based on this we set the in-game slider to run from <b>750 (Easy)</b> to <b>1100 (Pro)</b>. Settings below 750 were too easy to be interesting in play, and 1100 is the most the current engine can reach.</p>
+<p>The most important result is about the game rather than the bot. Moving first is worth next to nothing between weak players, but once both sides reliably search three plies it is worth 150 to 250 Elo, and it is still growing at the top of our ladder. A stronger engine, or strong human players, will most likely see an even larger edge. The main cause is the first stone every search tier plays, white in the centre, which is the strongest opening there is. Rated games between strong players will need a balancing rule, such as a fixed opening or a swap rule. The <a href="../handicap-study/index.html#opening">handicap study</a> looks at which first move would make the game fair.</p>
+<p>The rest is about the AI. We rated it at fifteen points along its difficulty scale, from uniformly random play to a 150,000-node search. Search keeps paying all the way up, unlike in our first run: every fourfold increase in the node budget is worth roughly 100 to 130 Elo, and the strongest tier rates 1615. Below that, not blundering is still the cheapest strength there is. Taking a win when one is on the board, never completing your own quart and never leaving the opponent an immediate quint are together worth 814 Elo over random play, with no lookahead at all.</p>
+<p>The in-game slider runs from <b>800</b> to <b>1600</b>: from the quiet tier, which never throws a game away but otherwise plays at random, to just short of the 150,000-node search.</p>
 
 <h2 id="ladder">The ladder</h2>
-<p>Difficulty is a number from 0 to 6 in <code>packages/shared/src/ai.js</code>. Each whole number is a tier:</p>
+<p>Difficulty is a number from 0 to 7 in <code>packages/shared/src/ai.js</code>. Each whole number is a tier:</p>
 <ol start="0">
   <li><b>Random.</b> Any legal move, uniformly. This is the anchor, fixed at 0 Elo.</li>
   <li><b>Safe.</b> Takes an immediate win if there is one, otherwise plays randomly among moves that don't lose on the spot.</li>
   <li><b>Quiet.</b> Safe, and also avoids moves that leave the opponent an immediate win.</li>
   <li><b>1-ply search</b> with the hand-written evaluation.</li>
-  <li><b>Search, 3,000 nodes,</b> with iterative deepening. In practice this reaches depth 2.</li>
-  <li><b>Search, 12,000 nodes.</b> About the old "normal" level's think time.</li>
-  <li><b>Search, 50,000 nodes.</b> About the old "hard" level's think time.</li>
+  <li><b>Search, 3,000 nodes,</b> with iterative deepening.</li>
+  <li><b>Search, 12,000 nodes.</b></li>
+  <li><b>Search, 50,000 nodes.</b></li>
+  <li><b>Search, 150,000 nodes.</b> Added once the engine got fast enough to afford it.</li>
 </ol>
-<p>A fractional difficulty mixes the two neighbouring tiers on each move. At 3.4, the bot plays as tier 4 on 40% of its moves and as tier 3 on the rest. Search is budgeted in nodes rather than milliseconds, so a given difficulty is equally strong on a fast desktop and a slow phone.</p>
+<p>A fractional difficulty mixes the two neighbouring tiers on each move. At 3.4, the bot plays as tier 4 on 40% of its moves and as tier 3 on the rest. Search is budgeted in nodes rather than milliseconds, so a given difficulty is equally strong on a fast desktop and a slow phone. The <a href="../negamax/index.html">negamax explainer</a> describes the search itself.</p>
 
 <h2 id="method">Method</h2>
-<p><code>scripts/rate-ai.js</code> played bots at every half step from 0 to 6 against their neighbours one half step and one full step away. Each pairing played 40 games with colours alternating, 920 games in all, averaging 20.5 moves each. All games were then fitted at once by maximum likelihood with a Bradley–Terry model (the model behind Elo), which also estimates a first-move advantage. That advantage came out at 9 ± 12 Elo, which is negligible. Fitting everything at once, rather than updating ratings game by game, means the result doesn't depend on the order the games were played and comes with standard errors.</p>
+<p><code>scripts/rate-ai.js</code> plays bots at every half step from 0 to 7 against their neighbours one half step and one full step away, with colours alternating. The current ratings pool 10,000 games from two independent runs, 400 per pairing up to difficulty 6 and 200 for pairings with 6.5 or 7, averaging 19.7 moves each. A game is only counted if it was played by the current engine (version 3) and both of its bots would still play the same tiers today, so games from before the 150,000-node tier was added still count wherever they are unaffected.</p>
+<p>All games are fitted at once by maximum likelihood with a Bradley–Terry model, the model behind Elo. The model gives each difficulty its own first-move advantage as well as its own rating; a game's advantage is the mean of its two players' terms. That turned out to matter: a single shared term, as in the first run, is a poor fit once the stronger bots are included (see <a href="#first">Moving first</a>). Fitting everything at once means the result doesn't depend on the order the games were played and comes with standard errors.</p>
 
 <figure>
   <div class="chart" id="fig-curve"></div>
-  <figcaption>Error bars are ±1 standard error relative to the random anchor, so they grow along the chain. Differences between neighbouring points are better determined than the bars suggest; see the table below. The shaded band is the range the in-game slider offers.</figcaption>
+  <figcaption>Engine 3 in blue, with ±1 standard error relative to the random anchor. The errors grow along the chain, and differences between neighbouring points are better determined than the bars suggest. The grey dashed line is the first run with engine 1, where search stopped paying after 3,000 nodes. The shaded band is the range the in-game slider offers.</figcaption>
 </figure>
 
 <h2 id="results">Results</h2>
 <div class="table-wrap">
 <table>
-  <thead><tr><th>Level</th><th>Plays as</th><th class="n">Elo</th><th class="n">±</th><th class="n">vs +½</th></tr></thead>
+  <thead><tr><th>Level</th><th>Plays as</th><th class="n">Elo</th><th class="n">±</th><th class="n">First move</th><th class="n">Games</th><th class="n">vs +½</th></tr></thead>
   <tbody id="tbl-points"></tbody>
 </table>
 </div>
-<p class="note">"vs +½" is how the point half a step up scored against this row over their 40 games, and the Elo gap that score implies. A negative gap means the harder setting lost more than it won. Rows marked in blue fall inside the slider's range.</p>
+<p class="note">"First move" is the fitted first-move advantage for that difficulty, in Elo. "vs +½" is how the point half a step up scored against this row, and the Elo gap that score implies. Rows marked in blue fall inside the slider's range.</p>
 
-<p>Three things stand out.</p>
+<p>Four things stand out.</p>
 <ul>
-  <li><b>The big steps are cheap.</b> Going from random to safe is worth about 400 Elo, and from safe to quiet another 350. Neither needs any search. The most lopsided pairing in the run was difficulty 2.5 against 1.5: 40 wins out of 40.</li>
-  <li><b>Mixing tiers isn't linear.</b> Half-random, half-safe play (difficulty 0.5) already rates 338, most of the way to fully safe. One suicidal move ends a game, so avoiding even half of them gains most of the benefit. Because the slider maps Elo to difficulty using the measured half steps, it absorbs this.</li>
-  <li><b>More search stops paying at about depth 2.</b> The engine searches about 30 nodes per millisecond. Every node recomputes the groups on the whole board, so even 50,000 nodes rarely finishes depth 3. Tiers 4, 5 and 6 all end up as depth-2 players and score around 50% against each other.</li>
+  <li><b>The big steps are still cheap.</b> Random to safe is worth about 420 Elo, and safe to quiet another 400. Neither needs any search. The most lopsided pairing in the run was difficulty 2.5 against 1.5, which won 382 of 400.</li>
+  <li><b>Mixing tiers isn't linear.</b> Half-random, half-safe play (difficulty 0.5) already rates 297, most of the way to fully safe at 419. One suicidal move ends a game, so avoiding even half of them gains most of the benefit. The slider maps Elo to difficulty through the measured half steps, so it absorbs this.</li>
+  <li><b>1-ply search is a small step, deeper search a big one.</b> The 1-ply tier gains only 160 over quiet play. The first real search budget, 3,000 nodes, gains another 290.</li>
+  <li><b>More search keeps paying.</b> From 3,000 to 12,000 nodes is worth +98, from 12,000 to 50,000 +133, and the threefold step to 150,000 another +118. Each search tier from 5 to 7 now beats the one below it 62 to 70% of the time, where in the first run tiers 4 to 6 were indistinguishable.</li>
 </ul>
 
-<h2 id="slider">What this means for the slider</h2>
-<p>The slider runs from 750 to 1100 Elo in steps of 25 and is converted to a difficulty by linear interpolation over the measured points. The Easy end is the quiet tier: it never throws a game away, but otherwise plays at random. The Pro end is the 12k-node search. Settings past the strongest measured point use the cheapest difficulty that reached it, so Pro never pays for tier 6's think time.</p>
-<p>The top of the scale is set by engine speed, not by any natural ceiling. Tracking group sizes as moves are made and undone, instead of flood-filling the whole board at every node, should let the same think time reach depth 3 or 4. Then the ladder can grow and be re-rated. Running <code>bun run rate-ai</code> again adds games to <code>scripts/ai-games.jsonl</code> and refits.</p>
+<h2 id="search">What search buys</h2>
+<p>Each search tier deepens iteratively until its node budget runs out, and plays the move from the deepest iteration it finished. Budgets are fixed, so the depth reached depends on the position. The engine now searches about 220 nodes per millisecond, so even the top tier answers in well under a second.</p>
+<figure>
+  <div class="chart" id="fig-depth"></div>
+  <figcaption>Deepest completed iteration on 72 positions after 2 to 16 moves, taken from games between two difficulty-7 bots. An iteration that finds a forced win or loss ends the deepening early, which is why a few positions stop at depth 2 even with a large budget. Times are the median and 90th percentile per move on a recent Mac, single-threaded.</figcaption>
+</figure>
+<p>The pattern fits the ratings. Each tier's gain comes from moving a larger share of positions one ply deeper: 3,000 nodes is mostly a depth-2 player, 12,000 finishes depth 3 about a third of the time, 50,000 mostly finishes depth 3, and 150,000 finishes depth 4 or more in almost half of positions. Going much further in the browser would take a smarter search rather than a bigger budget; the <a href="../negamax/index.html#next">negamax explainer</a> lists the options.</p>
+
+<h2 id="first">Moving first</h2>
+<p>In the first run, with all search tiers stuck at depth 2, the first-move advantage came out at 9 ± 12 Elo, which is nothing. With deeper search it is large. The model's per-difficulty terms stay within about 50 Elo of zero up to difficulty 5, then rise to +156 at difficulty 6 and +223 at difficulty 7. Between two difficulty-7 bots, +223 means the first player wins about 78% of games.</p>
+<figure>
+  <div class="chart" id="fig-first"></div>
+  <figcaption>Points: the first player's score in each rating pairing, plotted at the pairing's mean difficulty, ±1 standard error. Colours alternate within a pairing, so the strength difference between the two bots largely cancels. Line: the fitted first-move advantage, as the score it implies between two equal bots. The orange diamond is a direct measurement from the <a href="../handicap-study/index.html#opening">opening study</a>, 100 games between two difficulty-6 bots.</figcaption>
+</figure>
+<p>The raw pairings tell the same story without the model. Every pairing between two bots of difficulty 5.5 or more gave the first player at least 66%, and the two pairings involving difficulty 7 gave 75% and 77%. The direct measurement between two difficulty-6 bots, 82 of 100 games (about +260 Elo), is higher than the fitted +156 ± 20. The fitted term for a difficulty is estimated from games against its neighbours and smoothed towards them, so it is best read as a trend. The direct figure is the better number for two equal bots.</p>
+<p>The advantage is mostly about the opening. All of the search tiers open with a white stone in the centre, and the <a href="../handicap-study/index.html#opening">opening study</a> found that this is the strongest first move there is. It also found that a white first stone on c3, one of the star points next to the centre, leaves two difficulty-6 or difficulty-7 bots close to even. That makes a fixed c3 opening a natural rule for games between equals.</p>
+<p>For the ratings themselves, the per-difficulty first-move term is what keeps the fit honest. Games at the top are played with colours alternating, so ratings are colour-averaged, but a single shared term would be pulled between near-zero at the bottom and 200 at the top and bend every rating around it.</p>
+
+<h2 id="history">What changed since the first run</h2>
+<p>The first run, with 920 games, found a plateau. Tiers 4 to 6 rated 1048, 1092 and 1061, the same player within noise, and we concluded that search stopped paying at about depth 2. Two bugs made that look true when it wasn't.</p>
+<ul>
+  <li><b>Engine 2: exact ties.</b> The root search counted moves that had merely been cut off as ties for best and picked among them at random. Once a forced win was found, the bot played it only about four times in ten. Deeper searches find more forced wins, so they threw away more of them. Fixing it lifted tiers 4 to 6 to 1104, 1221 and 1288 in a re-rating of another 920 games.</li>
+  <li><b>Engine 3: speed.</b> Engine 2 managed about 6 nodes per millisecond, so the 50,000-node tier took six seconds a move and was really limited by the 4-second safety cap. Labelling the groups once per node made the search 35 times faster with identical decisions. Every tier now gets its full budget, which made room for the 150,000-node tier.</li>
+</ul>
+<p>Both are described in the <a href="../negamax/index.html">negamax explainer</a>. The tiers without search rated the same within noise in every run, as they should: quiet play came out at 756 in the first run and 814 now.</p>
+
+<h2 id="slider">The slider</h2>
+<p>The slider runs from 800 to 1600 Elo in steps of 25 and is converted to a difficulty by linear interpolation over the measured points in <code>packages/shared/src/ai-ratings.json</code>. The bottom end is the quiet tier. The top end, 1600, sits just below the 150,000-node tier's 1615, and plays as that tier on about three moves in four and as the 50,000-node tier on the rest. Settings below 800 would mean a bot that sometimes loses on the spot, which is too easy to be interesting.</p>
+<p>The top of the scale is now set by what a browser can afford per move rather than by the engine hitting a wall. Running <code>bun run rate-ai</code> adds games to <code>scripts/ai-games.jsonl</code> and refits, keeping every game that still applies. When the search changes how the bots play, <code>ENGINE</code> in <code>ai.js</code> is bumped and older games drop out.</p>
 
 <h2 id="limits">Limitations</h2>
 <ul>
-  <li><b>40 games per pairing is thin.</b> The standard error at the top of the scale is about ±100 relative to random. The ordering of tiers 4 to 6 is not resolved and may never be, since they seem to play at the same strength.</li>
+  <li><b>The absolute scale is only as good as its lowest links.</b> Every rating is chained up from random play, so noise in the easiest pairings shifts every rating above them. Two independent runs of about 5,000 games disagreed by up to 160 Elo at the top, mostly because random play against difficulty 0.5 came out differently. Pooling both halves that risk. Gaps between neighbouring difficulties are much better determined than the absolute values.</li>
+  <li><b>The top of the ladder has the fewest games.</b> 200 games per pairing involving difficulty 6.5 or 7, so the standard error at difficulty 7 is ±43 against the anchor and ±33 on its first-move term.</li>
   <li><b>These are self-play ratings.</b> They measure how the bots do against each other, not against people. A human rated 1000 on some future ladder won't necessarily win half their games against the 1000 bot, until the bots take part in rated human games and anchor that scale too.</li>
-  <li><b>Search is still capped by time on slow devices.</b> The 4-second cap only applies on hardware far slower than a current phone, but where it triggers, the bot plays below its measured strength.</li>
+  <li><b>Colour matters at the top.</b> The ratings are colour-averaged. Against a difficulty-7 bot, which colour you play is worth more than the whole step from difficulty 6 to 7.</li>
 </ul>
 </main>
 
+<script src="../shared/docs.js"></script>
 <script>
-// Fitted ratings (packages/shared/src/ai-ratings.json) and raw pairings (scripts/ai-games.jsonl),
-// as of the first full run. Pairings: [weaker, stronger, stronger's score, games].
-const POINTS = [{"difficulty":0,"elo":0,"se":0,"games":80},{"difficulty":0.5,"elo":338,"se":64,"games":120},{"difficulty":1,"elo":404,"se":66,"games":160},{"difficulty":1.5,"elo":455,"se":72,"games":160},{"difficulty":2,"elo":756,"se":83,"games":160},{"difficulty":2.5,"elo":857,"se":88,"games":160},{"difficulty":3,"elo":874,"se":91,"games":160},{"difficulty":3.5,"elo":926,"se":94,"games":160},{"difficulty":4,"elo":1048,"se":98,"games":160},{"difficulty":4.5,"elo":1033,"se":101,"games":160},{"difficulty":5,"elo":1092,"se":104,"games":160},{"difficulty":5.5,"elo":1078,"se":107,"games":120},{"difficulty":6,"elo":1061,"se":110,"games":80}];
-const PAIRS = [[0,0.5,34,40],[0,1,39,40],[0.5,1,18,40],[0.5,1.5,31,40],[1,1.5,21,40],[1,2,34,40],[1.5,2,34,40],[1.5,2.5,40,40],[2,2.5,29,40],[2,3,21,40],[2.5,3,25,40],[2.5,3.5,26,40],[3,3.5,22,40],[3,4,29,40],[3.5,4,30,40],[3.5,4.5,24,40],[4,4.5,17,40],[4,5,27,40],[4.5,5,21,40],[4.5,5.5,21,40],[5,5.5,20,40],[5,6,19,40],[5.5,6,18,40]];
-const TIER_NAMES = ['random', 'safe', 'quiet', '1-ply', '3k nodes', '12k nodes', '50k nodes'];
-const SLIDER = [750, 1100];
-
-const $ = s => document.querySelector(s);
-const tip = $('#tip');
-function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 28) + 'px'; }
-function hideTip() { tip.style.opacity = 0; }
-function attach(el) { el.querySelectorAll('[data-tip]').forEach(n => { n.addEventListener('mousemove', e => showTip(e, n.dataset.tip)); n.addEventListener('mouseleave', hideTip); }); }
-const elo = p => { p = Math.min(Math.max(p, .005), .995); return 400 * Math.log10(p / (1 - p)); };
+// Engine 3 fit (packages/shared/src/ai-ratings.json): difficulty, Elo, standard error, first-move advantage and its error, games.
+const POINTS = [[0, 0, 0, 18, 31, 800], [0.5, 297, 20, 8, 20, 1200], [1, 419, 21, 1, 19, 1600], [1.5, 511, 23, -3, 19, 1600], [2, 814, 27, -15, 19, 1600], [2.5, 915, 29, 32, 18, 1600], [3, 976, 30, 16, 18, 1600], [3.5, 1145, 32, 29, 18, 1600], [4, 1266, 33, 52, 17, 1600], [4.5, 1310, 34, 44, 17, 1600], [5, 1364, 35, -17, 17, 1600], [5.5, 1455, 36, 75, 18, 1400], [6, 1497, 37, 156, 20, 1200], [6.5, 1584, 40, 194, 24, 600], [7, 1615, 43, 223, 33, 400]]
+  .map(([difficulty, elo, se, fm, fmSe, games]) => ({ difficulty, elo, se, fm, fmSe, games }));
+// Engine 3 pairings (scripts/ai-games.jsonl): [weaker, stronger, stronger's score, games, first player's score, mean moves].
+const PAIRS = [[0,0.5,333,400,205,17.5],[0,1,374,400,202,17.1],[0.5,1,253,400,197,15.9],[0.5,1.5,319,400,205,16.9],[1,1.5,243,400,201,16.2],[1,2,364,400,202,18.6],[1.5,2,324,400,192,21.1],[1.5,2.5,382,400,204,14.9],[2,2.5,254,400,208,21.8],[2,3,273,400,191,17.6],[2.5,3,249,400,227,19],[2.5,3.5,316,400,202,17.5],[3,3.5,287,400,203,20.4],[3,4,340,400,210,21],[3.5,4,256,400,234,22.6],[3.5,4.5,295,400,219,21.7],[4,4.5,224,400,220,24.6],[4,5,250,400,208,24.2],[4.5,5,246,400,204,23.9],[4.5,5.5,267,400,245,21.1],[5,5.5,253,400,201,21],[5,6,279,400,233,20],[5.5,6,215,400,265,20.4],[5.5,6.5,130,200,132,19.6],[6,6.5,123,200,147,19],[6,7,124,200,150,17.3],[6.5,7,108,200,154,18.3]];
+// The first run (engine 1, 920 games), for comparison.
+const ENGINE1 = [[0, 0], [0.5, 338], [1, 404], [1.5, 455], [2, 756], [2.5, 857], [3, 874], [3.5, 926], [4, 1048], [4.5, 1033], [5, 1092], [5.5, 1078], [6, 1061]];
+// Deepest completed iteration per tier on 72 midgame positions, with median and 90th-percentile ms per move.
+const DEPTH = [
+  { tier: 4, ms: 13, p90: 18, depth: { 1: 1, 2: 56, 3: 15 } },
+  { tier: 5, ms: 48, p90: 68, depth: { 2: 47, 3: 22, 4: 3 } },
+  { tier: 6, ms: 196, p90: 272, depth: { 2: 11, 3: 46, 4: 14, 5: 1 } },
+  { tier: 7, ms: 605, p90: 770, depth: { 2: 10, 3: 28, 4: 26, 5: 7, 6: 1 } },
+];
+const TIER_NAMES = ['random', 'safe', 'quiet', '1-ply', '3k nodes', '12k nodes', '50k nodes', '150k nodes'];
+const SLIDER = [800, 1600];
 const plays = x => Number.isInteger(x) ? TIER_NAMES[x] : `${TIER_NAMES[Math.floor(x)]} + ${TIER_NAMES[Math.ceil(x)]}`;
+const signed = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
+const winP = e => 1 / (1 + 10 ** (-e / 400));
 
 // ---------- figure: Elo by difficulty ----------
 (function () {
-  const W = 640, H = 360, L = 56, R = 64, T = 16, B = 52;
-  const x2p = x => L + x / 6 * (W - L - R);
-  const yMin = -100, yMax = 1300, v2y = e => T + (1 - (e - yMin) / (yMax - yMin)) * (H - T - B);
-  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-  // slider band
+  const W = 640, H = 380, L = 56, R = 64, T = 16, B = 52;
+  const x2p = x => L + x / 7 * (W - L - R);
+  const yMin = -100, yMax = 1800, v2y = e => T + (1 - (e - yMin) / (yMax - yMin)) * (H - T - B);
+  let s = svgOpen(W, H);
   s += `<rect x="${L}" y="${v2y(SLIDER[1])}" width="${W - L - R}" height="${v2y(SLIDER[0]) - v2y(SLIDER[1])}" fill="var(--s1-wash)"/>`;
-  s += `<text x="${W - R + 8}" y="${v2y(SLIDER[1]) + 4}" font-size="12" fill="var(--s1)">Pro ${SLIDER[1]}</text>`;
-  s += `<text x="${W - R + 8}" y="${v2y(SLIDER[0]) + 4}" font-size="12" fill="var(--s1)">Easy ${SLIDER[0]}</text>`;
-  for (const t of [0, 200, 400, 600, 800, 1000, 1200]) {
-    const y = v2y(t);
-    s += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="${t === 0 ? 'var(--axis)' : 'var(--grid)'}"/><text x="${L - 8}" y="${y + 4}" text-anchor="end" font-size="12" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${t}</text>`;
-  }
-  for (let k = 0; k <= 6; k++) {
+  s += `<text x="${W - R + 8}" y="${v2y(SLIDER[1]) + 4}" font-size="12" fill="var(--s1)">top ${SLIDER[1]}</text>`;
+  s += `<text x="${W - R + 8}" y="${v2y(SLIDER[0]) + 4}" font-size="12" fill="var(--s1)">bottom ${SLIDER[0]}</text>`;
+  s += yAxis(L, W - R, v2y, [0, 400, 800, 1200, 1600], t => t, 0);
+  for (let k = 0; k <= 7; k++) {
     s += `<text x="${x2p(k)}" y="${H - 30}" text-anchor="middle" font-size="12" fill="var(--ink-2)">${k}</text>`;
     s += `<text x="${x2p(k)}" y="${H - 14}" text-anchor="middle" font-size="11" fill="var(--muted)">${TIER_NAMES[k]}</text>`;
   }
+  s += `<path d="${ENGINE1.map(([x, e], i) => (i ? 'L' : 'M') + x2p(x) + ',' + v2y(e)).join(' ')}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4" stroke-linejoin="round"/>`;
+  for (const [x, e] of ENGINE1) s += `<g data-tip="first run (engine 1), difficulty ${x}: ${e} Elo"><circle cx="${x2p(x)}" cy="${v2y(e)}" r="10" fill="transparent"/><circle cx="${x2p(x)}" cy="${v2y(e)}" r="3" fill="var(--muted)"/></g>`;
   s += `<path d="${POINTS.map((p, i) => (i ? 'L' : 'M') + x2p(p.difficulty) + ',' + v2y(p.elo)).join(' ')}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>`;
   for (const p of POINTS) {
     const cx = x2p(p.difficulty), cy = v2y(p.elo), whole = Number.isInteger(p.difficulty);
@@ -185,17 +168,67 @@ const plays = x => Number.isInteger(x) ? TIER_NAMES[x] : `${TIER_NAMES[Math.floo
       + `<circle cx="${cx}" cy="${cy}" r="12" fill="transparent"/><circle cx="${cx}" cy="${cy}" r="5" fill="${whole ? 'var(--s1)' : 'var(--surface)'}" stroke="var(--s1)" stroke-width="2"/></g>`;
   }
   s += '</svg>';
-  const el = $('#fig-curve');
-  el.innerHTML = `<div class="chart-title">Rated strength by difficulty</div><div class="chart-sub">Elo, with uniformly random play fixed at 0</div>${s}<div class="legend"><span style="--c:var(--s1)">whole tier</span><span style="--c:var(--surface);--b:var(--s1)">half step: two tiers mixed move by move</span></div>`;
-  attach(el);
+  renderChart($('#fig-curve'), {
+    title: 'Rated strength by difficulty', sub: 'Elo, with uniformly random play fixed at 0', svg: s,
+    legend: [['engine 3, whole tier', '--c:var(--s1)'], ['half step: two tiers mixed move by move', '--c:var(--s1)', 'ring'], ['first run, engine 1', '--c:var(--muted)']],
+  });
+})();
+
+// ---------- figure: depth reached per tier ----------
+(function () {
+  const W = 640, L = 96, R = 150, T = 8, rowH = 40, H = T + DEPTH.length * rowH + 24, pw = W - L - R;
+  const shade = { 1: 'var(--grid)', 2: 'var(--s1-wash)', 3: 'color-mix(in srgb, var(--s1) 45%, transparent)', 4: 'color-mix(in srgb, var(--s1) 75%, transparent)', 5: 'var(--s1)', 6: 'var(--ink)' };
+  let s = svgOpen(W, H);
+  DEPTH.forEach((d, k) => {
+    const n = Object.values(d.depth).reduce((a, b) => a + b, 0), y = T + k * rowH;
+    s += `<text x="${L - 10}" y="${y + 16}" text-anchor="end" font-size="13" fill="var(--ink)">${TIER_NAMES[d.tier]}</text><text x="${L - 10}" y="${y + 30}" text-anchor="end" font-size="11" fill="var(--muted)">difficulty ${d.tier}</text>`;
+    let x = L;
+    for (const [depth, c] of Object.entries(d.depth)) {
+      const w = c / n * pw;
+      s += `<g data-tip="${TIER_NAMES[d.tier]}: depth ${depth} in ${c} of ${n} positions (${pct(c / n)})"><rect x="${x}" y="${y + 4}" width="${w}" height="${rowH - 12}" fill="${shade[depth]}" stroke="var(--surface)" stroke-width="1"/>`
+        + (w > 22 ? `<text x="${x + w / 2}" y="${y + rowH / 2 + 2}" text-anchor="middle" font-size="12" fill="${+depth >= 4 ? 'var(--surface)' : 'var(--ink)'}">${depth}</text>` : '') + '</g>';
+      x += w;
+    }
+    s += `<text x="${L + pw + 12}" y="${y + 16}" font-size="13" fill="var(--ink)" style="font-variant-numeric:tabular-nums">${d.ms < 1000 ? d.ms + ' ms' : (d.ms / 1000).toFixed(1) + ' s'} median</text><text x="${L + pw + 12}" y="${y + 30}" font-size="11" fill="var(--muted)" style="font-variant-numeric:tabular-nums">${d.p90} ms at 90th pct</text>`;
+  });
+  for (const t of [0, .25, .5, .75, 1]) s += `<text x="${L + t * pw}" y="${H - 6}" text-anchor="middle" font-size="11" fill="var(--muted)">${pct(t)}</text>`;
+  s += '</svg>';
+  renderChart($('#fig-depth'), {
+    title: 'How deep each tier searches', sub: 'Share of positions by deepest completed iteration; numbers on the bars are plies', svg: s,
+  });
+})();
+
+// ---------- figure: first-move advantage ----------
+(function () {
+  const W = 640, H = 320, L = 56, R = 20, T = 16, B = 52;
+  const x2p = x => L + x / 7 * (W - L - R), yMin = .35, yMax = .9, v2y = p => T + (1 - (p - yMin) / (yMax - yMin)) * (H - T - B);
+  let s = svgOpen(W, H);
+  s += yAxis(L, W - R, v2y, [.4, .5, .6, .7, .8, .9], pct, .5);
+  for (let k = 0; k <= 7; k++) s += `<text x="${x2p(k)}" y="${H - 30}" text-anchor="middle" font-size="12" fill="var(--ink-2)">${k}</text><text x="${x2p(k)}" y="${H - 14}" text-anchor="middle" font-size="11" fill="var(--muted)">${TIER_NAMES[k]}</text>`;
+  // fitted: score between two equal bots at difficulty x
+  const band = POINTS.map(p => [x2p(p.difficulty), v2y(winP(p.fm + p.fmSe)), v2y(winP(p.fm - p.fmSe))]);
+  s += `<path d="M${band.map(b => b[0] + ',' + b[1]).join(' L')} L${band.reverse().map(b => b[0] + ',' + b[2]).join(' L')} Z" fill="var(--s1-wash)"/>`;
+  s += `<path d="${POINTS.map((p, i) => (i ? 'L' : 'M') + x2p(p.difficulty) + ',' + v2y(winP(p.fm))).join(' ')}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>`;
+  for (const p of POINTS) s += `<g data-tip="fitted first-move advantage at difficulty ${p.difficulty}: ${signed(p.fm)} ± ${p.fmSe} Elo, a ${pct(winP(p.fm))} score between two equal bots"><circle cx="${x2p(p.difficulty)}" cy="${v2y(winP(p.fm))}" r="9" fill="transparent"/></g>`;
+  for (const [a, b, , n, f] of PAIRS) {
+    const x = x2p((a + b) / 2) + (b - a === 1 ? 5 : -5), p = f / n, e = Math.sqrt(p * (1 - p) / n);
+    s += `<g data-tip="difficulty ${a} vs ${b}: first player scored ${f}/${n} (${pct(p)})"><line x1="${x}" x2="${x}" y1="${v2y(p - e)}" y2="${v2y(p + e)}" stroke="var(--ink-2)" stroke-width="1.2"/><circle cx="${x}" cy="${v2y(p)}" r="9" fill="transparent"/><circle cx="${x}" cy="${v2y(p)}" r="3.5" fill="var(--ink-2)"/></g>`;
+  }
+  const dx = x2p(6), dp = .82, de = Math.sqrt(dp * (1 - dp) / 100);
+  s += `<g data-tip="opening study: two difficulty-6 bots, the first player won 82 of 100 games"><line x1="${dx}" x2="${dx}" y1="${v2y(dp - de)}" y2="${v2y(dp + de)}" stroke="var(--s2)" stroke-width="1.5"/><rect x="${dx - 5}" y="${v2y(dp) - 5}" width="10" height="10" transform="rotate(45 ${dx} ${v2y(dp)})" fill="var(--s2)"/><rect x="${dx - 10}" y="${v2y(dp) - 10}" width="20" height="20" fill="transparent"/></g>`;
+  s += '</svg>';
+  renderChart($('#fig-first'), {
+    title: "First player's score by difficulty", sub: 'Rating pairings and the fitted first-move advantage, ±1 standard error', svg: s,
+    legend: [['one rating pairing', '--c:var(--ink-2)'], ['fitted, between two equal bots', '--c:var(--s1)'], ['difficulty 6 vs 6, opening study', '--c:var(--s2)']],
+  });
 })();
 
 // ---------- table ----------
 $('#tbl-points').innerHTML = POINTS.map(p => {
   const pair = PAIRS.find(([a, b]) => a === p.difficulty && b === p.difficulty + .5);
-  const vs = pair ? `${pair[2]}/${pair[3]} (${Math.round(elo(pair[2] / pair[3])) >= 0 ? '+' : ''}${Math.round(elo(pair[2] / pair[3]))})` : '';
-  const cls = [Number.isInteger(p.difficulty) ? '' : 'half', p.elo >= SLIDER[0] && p.elo <= SLIDER[1] ? 'band' : ''].join(' ').trim();
-  return `<tr class="${cls}"><td>${p.difficulty}</td><td>${plays(p.difficulty)}</td><td class="n">${p.elo}</td><td class="n">${p.se || '—'}</td><td class="n">${vs}</td></tr>`;
+  const vs = pair ? `${pair[2]}/${pair[3]} (${signed(Math.round(elo(pair[2] / pair[3])))})` : '';
+  const cls = [Number.isInteger(p.difficulty) ? '' : 'quiet', p.elo >= SLIDER[0] && p.elo <= SLIDER[1] ? 'band' : ''].join(' ').trim();
+  return `<tr class="${cls}"><td>${p.difficulty}</td><td>${plays(p.difficulty)}</td><td class="n">${p.elo}</td><td class="n">${p.se || '—'}</td><td class="n">${signed(p.fm)}</td><td class="n">${p.games.toLocaleString('en')}</td><td class="n">${vs}</td></tr>`;
 }).join('');
 </script>
 </body>
